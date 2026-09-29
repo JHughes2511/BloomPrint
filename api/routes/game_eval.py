@@ -4123,7 +4123,20 @@ def opponent_profile(
                         "per_game": round(all_stat_counts.get(st, 0) / n_games, 1)}
                        for st, sc in weak_spots],
         "ai_scouting_report": latest_report,
+        # What they run and what works against them, from the play calling
+        # recorded in these games (None when none was).
+        "play_calling": scout_play_calling(db, opponent_name, games),
     }
+
+
+def scout_play_calling(db: Session, team_name: str, games: list) -> dict | None:
+    """A team's play calling across the given games, read from its own bench in
+    each: the team row's side when it is one of this team's rows, else the
+    opponent side — the same rule the scouting page reads every game by."""
+    from .. import play_calling as pc
+    same = _same_team_ids(db, team_name)
+    entries = [(g, "our" if (same and g.team_id in same) else "opponent") for g in games]
+    return pc.team_profile(db, entries)
 
 
 # ── Opponent Notes ────────────────────────────────────────────────────────────

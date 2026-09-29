@@ -3029,6 +3029,15 @@
     },
     "result": "Aruncare / rezultat",
     "pickPlayFirst": "Alege apărarea, apoi sistemul, pentru a începe o posesie.",
-    "deleteNote": "Statisticile ei ies și din foaia de statistici, iar punctele se scad din scor."
+    "deleteNote": "Statisticile ei ies și din foaia de statistici, iar punctele se scad din scor.",
+    "summary": {
+      "open": "Deschide sistemele",
+      "more": "încă {{n}}",
+      "less": "Arată mai puțin",
+      "acrossGames": "Meciuri cu sisteme: {{count}}",
+      "againstDefense": "Împotriva apărării {{team}}",
+      "theirPlays": "Sistemele adversarilor împotriva lor",
+      "theirDefense": "După apărarea jucată"
+    }
   }
 }

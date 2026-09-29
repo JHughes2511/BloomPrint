@@ -3029,6 +3029,15 @@
     },
     "result": "Arremesso / resultado",
     "pickPlayFirst": "Escolha a defesa e depois a jogada para começar uma posse.",
-    "deleteNote": "As estatísticas também saem do box score e os pontos saem do placar."
+    "deleteNote": "As estatísticas também saem do box score e os pontos saem do placar.",
+    "summary": {
+      "open": "Abrir chamada de jogadas",
+      "more": "mais {{n}}",
+      "less": "Mostrar menos",
+      "acrossGames": "Jogos com chamada de jogadas: {{count}}",
+      "againstDefense": "Contra a defesa do {{team}}",
+      "theirPlays": "Jogadas adversárias contra eles",
+      "theirDefense": "Pela defesa que usaram"
+    }
   }
 }

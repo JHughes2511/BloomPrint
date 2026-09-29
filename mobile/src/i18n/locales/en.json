@@ -3029,6 +3029,15 @@
     },
     "result": "Shot / result",
     "pickPlayFirst": "Pick the defense, then the play, to start a possession.",
-    "deleteNote": "Its stats come out of the box score too, and any points come off the score."
+    "deleteNote": "Its stats come out of the box score too, and any points come off the score.",
+    "summary": {
+      "open": "Open Play Calling",
+      "more": "{{n}} more",
+      "less": "Show less",
+      "acrossGames": "Games with play calling: {{count}}",
+      "againstDefense": "Against {{team}}'s defense",
+      "theirPlays": "Opponents' plays against them",
+      "theirDefense": "By the defense they played"
+    }
   }
 }

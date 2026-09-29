@@ -29,6 +29,7 @@ import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
+import PlayCallingSummary, { GamePlayCallingCard } from '../components/PlayCallingSummary';
 import PlayCallingPanel from '../components/PlayCallingPanel';
 import PlayCallingImport from '../components/PlayCallingImport';
 import PlayCallingPage from '../components/PlayCallingPage';
@@ -3921,6 +3922,16 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {seenTabs.has('insights') && (
             <View style={detailTab === 'insights' ? undefined : { display: 'none' }}>
               <GameStatsPanel gameId={detailGame.id} refreshKey={statsVersion} />
+              {/* Play calling, when the game has any: what each team ran, what
+                  scored, against which defense. The full page is a tap away. */}
+              <GamePlayCallingCard
+                gameId={detailGame.id}
+                sideNames={sideNamesFor(detailGame)}
+                refreshKey={statsVersion}
+                onOpen={() => leaveStep(() => { setPcGame(detailGame); setActiveView('playcalling'); })}
+                t={t}
+                tr={tr}
+              />
             </View>
           )}
 
@@ -4239,6 +4250,30 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         </View>
                       ))}
                   </View>
+
+                  {/* Play calling across these games: what they run and how it
+                      scores against each defense, and what has worked against
+                      their defense. Only when some was recorded. */}
+                  {scoutData.play_calling && (
+                    <PlayCallingSummary
+                      title={tr('playCalling.page.tab')}
+                      subtitle={tr('playCalling.summary.acrossGames', { count: scoutData.play_calling.games })}
+                      blocks={[
+                        scoutData.play_calling.offense && {
+                          key: 'off', block: scoutData.play_calling.offense, color: t.negative,
+                          title: tr('playCalling.page.overall', { team: scoutOpponent }),
+                          playsTitle: tr('playCalling.page.byPlay'), defenseTitle: tr('playCalling.page.byDefense'),
+                        },
+                        scoutData.play_calling.defense && {
+                          key: 'def', block: scoutData.play_calling.defense, color: t.accent,
+                          title: tr('playCalling.summary.againstDefense', { team: scoutOpponent }),
+                          playsTitle: tr('playCalling.summary.theirPlays'), defenseTitle: tr('playCalling.summary.theirDefense'),
+                        },
+                      ].filter(Boolean) as any}
+                      t={t}
+                      tr={tr}
+                    />
+                  )}
 
                   {/* Scouting context — add context + generate/regenerate */}
                   <View style={s.card} onLayout={e => { noteInputY.current = e.nativeEvent.layout.y; }}>

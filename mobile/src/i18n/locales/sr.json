@@ -3029,6 +3029,15 @@
     },
     "result": "Šut / ishod",
     "pickPlayFirst": "Izaberi odbranu, pa akciju, da počneš napad.",
-    "deleteNote": "Njegova statistika se briše i iz zapisnika, a poeni se oduzimaju od rezultata."
+    "deleteNote": "Njegova statistika se briše i iz zapisnika, a poeni se oduzimaju od rezultata.",
+    "summary": {
+      "open": "Otvori akcije",
+      "more": "još {{n}}",
+      "less": "Prikaži manje",
+      "acrossGames": "Utakmica sa akcijama: {{count}}",
+      "againstDefense": "Protiv odbrane {{team}}",
+      "theirPlays": "Akcije protivnika protiv njih",
+      "theirDefense": "Po odbrani koju su igrali"
+    }
   }
 }

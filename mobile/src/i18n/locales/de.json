@@ -3029,6 +3029,15 @@
     },
     "result": "Wurf / Ergebnis",
     "pickPlayFirst": "Wähle die Verteidigung, dann den Spielzug, um einen Angriff zu starten.",
-    "deleteNote": "Seine Statistiken werden auch aus dem Boxscore entfernt und Punkte vom Spielstand abgezogen."
+    "deleteNote": "Seine Statistiken werden auch aus dem Boxscore entfernt und Punkte vom Spielstand abgezogen.",
+    "summary": {
+      "open": "Spielzüge öffnen",
+      "more": "{{n}} weitere",
+      "less": "Weniger anzeigen",
+      "acrossGames": "Spiele mit Spielzügen: {{count}}",
+      "againstDefense": "Gegen die Verteidigung von {{team}}",
+      "theirPlays": "Spielzüge der Gegner gegen sie",
+      "theirDefense": "Nach ihrer Verteidigung"
+    }
   }
 }

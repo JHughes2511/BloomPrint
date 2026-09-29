@@ -3029,6 +3029,15 @@
     },
     "result": "Şut / sonuç",
     "pickPlayFirst": "Hücumu başlatmak için önce savunmayı, sonra seti seç.",
-    "deleteNote": "İstatistikleri de kutu skordan çıkar ve sayıları skordan düşülür."
+    "deleteNote": "İstatistikleri de kutu skordan çıkar ve sayıları skordan düşülür.",
+    "summary": {
+      "open": "Set seçimini aç",
+      "more": "{{n}} daha",
+      "less": "Daha az göster",
+      "acrossGames": "Set seçimi olan maçlar: {{count}}",
+      "againstDefense": "{{team}} savunmasına karşı",
+      "theirPlays": "Rakiplerin onlara karşı setleri",
+      "theirDefense": "Oynadıkları savunmaya göre"
+    }
   }
 }

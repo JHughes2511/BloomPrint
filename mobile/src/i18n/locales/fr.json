@@ -3029,6 +3029,15 @@
     },
     "result": "Tir / résultat",
     "pickPlayFirst": "Choisissez la défense, puis le système, pour lancer une possession.",
-    "deleteNote": "Ses stats sortent aussi de la feuille de match et ses points sont retirés du score."
+    "deleteNote": "Ses stats sortent aussi de la feuille de match et ses points sont retirés du score.",
+    "summary": {
+      "open": "Ouvrir les systèmes",
+      "more": "{{n}} de plus",
+      "less": "Afficher moins",
+      "acrossGames": "Matchs avec systèmes : {{count}}",
+      "againstDefense": "Contre la défense de {{team}}",
+      "theirPlays": "Systèmes adverses contre eux",
+      "theirDefense": "Par la défense jouée"
+    }
   }
 }

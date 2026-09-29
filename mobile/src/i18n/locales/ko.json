@@ -3029,6 +3029,15 @@
     },
     "result": "슛 / 결과",
     "pickPlayFirst": "수비를 고른 다음 플레이를 골라 공격을 시작하세요.",
-    "deleteNote": "기록도 박스 스코어에서 삭제되고 득점은 점수에서 빠집니다."
+    "deleteNote": "기록도 박스 스코어에서 삭제되고 득점은 점수에서 빠집니다.",
+    "summary": {
+      "open": "플레이 콜 열기",
+      "more": "{{n}}개 더",
+      "less": "접기",
+      "acrossGames": "플레이 콜이 있는 경기: {{count}}",
+      "againstDefense": "{{team}} 수비 상대",
+      "theirPlays": "상대 팀이 그들에게 쓴 플레이",
+      "theirDefense": "그들이 쓴 수비별"
+    }
   }
 }

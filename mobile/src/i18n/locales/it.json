@@ -3029,6 +3029,15 @@
     },
     "result": "Tiro / esito",
     "pickPlayFirst": "Scegli la difesa, poi il gioco, per iniziare un possesso.",
-    "deleteNote": "Anche le sue statistiche escono dal tabellino e i punti vengono tolti dal punteggio."
+    "deleteNote": "Anche le sue statistiche escono dal tabellino e i punti vengono tolti dal punteggio.",
+    "summary": {
+      "open": "Apri chiamate di gioco",
+      "more": "altri {{n}}",
+      "less": "Mostra meno",
+      "acrossGames": "Partite con chiamate: {{count}}",
+      "againstDefense": "Contro la difesa di {{team}}",
+      "theirPlays": "Giochi avversari contro di loro",
+      "theirDefense": "Per difesa usata"
+    }
   }
 }

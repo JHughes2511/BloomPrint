@@ -3029,6 +3029,15 @@
     },
     "result": "Skott / resultat",
     "pickPlayFirst": "Välj försvaret och sedan spelet för att starta ett anfall.",
-    "deleteNote": "Statistiken tas också bort ur boxscoren och poängen dras av från ställningen."
+    "deleteNote": "Statistiken tas också bort ur boxscoren och poängen dras av från ställningen.",
+    "summary": {
+      "open": "Öppna spelval",
+      "more": "{{n}} till",
+      "less": "Visa mindre",
+      "acrossGames": "Matcher med spelval: {{count}}",
+      "againstDefense": "Mot {{team}}s försvar",
+      "theirPlays": "Motståndarnas spel mot dem",
+      "theirDefense": "Efter försvaret de spelade"
+    }
   }
 }

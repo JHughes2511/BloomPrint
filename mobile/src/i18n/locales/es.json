@@ -3029,6 +3029,15 @@
     },
     "result": "Tiro / resultado",
     "pickPlayFirst": "Elige la defensa y luego la jugada para empezar una posesión.",
-    "deleteNote": "Sus estadísticas también salen del box score y sus puntos se restan del marcador."
+    "deleteNote": "Sus estadísticas también salen del box score y sus puntos se restan del marcador.",
+    "summary": {
+      "open": "Abrir llamado de jugadas",
+      "more": "{{n}} más",
+      "less": "Mostrar menos",
+      "acrossGames": "Partidos con llamado de jugadas: {{count}}",
+      "againstDefense": "Contra la defensa de {{team}}",
+      "theirPlays": "Jugadas rivales contra ellos",
+      "theirDefense": "Por la defensa que jugaron"
+    }
   }
 }

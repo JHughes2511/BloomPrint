@@ -3029,6 +3029,15 @@
     },
     "result": "Metimas / rezultatas",
     "pickPlayFirst": "Pasirinkite gynybą, tada derinį, kad pradėtumėte ataką.",
-    "deleteNote": "Jos statistika taip pat pašalinama iš protokolo, o taškai atimami iš rezultato."
+    "deleteNote": "Jos statistika taip pat pašalinama iš protokolo, o taškai atimami iš rezultato.",
+    "summary": {
+      "open": "Atidaryti derinius",
+      "more": "dar {{n}}",
+      "less": "Rodyti mažiau",
+      "acrossGames": "Rungtynės su deriniais: {{count}}",
+      "againstDefense": "Prieš {{team}} gynybą",
+      "theirPlays": "Varžovų deriniai prieš juos",
+      "theirDefense": "Pagal jų žaistą gynybą"
+    }
   }
 }

@@ -3029,6 +3029,15 @@
     },
     "result": "Tira / resulta",
     "pickPlayFirst": "Piliin ang depensa, tapos ang play, para magsimula ng possession.",
-    "deleteNote": "Aalisin din ang stats nito sa box score at ibabawas ang puntos sa iskor."
+    "deleteNote": "Aalisin din ang stats nito sa box score at ibabawas ang puntos sa iskor.",
+    "summary": {
+      "open": "Buksan ang Play Calling",
+      "more": "{{n}} pa",
+      "less": "Ipakita nang mas kaunti",
+      "acrossGames": "Mga laro na may play calling: {{count}}",
+      "againstDefense": "Laban sa depensa ng {{team}}",
+      "theirPlays": "Mga play ng kalaban laban sa kanila",
+      "theirDefense": "Ayon sa depensang ginamit nila"
+    }
   }
 }

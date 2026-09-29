@@ -3029,6 +3029,15 @@
     },
     "result": "Schot / resultaat",
     "pickPlayFirst": "Kies de verdediging en dan het spel om een balbezit te starten.",
-    "deleteNote": "De statistieken gaan ook uit de boxscore en punten gaan van de stand af."
+    "deleteNote": "De statistieken gaan ook uit de boxscore en punten gaan van de stand af.",
+    "summary": {
+      "open": "Spelkeuze openen",
+      "more": "nog {{n}}",
+      "less": "Minder tonen",
+      "acrossGames": "Wedstrijden met spelkeuze: {{count}}",
+      "againstDefense": "Tegen de verdediging van {{team}}",
+      "theirPlays": "Spellen van tegenstanders tegen hen",
+      "theirDefense": "Per verdediging die zij speelden"
+    }
   }
 }

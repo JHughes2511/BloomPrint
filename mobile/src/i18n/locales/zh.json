@@ -3029,6 +3029,15 @@
     },
     "result": "投篮 / 结果",
     "pickPlayFirst": "先选防守，再选战术，开始一次进攻。",
-    "deleteNote": "其数据也会从技术统计中删除，得分也会从比分中扣除。"
+    "deleteNote": "其数据也会从技术统计中删除，得分也会从比分中扣除。",
+    "summary": {
+      "open": "打开战术记录",
+      "more": "还有 {{n}} 项",
+      "less": "收起",
+      "acrossGames": "有战术记录的比赛：{{count}}",
+      "againstDefense": "对阵{{team}}的防守",
+      "theirPlays": "对手针对他们的战术",
+      "theirDefense": "按他们使用的防守"
+    }
   }
 }

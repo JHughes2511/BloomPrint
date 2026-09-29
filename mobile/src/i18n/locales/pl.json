@@ -3029,6 +3029,15 @@
     },
     "result": "Rzut / wynik",
     "pickPlayFirst": "Wybierz obronę, potem zagrywkę, by rozpocząć posiadanie.",
-    "deleteNote": "Jego statystyki też znikną z protokołu, a punkty zostaną odjęte od wyniku."
+    "deleteNote": "Jego statystyki też znikną z protokołu, a punkty zostaną odjęte od wyniku.",
+    "summary": {
+      "open": "Otwórz zagrywki",
+      "more": "jeszcze {{n}}",
+      "less": "Pokaż mniej",
+      "acrossGames": "Mecze z zagrywkami: {{count}}",
+      "againstDefense": "Przeciw obronie {{team}}",
+      "theirPlays": "Zagrywki rywali przeciw nim",
+      "theirDefense": "Według obrony, którą grali"
+    }
   }
 }
