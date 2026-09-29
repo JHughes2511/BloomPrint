@@ -24,6 +24,7 @@ import { GeneratingOverlay } from '../../components/GeneratingBasketball';
 import CommentThread from '../../components/CommentThread';
 import { parseDrills } from '../../utils/trainingDrills';
 import DrillRow from '../../components/DrillRow';
+import { VersionSwitch, ShortVersionView } from '../../components/ShortVersion';
 import { buildPdfFileName } from '../../utils/buildReportPdf';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 
@@ -93,6 +94,34 @@ export default function PlayerCoachTrainingDetailScreen() {
   const doneCount = drillSections.reduce(
     (n, s) => n + s.drills.filter(d => completed.has(d.key)).length, 0,
   );
+
+  // Short rows tick the checklist's own items: the drills whose name the row
+  // names. A row that names none keeps a tick of its own, so it still sticks.
+  const [view, setView] = useState<'standard' | 'short'>('standard');
+  const allDrills = drillSections.flatMap(sec => sec.drills);
+  const words = (x: string) => x.toLowerCase().replace(/[^a-z0-9\u00c0-\uffff]+/g, ' ').split(' ').filter(w => w.length > 2);
+  const keysFor = (row: any): string[] => {
+    const want = words(row.drill ?? '');
+    if (!want.length) return [`short:${(row.drill ?? '').toLowerCase()}`];
+    const hits = allDrills.filter(d => {
+      const have = new Set(words(`${d.label} ${d.meta ?? ''} ${(d.detail ?? []).join(' ')}`));
+      return want.filter(w => have.has(w)).length / want.length >= 0.6;
+    }).map(d => d.key);
+    return hits.length ? hits : [`short:${want.join('-')}`];
+  };
+  const shortTicks = {
+    isDone: (row: any) => keysFor(row).every(k => completed.has(k)),
+    toggle: (row: any) => {
+      const keys = keysFor(row);
+      setCompleted(prev => {
+        const next = new Set(prev);
+        const done = keys.every(k => next.has(k));
+        keys.forEach(k => (done ? next.delete(k) : next.add(k)));
+        playerTrainingAPI.setCoachSentProgress(trainingId, [...next]).catch(() => {});
+        return next;
+      });
+    },
+  };
 
   const toggleDrill = (key: string) => {
     setCompleted(prev => {
@@ -266,8 +295,18 @@ export default function PlayerCoachTrainingDetailScreen() {
           </View>
         ) : (
           <>
+            {/* Standard | Short. Short is the one page the coach sees too (with
+                their edits); its rows tick the same drills as the checklist. */}
+            <VersionSwitch value={view} onChange={setView} />
+            {view === 'short' && (
+              <View style={{ marginBottom: 16 }}>
+                <ShortVersionView kind="training" refId={trainingId} readOnly
+                                  fetcher={() => playerTrainingAPI.coachSentShort(trainingId)} ticks={shortTicks} />
+              </View>
+            )}
+
             {/* Drill tracking */}
-            {drillTotal > 0 && (
+            {view === 'standard' && drillTotal > 0 && (
               <>
                 <View style={styles.progressCard}>
                   <View style={styles.progressTop}>
@@ -300,6 +339,7 @@ export default function PlayerCoachTrainingDetailScreen() {
               </>
             )}
 
+            {view === 'standard' && (
             <View style={styles.section}>
               <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.coachTrainingDetail.yourProgram')}</Text>
               <View style={styles.programBox}>
@@ -308,6 +348,7 @@ export default function PlayerCoachTrainingDetailScreen() {
                   : <Text style={{ color: t.muted, fontSize: 13 }}>{tr('playerApp.coachTrainingDetail.notReady')}</Text>}
               </View>
             </View>
+            )}
 
             {/* Comments */}
             <View style={styles.section}>

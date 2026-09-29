@@ -56,7 +56,15 @@ export function WithShortVersion({ kind, refId, children, switchStyle }: {
   );
 }
 
-export function ShortVersionView({ kind, refId }: { kind: ShortKind; refId: number }) {
+/** Checkboxes on a player's checklist rows: done, and what a tap does. */
+export type ShortTicks = { isDone: (row: any) => boolean; toggle: (row: any) => void };
+
+export function ShortVersionView({ kind, refId, fetcher, readOnly, ticks }: {
+  kind: ShortKind; refId: number;
+  fetcher?: () => Promise<any>;   // the player app reads through its own endpoint
+  readOnly?: boolean;             // no Edit / Correct / Remake (the player's view)
+  ticks?: ShortTicks;
+}) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const s = makeStyles(t);
@@ -73,13 +81,13 @@ export function ShortVersionView({ kind, refId }: { kind: ShortKind; refId: numb
     setGot(r);
     clearTimeout(timer.current);
     if (r.status === 'making') {
-      timer.current = setTimeout(() => shortAPI.get(kind, refId).then(follow).catch(() => {}), 2500);
+      timer.current = setTimeout(() => (fetcher ? fetcher() : shortAPI.get(kind, refId)).then(follow).catch(() => {}), 2500);
     }
   };
   useEffect(() => {
     live.current = true;
     setGot(null); setDraft(null); setCorrecting(false);
-    shortAPI.get(kind, refId).then(follow).catch(() => { if (live.current) setGot({ status: 'failed' }); });
+    (fetcher ? fetcher() : shortAPI.get(kind, refId)).then(follow).catch(() => { if (live.current) setGot({ status: 'failed' }); });
     return () => { live.current = false; clearTimeout(timer.current); };
   }, [kind, refId]);
 
@@ -129,9 +137,11 @@ export function ShortVersionView({ kind, refId }: { kind: ShortKind; refId: numb
     return (
       <View style={s.page}>
         <Text style={s.muted}>{tr('shortVersion.failed')}</Text>
-        <TouchableOpacity onPress={remake} style={{ marginTop: 8 }}>
-          <Text style={s.link}>{tr('shortVersion.retry')}</Text>
-        </TouchableOpacity>
+        {!readOnly && (
+          <TouchableOpacity onPress={remake} style={{ marginTop: 8 }}>
+            <Text style={s.link}>{tr('shortVersion.retry')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
@@ -151,6 +161,10 @@ export function ShortVersionView({ kind, refId }: { kind: ShortKind; refId: numb
         </View>
       </View>
     );
+  }
+
+  if (readOnly) {
+    return kind === 'training' ? <PlayerSheet d={got.data} t={t} tr={tr} ticks={ticks} /> : <TeamSheet d={got.data} t={t} tr={tr} />;
   }
 
   return (
@@ -395,7 +409,7 @@ function TeamSheet({ d, t, tr }: { d: any; t: ThemeTokens; tr: (k: string, o?: a
   );
 }
 
-function PlayerSheet({ d, t, tr }: { d: any; t: ThemeTokens; tr: (k: string, o?: any) => string }) {
+function PlayerSheet({ d, t, tr, ticks }: { d: any; t: ThemeTokens; tr: (k: string, o?: any) => string; ticks?: ShortTicks }) {
   const s = makeStyles(t);
   return (
     <View style={s.page}>
@@ -413,7 +427,14 @@ function PlayerSheet({ d, t, tr }: { d: any; t: ThemeTokens; tr: (k: string, o?:
         </View>
         {(d.checklist ?? []).map((c: any, i: number) => (
           <View key={i} style={[s.tr, i % 2 === 0 && s.zebra]}>
-            <Text style={[s.td, { flex: 1.3, fontFamily: fonts[800] }]}>{c.drill}</Text>
+            {ticks && (
+              <TouchableOpacity onPress={() => ticks.toggle(c)} hitSlop={8} accessibilityRole="checkbox"
+                                accessibilityState={{ checked: ticks.isDone(c) }} accessibilityLabel={c.drill}>
+                <Ionicons name={ticks.isDone(c) ? 'checkbox' : 'square-outline'} size={20} color={ticks.isDone(c) ? t.positive : t.muted2} />
+              </TouchableOpacity>
+            )}
+            <Text style={[s.td, { flex: 1.3, fontFamily: fonts[800] },
+                          ticks?.isDone(c) && { textDecorationLine: 'line-through', color: t.muted }]}>{c.drill}</Text>
             <Text style={[s.td, { width: 96 }]}>{c.amount ?? '—'}</Text>
             <Text style={[s.td, { flex: 1, color: t.inkSoft }]}>{c.cue ?? ''}</Text>
           </View>

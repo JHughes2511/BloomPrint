@@ -102,6 +102,8 @@ export const playerTrainingAPI = {
     playerApi.get(`/player/coach-training/${id}/comments`).then(r => r.data),
   addCoachSentComment: (id: number, text: string, parentId?: number) =>
     playerApi.post(`/player/coach-training/${id}/comments`, { text, parent_id: parentId }).then(r => r.data),
+  /** The one-page version of a coach-sent program (the same one the coach sees). */
+  coachSentShort: (id: number) => playerApi.get(`/player/coach-training/${id}/short`).then(r => r.data),
   setCoachSentProgress: (id: number, completed_drills: string[]) =>
     playerApi.patch(`/player/coach-training/${id}/progress`, { completed_drills }).then(r => r.data),
   refreshCoachSent: (id: number, feedback: string) =>

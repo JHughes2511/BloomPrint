@@ -766,6 +766,24 @@ def get_coach_training(
     return _coach_training_out(session)
 
 
+@router.get("/coach-training/{training_id}/short")
+def get_coach_training_short(
+    training_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """The one-page version of a program the coach sent: the same one the coach
+    sees (and may have edited), made the first time anyone opens it."""
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id or not session.sent_to_player:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    from .. import short_versions as sv
+    got = sv.out(sv.ensure(db, "training", training_id), db)
+    got.pop("stale", None)
+    got.pop("edited", None)
+    return got
+
+
 @router.patch("/coach-training/{training_id}/progress")
 def update_coach_training_progress(
     training_id: int,
