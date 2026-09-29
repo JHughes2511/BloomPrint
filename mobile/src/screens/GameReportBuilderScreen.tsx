@@ -190,6 +190,12 @@ export default function GameReportBuilderScreen() {
    * opponent twice and a night game logged after midnight is a day out.
    */
   const [linkAsk, setLinkAsk] = useState<any | null>(null);
+  // Film picked and waiting on "who wore what": the colours let the film file
+  // each player under their team.
+  const [pendingFilm, setPendingFilm] = useState<{ asset: any; label: string; teamName: string } | null>(null);
+  const [uniformRows, setUniformRows] = useState<{ team: string; colour: string }[]>([]);
+  // Colours a film saw, being put to teams: {clipId: {colour: team}}.
+  const [wore, setWore] = useState<Record<number, Record<string, string>>>({});
   const [linking, setLinking] = useState(false);
   const [gameQuery, setGameQuery] = useState('');
   const [searchingGames, setSearchingGames] = useState(false);
@@ -495,17 +501,57 @@ export default function GameReportBuilderScreen() {
     const asset = result.assets[0];
     const choices = filmChoices();
     // One possible team means there is nothing to ask.
-    if (choices.length === 1) { uploadClip(asset, choices[0].label, choices[0].name); return; }
+    if (choices.length === 1) { askUniforms(asset, choices[0].label, choices[0].name); return; }
     Alert.alert(tr('gameBuilder.whoseFilm'), '', [
       ...choices.map(c => ({
         text: c.name,
-        onPress: () => uploadClip(asset, c.label, (c as any).teamName ?? c.name),
+        onPress: () => askUniforms(asset, c.label, (c as any).teamName ?? c.name),
       })),
       { text: tr('common.cancel'), style: 'cancel' as const },
     ]);
   };
 
-  const uploadClip = async (asset: any, label: string, teamName = '') => {
+  /**
+   * Who wore what, before the film goes up. Game film shows two teams, and a
+   * jersey number alone cannot say whose #5 it is; the colours can. Two rows,
+   * filled with the teams the packet already names, both editable — and
+   * skippable: the film then says which colours it saw and asks afterwards.
+   */
+  const askUniforms = (asset: any, label: string, teamName: string) => {
+    const sides = filmSides().map(s => s.name);
+    const first = label === 'both' ? sides[0] : teamName;
+    const second = label === 'both' ? sides[1] : sides.find(n => n !== teamName) ?? '';
+    setUniformRows([{ team: first ?? '', colour: '' }, { team: second ?? '', colour: '' }]);
+    setPendingFilm({ asset, label, teamName });
+  };
+
+  const sendPendingFilm = (withColours: boolean) => {
+    if (!pendingFilm) return;
+    const map: Record<string, string> = {};
+    if (withColours) {
+      for (const r of uniformRows) {
+        if (r.team.trim() && r.colour.trim()) map[r.colour.trim().toLowerCase()] = r.team.trim();
+      }
+    }
+    const { asset, label, teamName } = pendingFilm;
+    setPendingFilm(null);
+    uploadClip(asset, label, teamName, Object.keys(map).length ? JSON.stringify(map) : '');
+  };
+
+  /** Put a team to a colour the film saw; saved once every colour has one. */
+  const pickWore = async (clip: any, colour: string, team: string) => {
+    const next = { ...(wore[clip.id] ?? {}), [colour]: team };
+    setWore(prev => ({ ...prev, [clip.id]: next }));
+    if (!reportId || !(clip.uniforms_seen ?? []).every((c: string) => next[c])) return;
+    try {
+      await gameReportsAPI.setClipUniforms(reportId, clip.id, next);
+      setReport(await gameReportsAPI.get(reportId));
+    } catch (e: any) {
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('common.somethingWentWrong'));
+    }
+  };
+
+  const uploadClip = async (asset: any, label: string, teamName = '', uniforms = '') => {
     if (!reportId) return;
     setUploadingClip(true);
     setClipProgress(tr('gameBuilder.uploadingFilm'));
@@ -529,13 +575,14 @@ export default function GameReportBuilderScreen() {
           purpose: `gr${reportId}clip`, onProgress: onProg,
         });
         created = await gameReportsAPI.addClipRef(reportId, {
-          label, team_name: teamName, video_ref: ref,
+          label, team_name: teamName, video_ref: ref, uniforms,
         });
       } else {
         created = await uploadFileStreamed(
           // On web the picker hands back the File itself; upload that rather than
           // asking the browser to rebuild it from the blob: URL.
-          `/game-reports/${reportId}/clips`, asset.file ?? asset.uri, { label, team_name: teamName }, 'video', 'video/mp4',
+          `/game-reports/${reportId}/clips`, asset.file ?? asset.uri,
+          { label, team_name: teamName, ...(uniforms ? { uniforms } : {}) }, 'video', 'video/mp4',
           onProg,
         );
       }
@@ -1122,7 +1169,33 @@ export default function GameReportBuilderScreen() {
               </Text>
               <Ionicons name="chevron-forward" size={14} color={t.muted2} />
             </TouchableOpacity>
-          ))
+          )).flatMap((card: any, i: number) => {
+            const clip = clips[i];
+            const seen: string[] = clip.uniforms_seen ?? [];
+            if (!seen.length) return [card];
+            const teamsHere = filmSides().map(s => s.name).slice(0, 3);
+            return [card, (
+              <View key={`wore-${clip.id}`} style={styles.woreBox}>
+                <Text style={styles.woreHint}>{tr('gameBuilder.whoWoreHint')}</Text>
+                {seen.map(colour => (
+                  <View key={colour} style={styles.woreRow}>
+                    <Text style={styles.woreQ}>{tr('gameBuilder.whoWore', { colour })}</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                      {teamsHere.map(team => {
+                        const on = wore[clip.id]?.[colour] === team;
+                        return (
+                          <TouchableOpacity key={team} onPress={() => pickWore(clip, colour, team)}
+                                            style={[styles.woreChip, on && styles.woreChipOn]}>
+                            <Text style={[styles.woreChipText, on && styles.woreChipTextOn]}>{team}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )];
+          })
         )}
 
         {/* Film analysis progress — under the film area, above box score. */}
@@ -1408,6 +1481,48 @@ export default function GameReportBuilderScreen() {
           asks who is IN the film, and asked right after it: a suggestion the
           coach confirms, a way to say none of them, and a way to go and import
           the game if it is not in the app yet. */}
+      {/* Who wore what: asked as the film goes up. */}
+      <Sheet visible={!!pendingFilm} animationType="slide" transparent onRequestClose={() => setPendingFilm(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{tr('gameBuilder.uniformsTitle')}</Text>
+              <TouchableOpacity onPress={() => setPendingFilm(null)} style={{ marginLeft: 'auto' }}>
+                <Ionicons name="close" size={22} color={t.muted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalSub}>{tr('gameBuilder.uniformsHint')}</Text>
+            {uniformRows.map((row, i) => (
+              <View key={i} style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+                <TextInput
+                  style={[styles.oppNameInput, { flex: 1.3, marginBottom: 0 }]}
+                  placeholder={tr('gameBuilder.otherTeam')}
+                  placeholderTextColor={t.muted2}
+                  value={row.team}
+                  onChangeText={v => setUniformRows(prev => prev.map((r, j) => (j === i ? { ...r, team: v } : r)))}
+                />
+                <TextInput
+                  style={[styles.oppNameInput, { flex: 1, marginBottom: 0 }]}
+                  placeholder={tr('gameBuilder.uniformPlaceholder')}
+                  placeholderTextColor={t.muted2}
+                  value={row.colour}
+                  accessibilityLabel={tr('gameBuilder.uniformPlaceholder')}
+                  onChangeText={v => setUniformRows(prev => prev.map((r, j) => (j === i ? { ...r, colour: v } : r)))}
+                />
+              </View>
+            ))}
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
+              <TouchableOpacity style={[styles.woreBtn, { borderWidth: 1, borderColor: t.line }]} onPress={() => sendPendingFilm(false)}>
+                <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('gameBuilder.skipColours')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.woreBtn, { backgroundColor: t.ctaBg }]} onPress={() => sendPendingFilm(true)}>
+                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('gameBuilder.uploadFilmBtn')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Sheet>
+
       <Sheet visible={!!linkAsk} animationType="slide" transparent onRequestClose={() => setLinkAsk(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
@@ -1778,6 +1893,16 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   correctionBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   // Modals
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  woreBox: { borderWidth: 1, borderColor: t.cardBorder, backgroundColor: t.card, borderRadius: 12,
+             padding: 12, marginTop: -4, marginBottom: 10, gap: 8 },
+  woreHint: { color: t.muted, fontSize: 12 },
+  woreRow: { gap: 6 },
+  woreQ: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
+  woreChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  woreChipOn: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  woreChipText: { color: t.inkSoft, fontSize: 12, fontFamily: fonts[700] },
+  woreChipTextOn: { color: t.ctaText },
+  woreBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(REPORT_MODAL_WIDTH)},
   modalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1 },

@@ -940,6 +940,9 @@ export const gameEvalAPI = {
   restoreReportVersion: (gameId: number, versionId: number) =>
     api.post(`/game-eval/sessions/${gameId}/report-versions/${versionId}/restore`).then(r => r.data),
   getSeasonDashboard: (params?: any) => api.get('/game-eval/season-dashboard', { params }).then(r => r.data),
+  /** Their players' tendencies, counted across every film of them. */
+  opponentTendencies: (name: string) =>
+    api.get(`/game-eval/opponents/${encodeURIComponent(name)}/tendencies`).then(r => r.data),
   getOpponentProfile: (name: string, range: ScoutRange = {}) =>
     api.get(`/game-eval/opponents/${encodeURIComponent(name)}`, { params: range }).then(r => r.data),
   compareGames: (game1Id: number, game2Id: number) => api.get('/game-eval/compare', { params: { game1_id: game1Id, game2_id: game2Id } }).then(r => r.data),
@@ -1009,13 +1012,17 @@ export const gameReportsAPI = {
   addClip: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/clips`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
   /** Film already in storage (uploaded straight there) — just register it. */
-  addClipRef: (id: number, data: { label: string; team_name?: string; video_ref: string }) => {
+  addClipRef: (id: number, data: { label: string; team_name?: string; video_ref: string; uniforms?: string }) => {
     const form = new FormData();
     form.append('label', data.label);
     form.append('team_name', data.team_name ?? '');
     form.append('video_ref', data.video_ref);
+    if (data.uniforms) form.append('uniforms', data.uniforms);
     return api.post(`/game-reports/${id}/clips`, form).then(r => r.data);
   },
+  /** Which team wore which colour, for a film read without being told. */
+  setClipUniforms: (id: number, clipId: number, uniforms: Record<string, string>) =>
+    api.put(`/game-reports/${id}/clips/${clipId}/uniforms`, { uniforms }).then(r => r.data),
   // Default keeps the breakdown and only frees the film — deleting a video
   // out of the film catalog must not take the report with it. Pass discard to
   // remove the clip outright, which is what deleting it inside a packet means.

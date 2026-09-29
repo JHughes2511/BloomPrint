@@ -238,6 +238,38 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const statLabelMap = tr('teamGrade.stats', { returnObjects: true }) as Record<string, string>;
   const statLabel = (k: string) => (statLabelMap && (statLabelMap as any)[k]) || k;
   // Buckets past 4 are overtimes, one each: 5 is OT, 6 is OT2, 7 is OT3.
+  /** One tendency fact from film, in the coach's language. */
+  const tendWord = (w: string) => tr(`teamGrade.tendWord.${w}`, { defaultValue: w });
+  const tendParts = (parts: any[]) => (parts || []).map(([w, n]: any) => `${tendWord(w)} ${n}`).join(', ');
+  const tendLine = (f: any): string => {
+    const dir = f.dir === 'R' ? tendWord('right') : tendWord('left');
+    const ex = f.ex?.length ? ` (${f.ex.join(', ')})` : '';
+    switch (f.k) {
+      case 'driveDir': return tr('teamGrade.tend.driveDir', { dir, count: f.count, of: f.of }) + ex;
+      case 'driveBoth': return tr('teamGrade.tend.driveBoth', { right: f.right, left: f.left });
+      case 'driveEnds': return tr('teamGrade.tend.driveEnds', { parts: tendParts(f.parts), of: f.of });
+      case 'goingDir': return tr('teamGrade.tend.goingDir', { dir, end: tendWord(f.end), count: f.count, of: f.of });
+      case 'rimFinish': return tr('teamGrade.tend.rimFinish', { made: f.made, of: f.of });
+      case 'shotHow': return tr('teamGrade.tend.shotHow', { parts: tendParts(f.parts), of: f.of });
+      case 'shotZones': return tr('teamGrade.tend.shotZones', {
+        parts: f.parts.map(([z, m, a]: any) => `${tendWord(z === 'rim' ? 'atRim' : z)} ${m}/${a}`).join(', ') });
+      case 'threes': return tr('teamGrade.tend.threes', { made: f.made, of: f.of });
+      case 'pnrHandler': return tr('teamGrade.tend.pnrHandler', { parts: tendParts(f.parts), of: f.of });
+      case 'pnrScreener': return tr('teamGrade.tend.pnrScreener', { parts: tendParts(f.parts), of: f.of });
+      case 'post': return tr('teamGrade.tend.post', { count: f.count, parts: [
+        ...(f.shoulders || []).map(([d, n]: any) => `${tendWord(d === 'R' ? 'rightShoulder' : 'leftShoulder')} ${n}`),
+        ...(f.parts || []).map(([w, n]: any) => `${tendWord(w)} ${n}`)].join(', ') });
+      case 'runHard': return tr('teamGrade.tend.runHard', { count: f.count, of: f.of });
+      case 'runJog': return tr('teamGrade.tend.runJog', { count: f.count, of: f.of });
+      case 'runSometimes': return tr('teamGrade.tend.runSometimes', { count: f.count, of: f.of });
+      case 'cuts': return tr('teamGrade.tend.cuts', { count: f.count, scored: f.scored, open: f.open }) + ex;
+      case 'stagnantOff': return tr('teamGrade.tend.stagnantOff', { count: f.count }) + ex;
+      case 'movesWell': return tr('teamGrade.tend.movesWell', { count: f.count });
+      case 'defense': return tr('teamGrade.tend.defense', { parts: tendParts(f.parts) });
+      case 'stagnantDef': return tr('teamGrade.tend.stagnantDef', { count: f.count }) + ex;
+      default: return '';
+    }
+  };
   const qLabel = (q: number) => (q === 5 ? tr('teamGrade.otShort')
     : q > 5 ? `${tr('teamGrade.otShort')}${q - 4}` : tr('teamGrade.quarterShort', { q }));
   const qLabelLong = (q: number) => (q === 5 ? tr('teamGrade.overtime')
@@ -494,6 +526,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Opponent scout
   const [scoutOpponent, setScoutOpponent] = useState<string | null>(null);
   const [scoutData, setScoutData] = useState<any | null>(null);
+  // Their players' tendencies from film, across every film of them.
+  const [scoutTendencies, setScoutTendencies] = useState<any[]>([]);
   // The three places this screen draws a report: the scouting report under a
   // game, the one on an opponent's scout page, and a generated game report.
   // Three scroll views, so three searches.
@@ -2045,6 +2079,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setInsights(prev => (Object.keys(prev).length ? prev : kept.insights ?? {}));
       setLoadingScout(false);
     });
+    setScoutTendencies([]);
+    gameEvalAPI.opponentTendencies(opponentName).then(setScoutTendencies).catch(() => {});
     try {
       const [data, notes, kept] = await Promise.all([
         gameEvalAPI.getOpponentProfile(opponentName, scoutRange),
@@ -3953,6 +3989,33 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     </View>
                   )}
 
+                  {/* Each of their players, from film: what they like to do,
+                      with how many times it was seen. Players the film barely
+                      showed are named as such, not described. */}
+                  {scoutTendencies.length > 0 && (
+                    <View style={s.card}>
+                      <Text style={s.cardLabel}>{tr('teamGrade.playerTendencies')}</Text>
+                      <Text style={{ color: t.muted, fontSize: 11, marginTop: 2, marginBottom: 10 }}>
+                        {tr('teamGrade.tendenciesHint')}
+                      </Text>
+                      {scoutTendencies.filter(p => p.facts.length > 0).map(p => (
+                        <View key={p.jersey} style={s.tendPlayer}>
+                          <Text style={s.tendName}>#{p.jersey}{p.name ? `  ${p.name}` : ''}</Text>
+                          <Text style={s.tendMeta}>{tr('teamGrade.tendSeen', { count: p.events, films: p.films })}</Text>
+                          {p.facts.map((f: any, i: number) => (
+                            <Text key={i} style={s.tendLine}>• {tendLine(f)}</Text>
+                          ))}
+                        </View>
+                      ))}
+                      {scoutTendencies.some(p => !p.facts.length) && (
+                        <Text style={[s.tendMeta, { marginTop: 8 }]}>
+                          {tr('teamGrade.seenTooLittle')}: {scoutTendencies.filter(p => !p.facts.length)
+                            .map(p => `#${p.jersey}${p.name ? ` ${p.name}` : ''}`).join(', ')}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+
                   {/* Tendencies, as a read rather than a tally. A list of raw
                       counts ("2 FG Missed 24x") is arithmetic a coach has to do
                       in their head — over how many games, and so what? The
@@ -5312,6 +5375,10 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
   qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontFamily: fonts[700] },
+  tendPlayer: { paddingVertical: 8, borderTopWidth: 1, borderTopColor: t.divider },
+  tendName: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
+  tendMeta: { color: t.muted2, fontSize: 11, marginTop: 1, marginBottom: 3 },
+  tendLine: { color: t.inkSoft, fontSize: 12.5, lineHeight: 18 },
   liveLine: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
   liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: t.negative },
   liveText: { color: t.negative, fontSize: 10, fontFamily: fonts[800], letterSpacing: 0.8 },
