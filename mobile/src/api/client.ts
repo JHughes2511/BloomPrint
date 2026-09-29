@@ -383,6 +383,22 @@ export const playersAPI = {
 // background — the app polls evalsAPI.job for the result).
 const UPLOAD_TIMEOUT = 1800000;
 
+/** Play calling: possessions, catalogs, numbers. */
+export const playCallingAPI = {
+  game: (gameId: number) => api.get(`/play-calling/games/${gameId}`).then(r => r.data),
+  add: (gameId: number, data: { side: 'our' | 'opponent'; quarter: number; play: string; play_type?: string; defense?: string | null }) =>
+    api.post(`/play-calling/games/${gameId}/possessions`, data).then(r => r.data),
+  edit: (callId: number, data: any) => api.patch(`/play-calling/possessions/${callId}`, data).then(r => r.data),
+  remove: (callId: number) => api.delete(`/play-calling/possessions/${callId}`).then(r => r.data),
+  finish: (callId: number, data: { result: 'score' | 'no_score'; player_name?: string | null; ended?: string | null;
+                                   ft_made?: number | null; ft_att?: number | null }) =>
+    api.post(`/play-calling/possessions/${callId}/finish`, data).then(r => r.data),
+  orb: (gameId: number, side: 'our' | 'opponent', quarter: number, delta: number) =>
+    api.post(`/play-calling/games/${gameId}/orb`, { side, quarter, delta }).then(r => r.data),
+  countDuplicate: (dupId: number) => api.post(`/game-eval/duplicates/${dupId}/count`).then(r => r.data),
+  undoStat: (statId: number) => api.delete(`/game-eval/stats/${statId}`, { params: { adjust_score: true } }).then(r => r.data),
+};
+
 export const evalsAPI = {
   /** The two uniform colours in an uploaded film, as choices. */
   detectColours: (token: string) => {

@@ -16,7 +16,7 @@ import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 
-import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI, importsAPI } from '../api/client';
+import { playCallingAPI, gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI, importsAPI } from '../api/client';
 import type { ScoutInsightOut } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
@@ -29,6 +29,7 @@ import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
+import PlayCallingPanel from '../components/PlayCallingPanel';
 import TeamLabelPrompt from '../components/TeamLabelPrompt';
 import GameReportPanel from '../components/GameReportPanel';
 import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
@@ -404,6 +405,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [ourScore, setOurScore] = useState(0);
   // Everyone tracking the live game right now, from the heartbeat.
   const [trackers, setTrackers] = useState<{ coach_id: number; name: string; side: 'our' | 'opponent'; you: boolean }[]>([]);
+  // The last few things anyone logged, and a key that tells the play-calling
+  // panel stats changed (someone else's, or ours).
+  const [recent, setRecent] = useState<any[]>([]);
+  const [pcKey, setPcKey] = useState(0);
   // The circle whose name is showing: hovered on a computer, tapped on a phone.
   const [peekTracker, setPeekTracker] = useState<number | null>(null);
   const peekTimer = useRef<any>(null);
@@ -1009,6 +1014,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     try {
       const r = await gameEvalAPI.liveBeat(game.id, entryModeRef.current);
       setTrackers(r.trackers || []);
+      setRecent(r.recent || []);
       if (sSeq === scoreSeq.current && scoreInFlight.current === 0) {
         setOurScore(r.our_score ?? 0);
         setOppScore(r.opponent_score ?? 0);
@@ -1027,6 +1033,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       // player they added without a stat yet turns up within fifteen seconds.
       const count = r.stats?.count ?? 0;
       liveBeats.current += 1;
+      if (liveStatsCount.current !== null && count !== liveStatsCount.current) setPcKey(k => k + 1);
       if ((liveStatsCount.current !== null && count !== liveStatsCount.current)
           || liveBeats.current % 5 === 0) refreshLiveRosters(game);
       liveStatsCount.current = count;
@@ -1065,9 +1072,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     return () => { on = false; clearInterval(iv); };
   }, [activeView]);
 
-  // Switching sides shows on everyone else's bar straight away.
+  // Switching sides shows on everyone else's bar straight away — and if
+  // someone is already on that side, a word so two people do not both log it.
   useEffect(() => {
     if (activeView === 'live' && activeGame) liveBeat(activeGame);
+    const there = trackers.find(tk => !tk.you && tk.side === entryMode);
+    if (activeView === 'live' && activeGame && there) {
+      const team = entryMode === 'opponent' ? (activeGame.opponent_name || tr('teamGrade.opponent'))
+        : (activeGame.team_name ?? coach?.program_name ?? tr('teamGrade.ourTeam'));
+      setStatToast(tr('playCalling.sameSide', { name: there.name, team }));
+      setTimeout(() => setStatToast(null), 2500);
+    }
   }, [entryMode]);
 
   const addOpponentPlayer = async () => {
@@ -1162,10 +1177,6 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setGradeDetailLoading(false);
   };
 
-  const SCORE_DELTA: Record<string, number> = {
-    '2 FG Made': 2, '3 FG Made': 3, 'FT Made': 1,
-  };
-
   const logStat = async (statName: string) => {
     if (!activeGame || !selectedPlayer) {
       Alert.alert(tr('teamGrade.selectPlayerAlertTitle'), tr('teamGrade.selectPlayerAlertMsg'));
@@ -1175,7 +1186,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     const count = 1;
     const rawPoints = computeRawPoints(statName, count);
     try {
-      await gameEvalAPI.logStat(activeGame.id, {
+      // Live: the server counts it once across trackers, attaches it to the
+      // possession being played, and moves the score itself.
+      scoreSeq.current += 1;
+      const r: any = await gameEvalAPI.logStat(activeGame.id, {
         player_name: selectedPlayer,
         is_opponent: entryMode === 'opponent',
         quarter: activeQuarter,
@@ -1183,17 +1197,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         stat_category: category,
         raw_points: rawPoints,
         count,
+        live: true,
       });
-      // Auto-update scoreboard for scoring plays
-      const scoreDelta = SCORE_DELTA[statName];
-      if (scoreDelta) {
-        if (entryMode === 'our') updateScore('our', scoreDelta);
-        else updateScore('opp', scoreDelta);
-      }
+      if (r?.our_score != null) setOurScore(r.our_score);
+      if (r?.opponent_score != null) setOppScore(r.opponent_score);
+      setPcKey(k => k + 1);
       // Flash the button and show toast
       setFlashStat(statName);
-      setStatToast(tr('teamGrade.statLoggedToast', { player: selectedPlayer, stat: statLabel(statName) }));
-      setTimeout(() => { setFlashStat(null); setStatToast(null); }, 1200);
+      setStatToast(r?.merged
+        ? tr('playCalling.mergedToast')
+        : tr('teamGrade.statLoggedToast', { player: selectedPlayer, stat: statLabel(statName) }));
+      // A merge is news the coach should get to read.
+      setTimeout(() => { setFlashStat(null); setStatToast(null); }, r?.merged ? 2500 : 1200);
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotLogStat'));
     }
@@ -2879,6 +2894,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   ? tr('teamGrade.finalLabel')
                   : periodLabel(gameFmt, periodIndex)}
               </Text>
+              {/* Baskets go through a player (Stats or Play Calling); the
+                  score's own − / + are for putting it right. */}
+              {activeGame.tracking_mode !== 'post' && (
+                <Text style={{ color: t.muted2, fontSize: 9.5, marginTop: 1 }}>{tr('playCalling.scoreCorrection')}</Text>
+              )}
             </View>
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }} numberOfLines={1}>{sideLabels.theirs}</Text>
@@ -2928,6 +2948,53 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 );
               })}
             </View>
+          )}
+
+          {/* Recent: the last few things anyone logged, and by whom. A copy
+              of a basket someone else already had is merged, not counted —
+              shown faintly here with "Count it" for the rare real second one. */}
+          {activeGame.tracking_mode !== 'post' && recent.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.recentBar}
+                        contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 16 }}>
+              <Text style={s.trackerBarLabel}>{tr('playCalling.recent')}</Text>
+              {recent.map((x: any) => {
+                const secs = Math.max(0, Math.round((Date.now() - Date.parse(x.at)) / 1000));
+                const ago = secs < 60 ? `${secs}s` : `${Math.round(secs / 60)}m`;
+                const merged = x.kind === 'merged';
+                return (
+                  <View key={`${x.kind}-${x.id}`} style={[s.recentItem, merged && { opacity: 0.6 }]}>
+                    <Text style={s.recentText} numberOfLines={1}>
+                      {x.player_name} · {statLabel(x.stat_name)} · {x.you ? tr('teamGrade.you') : x.by} · {ago}
+                      {merged ? ` · ${tr('playCalling.mergedWith', { name: x.merged_with || '—' })}` : ''}
+                    </Text>
+                    {merged ? (
+                      <TouchableOpacity onPress={async () => {
+                        try {
+                          const r = await playCallingAPI.countDuplicate(x.id);
+                          if (r?.our_score != null) setOurScore(r.our_score);
+                          if (r?.opponent_score != null) setOppScore(r.opponent_score);
+                          setPcKey(k => k + 1);
+                          liveBeat(activeGame);
+                        } catch { /* already counted */ }
+                      }}>
+                        <Text style={s.recentAction}>{tr('playCalling.countIt')}</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity accessibilityLabel={tr('playCalling.undo')} onPress={async () => {
+                        try {
+                          scoreSeq.current += 1;
+                          await playCallingAPI.undoStat(x.id);
+                          setPcKey(k => k + 1);
+                          liveBeat(activeGame);
+                        } catch { /* gone already */ }
+                      }}>
+                        <Ionicons name="arrow-undo-outline" size={14} color={t.muted} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              })}
+            </ScrollView>
           )}
 
           {/* Stat recorded toast */}
@@ -3231,6 +3298,28 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <Text style={{ color: t.negative, fontFamily: fonts[600], fontSize: 13 }}>{tr('teamGrade.endGame')}</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Play calling: below Line-up and End Game, on the same page. */}
+            {activeGame.tracking_mode !== 'post' && (
+              <PlayCallingPanel
+                game={activeGame}
+                liveQuarter={activeQuarter}
+                qLabel={qLabel}
+                sideNames={{
+                  our: activeGame.team_name ?? (teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
+                    ?? coach?.program_name ?? tr('teamGrade.ourTeam'),
+                  opponent: activeGame.opponent_name || tr('teamGrade.opponent'),
+                }}
+                players={{
+                  our: roster.map((p: any) => ({ name: p.name, jersey: p.jersey_number })),
+                  opponent: opponentRoster.map((p: any) => ({ name: p.player_name, jersey: p.jersey_number })),
+                }}
+                refreshKey={pcKey}
+                onScores={(o, p) => { if (o != null) setOurScore(o); if (p != null) setOppScore(p); }}
+                t={t}
+                tr={tr}
+              />
+            )}
           </KeyboardAwareScrollView>
         </View>
       )}
@@ -5388,6 +5477,11 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   joinBtn: { backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
   joinBtnText: { color: t.ctaText, fontSize: 11, fontFamily: fonts[800] },
   // Above what follows, so a name popping out under a circle is not covered.
+  recentBar: { flexGrow: 0, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.divider },
+  recentItem: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: t.cardBorder,
+                backgroundColor: t.card, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, maxWidth: 360 },
+  recentText: { color: t.inkSoft, fontSize: 11.5, flexShrink: 1 },
+  recentAction: { color: t.accent, fontSize: 11.5, fontFamily: fonts[800] },
   trackerBar: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8,
                 paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider,
                 zIndex: 30 },

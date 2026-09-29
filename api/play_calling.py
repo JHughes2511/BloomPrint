@@ -283,7 +283,7 @@ def settle_from_stats(db: Session, call: models.PlayCall, closing: bool = False,
         return
     if call.result == "score" and (linked or taken_back):
         # The basket it scored with was taken back: open again.
-        call.result = call.points = call.ended = call.ft_made = call.ft_att = None
+        call.result = call.points = call.ended = call.ft_made = call.ft_att = call.player_name = None
     if closing and call.result is None:
         call.result, call.points = "no_score", 0
         last = next((s for s in reversed(linked) if s.stat_name in MISS_ENDING), None)
