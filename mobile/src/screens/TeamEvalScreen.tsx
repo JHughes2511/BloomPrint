@@ -3143,39 +3143,51 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </View>
 
           {detailTab !== 'insights' && detailTab === 'byquarter' && (() => {
-            const ourStats = gameStats.filter((st: any) => !st.is_opponent);
-            if (ourStats.length === 0) return (
+            if (gameStats.length === 0) return (
               <View style={s.card}>
                 <Text style={{ color: t.muted, textAlign: 'center', fontSize: 13 }}>{tr('teamGrade.noStatsLogged')}</Text>
               </View>
             );
-            // Build player -> quarter -> { weighted, counts, list }
+            const ourName = detailGame.team_name
+              ?? (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
+              ?? coach?.program_name ?? tr('teamGrade.ourTeam');
+            const theirName = detailGame.opponent_name || tr('teamGrade.opponent');
+            type QData = { weighted: number; counts: Record<string, number>; list: any[] };
+            type PData = { total: number; jersey?: string | null; quarters: Record<number, QData> };
             const qSet = new Set<number>();
-            const players: Record<string, { total: number; jersey?: string | null; quarters: Record<number, { weighted: number; counts: Record<string, number>; list: any[] }> }> = {};
-            for (const st of ourStats) {
-              qSet.add(st.quarter);
-              if (!players[st.player_name]) players[st.player_name] = { total: 0, quarters: {} };
-              const P = players[st.player_name];
-              // Whichever row carries it — they all came off the same sheet.
-              P.jersey = P.jersey ?? st.jersey_number ?? null;
-              if (!P.quarters[st.quarter]) P.quarters[st.quarter] = { weighted: 0, counts: {}, list: [] };
-              const Q = P.quarters[st.quarter];
-              Q.weighted += st.weighted_points;
-              Q.counts[st.stat_name] = (Q.counts[st.stat_name] || 0) + (st.count || 1);
-              Q.list.push(st);
-              P.total += st.weighted_points;
-            }
+            // Both teams, ours first, each with its own TEAM row. Every player
+            // carries a tag naming their team, in that team's colour, so a row
+            // can be read without scrolling back to see whose group it is in.
+            const groups = [false, true].map(isOpp => {
+              const players: Record<string, PData> = {};
+              for (const st of gameStats) {
+                if (!!st.is_opponent !== isOpp) continue;
+                qSet.add(st.quarter);
+                if (!players[st.player_name]) players[st.player_name] = { total: 0, quarters: {} };
+                const P = players[st.player_name];
+                // Whichever row carries it — they all came off the same sheet.
+                P.jersey = P.jersey ?? st.jersey_number ?? null;
+                if (!P.quarters[st.quarter]) P.quarters[st.quarter] = { weighted: 0, counts: {}, list: [] };
+                const Q = P.quarters[st.quarter];
+                Q.weighted += st.weighted_points;
+                Q.counts[st.stat_name] = (Q.counts[st.stat_name] || 0) + (st.count || 1);
+                Q.list.push(st);
+                P.total += st.weighted_points;
+              }
+              const playerNames = Object.keys(players).sort((a, b) => players[b].total - players[a].total);
+              return {
+                isOpp, players, playerNames,
+                name: isOpp ? theirName : ourName,
+                color: isOpp ? t.negative : t.accent,
+              };
+            }).filter(g => g.playerNames.length > 0);
             const qNums = Array.from(qSet).sort((a, b) => a - b);
             // A box score read off a sheet is whole-game totals filed under one
             // period. Calling that column "Q1" tells the coach the game had a
             // first quarter and nothing else, which is not what the sheet said.
             const wholeGame = qNums.length === 1
-              && ourStats.every((st: any) => st.source === 'import');
+              && gameStats.every((st: any) => st.source === 'import');
             const periodLabel = (q: number) => (wholeGame ? tr('teamGrade.fullGame') : qLabel(q));
-            const playerNames = Object.keys(players).sort((a, b) => players[b].total - players[a].total);
-            const teamQ: Record<number, number> = {};
-            for (const q of qNums) teamQ[q] = playerNames.reduce((sum, n) => sum + (players[n].quarters[q]?.weighted || 0), 0);
-            const teamTotal = playerNames.reduce((sum, n) => sum + players[n].total, 0);
             const cellColor = (v: number) => (v > 0 ? t.positive : v < 0 ? t.negative : t.muted);
             const fmt = (v: number) => (v > 0 ? '+' : '') + v.toFixed(1);
 
@@ -3190,85 +3202,102 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <View style={s.qHeaderRow}>
                   <Text style={s.qPlayerHead}>{tr('teamGrade.playerHead')}</Text>
                   {qNums.map(q => <Text key={q} style={s.qColHead}>{periodLabel(q)}</Text>)}
-                  <Text style={[s.qColHead, { color: t.accent }]}>{tr('teamGrade.tot')}</Text>
+                  <Text style={[s.qColHead, { color: t.inkSoft }]}>{tr('teamGrade.tot')}</Text>
                 </View>
 
-                {/* Team totals */}
-                <View style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8, marginTop: 4, marginBottom: 8 }]}>
-                  <Text style={[s.qPlayerName, { color: t.accent, fontFamily: fonts[800] }]}>{tr('teamGrade.teamRow')}</Text>
-                  {qNums.map(q => (
-                    <Text key={q} style={[s.qCell, { color: cellColor(teamQ[q]), fontFamily: fonts[800] }]}>{fmt(teamQ[q])}</Text>
-                  ))}
-                  <Text style={[s.qCell, { color: t.accent, fontFamily: fonts[800] }]}>{fmt(teamTotal)}</Text>
-                </View>
-
-                {/* Player rows */}
-                {playerNames.map(name => {
-                  const P = players[name];
-                  const isOpen = expandedQuarterPlayer === name;
+                {groups.map((g, gi) => {
+                  const { players, playerNames } = g;
+                  const teamQ: Record<number, number> = {};
+                  for (const q of qNums) teamQ[q] = playerNames.reduce((sum, n) => sum + (players[n].quarters[q]?.weighted || 0), 0);
+                  const teamTotal = playerNames.reduce((sum, n) => sum + players[n].total, 0);
                   return (
-                    <View key={name}>
-                      <TouchableOpacity
-                        style={[s.qRow, isOpen && { backgroundColor: t.chip, borderRadius: 8, marginTop: 4 }]}
-                        onPress={() => setExpandedQuarterPlayer(isOpen ? null : name)}
-                      >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 4 }}>
-                          <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={12} color={t.muted2} />
-                          <Text style={s.qPlayerName} numberOfLines={1}>
-                            {P.jersey ? `#${P.jersey} ` : ''}{name}
-                          </Text>
+                    <View key={String(g.isOpp)} style={gi > 0 ? { marginTop: 18 } : null}>
+                      {/* Team totals */}
+                      <View style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8, marginTop: 4, marginBottom: 8 }]}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[s.qPlayerName, { color: g.color, fontFamily: fonts[800] }]}>{tr('teamGrade.teamRow')}</Text>
+                          <Text style={[s.qTeamTag, { color: g.color }]} numberOfLines={1}>{g.name}</Text>
                         </View>
-                        {qNums.map(q => {
-                          const w = P.quarters[q]?.weighted;
-                          return (
-                            <Text key={q} style={[s.qCell, { color: w == null ? t.line : cellColor(w) }]}>
-                              {w == null ? '–' : fmt(w)}
-                            </Text>
-                          );
-                        })}
-                        <Text style={[s.qCell, { color: t.accent, fontFamily: fonts[800] }]}>{fmt(P.total)}</Text>
-                      </TouchableOpacity>
+                        {qNums.map(q => (
+                          <Text key={q} style={[s.qCell, { color: cellColor(teamQ[q]), fontFamily: fonts[800] }]}>{fmt(teamQ[q])}</Text>
+                        ))}
+                        <Text style={[s.qCell, { color: g.color, fontFamily: fonts[800] }]}>{fmt(teamTotal)}</Text>
+                      </View>
 
-                      {isOpen && (
-                        <View style={s.qExpand}>
-                          {qNums.filter(q => P.quarters[q]).map(q => {
-                            const Q = P.quarters[q];
-                            const c = Q.counts;
-                            const pts = (c['2 FG Made'] || 0) * 2 + (c['3 FG Made'] || 0) * 3 + (c['FT Made'] || 0);
-                            const reb = (c['Off. Reb'] || 0) + (c['Def. Reb'] || 0);
-                            const ast = c['Assists'] || 0;
-                            const stl = c['Steal'] || 0;
-                            const blk = c['Blocked Shot'] || 0;
-                            const to = c['Turnover'] || 0;
-                            return (
-                              <View key={q} style={{ marginBottom: 10 }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                  <Text style={{ color: t.inkSoft, fontSize: 11, fontFamily: fonts[800], letterSpacing: 0.5 }}>{periodLabel(q)}</Text>
-                                  <Text style={{ color: cellColor(Q.weighted), fontSize: 11, fontFamily: fonts[700] }}>{fmt(Q.weighted)} {tr('teamGrade.ptsAbbr')}</Text>
-                                </View>
-                                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 6 }}>
-                                  {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to]].map(([label, val]) => (
-                                    <View key={label as string} style={{ alignItems: 'center' }}>
-                                      <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>{label}</Text>
-                                      <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[800] }}>{val}</Text>
-                                    </View>
-                                  ))}
-                                </View>
-                                <View style={{ gap: 2 }}>
-                                  {Q.list.map((st: any, i: number) => (
-                                    <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                      <Text style={{ color: t.muted, fontSize: 11 }}>{st.stat_name}{st.count > 1 ? ` ×${st.count}` : ''}</Text>
-                                      <Text style={{ color: st.weighted_points >= 0 ? t.positive : t.negative, fontSize: 11, fontFamily: fonts[600] }}>
-                                        {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)}
-                                      </Text>
-                                    </View>
-                                  ))}
+                      {/* Player rows */}
+                      {playerNames.map(name => {
+                        const P = players[name];
+                        const key = `${g.isOpp ? 'opp' : 'our'}:${name}`;
+                        const isOpen = expandedQuarterPlayer === key;
+                        return (
+                          <View key={key}>
+                            <TouchableOpacity
+                              style={[s.qRow, isOpen && { backgroundColor: t.chip, borderRadius: 8, marginTop: 4 }]}
+                              onPress={() => setExpandedQuarterPlayer(isOpen ? null : key)}
+                            >
+                              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 4 }}>
+                                <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={12} color={t.muted2} />
+                                <View style={{ flex: 1 }}>
+                                  <Text style={s.qPlayerName} numberOfLines={1}>
+                                    {P.jersey ? `#${P.jersey} ` : ''}{name}
+                                  </Text>
+                                  <Text style={[s.qTeamTag, { color: g.color }]} numberOfLines={1}>{g.name}</Text>
                                 </View>
                               </View>
-                            );
-                          })}
-                        </View>
-                      )}
+                              {qNums.map(q => {
+                                const w = P.quarters[q]?.weighted;
+                                return (
+                                  <Text key={q} style={[s.qCell, { color: w == null ? t.line : cellColor(w) }]}>
+                                    {w == null ? '–' : fmt(w)}
+                                  </Text>
+                                );
+                              })}
+                              <Text style={[s.qCell, { color: g.color, fontFamily: fonts[800] }]}>{fmt(P.total)}</Text>
+                            </TouchableOpacity>
+
+                          {isOpen && (
+                            <View style={s.qExpand}>
+                              {qNums.filter(q => P.quarters[q]).map(q => {
+                                const Q = P.quarters[q];
+                                const c = Q.counts;
+                                const pts = (c['2 FG Made'] || 0) * 2 + (c['3 FG Made'] || 0) * 3 + (c['FT Made'] || 0);
+                                const reb = (c['Off. Reb'] || 0) + (c['Def. Reb'] || 0);
+                                const ast = c['Assists'] || 0;
+                                const stl = c['Steal'] || 0;
+                                const blk = c['Blocked Shot'] || 0;
+                                const to = c['Turnover'] || 0;
+                                return (
+                                  <View key={q} style={{ marginBottom: 10 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                                      <Text style={{ color: t.inkSoft, fontSize: 11, fontFamily: fonts[800], letterSpacing: 0.5 }}>{periodLabel(q)}</Text>
+                                      <Text style={{ color: cellColor(Q.weighted), fontSize: 11, fontFamily: fonts[700] }}>{fmt(Q.weighted)} {tr('teamGrade.ptsAbbr')}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', gap: 12, marginBottom: 6 }}>
+                                      {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to]].map(([label, val]) => (
+                                        <View key={label as string} style={{ alignItems: 'center' }}>
+                                          <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>{label}</Text>
+                                          <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[800] }}>{val}</Text>
+                                        </View>
+                                      ))}
+                                    </View>
+                                    <View style={{ gap: 2 }}>
+                                      {Q.list.map((st: any, i: number) => (
+                                        <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                          <Text style={{ color: t.muted, fontSize: 11 }}>{st.stat_name}{st.count > 1 ? ` ×${st.count}` : ''}</Text>
+                                          <Text style={{ color: st.weighted_points >= 0 ? t.positive : t.negative, fontSize: 11, fontFamily: fonts[600] }}>
+                                            {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)}
+                                          </Text>
+                                        </View>
+                                      ))}
+                                    </View>
+                                  </View>
+                                );
+                              })}
+                            </View>
+                          )}
+                          </View>
+                        );
+                      })}
                     </View>
                   );
                 })}
@@ -3280,7 +3309,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           ) : detailTab !== 'byquarter' && summary ? (
             <View style={s.card}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={[s.cardLabel, s.gameCardLabel]}>{tr('teamGrade.playerGrades')}</Text>
+                <Text style={[s.cardLabel, { color: detailTab === 'opponent' ? t.negative : t.accent }]}>{tr('teamGrade.playerGrades')}</Text>
                 <TouchableOpacity
                   onPress={() => {
                     setShowGradeSearch(prev => {
@@ -5061,6 +5090,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   qColHead: { width: 42, textAlign: 'center', color: t.muted, fontSize: 10, fontFamily: fonts[700] },
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
   qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
+  qTeamTag: { fontSize: 10, fontFamily: fonts[600], marginTop: 1 },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontFamily: fonts[700] },
   qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 10 },
   chip: {
