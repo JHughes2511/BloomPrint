@@ -113,6 +113,10 @@ def add_possession(game_id: int, body: PossessionIn, db: Session = Depends(get_d
     if body.side not in ("our", "opponent") or not body.quarter:
         raise HTTPException(status_code=400, detail="side and quarter are required")
     last = db.query(func.max(models.PlayCall.seq)).filter_by(game_id=game.id).scalar() or 0
+    # Calling the next play ends the one before: nothing scored, it was a stop.
+    prev = pc.current_possession(db, game.id)
+    if prev is not None and body.source != "import":
+        pc.settle_from_stats(db, prev, closing=True)
     call = models.PlayCall(game_id=game.id, side=body.side, quarter=body.quarter, seq=last + 1,
                            play="Unknown", play_type="unknown", logged_by=coach.id)
     if body.play is None:
@@ -150,6 +154,39 @@ def delete_possession(call_id: int, db: Session = Depends(get_db),
     db.delete(call)
     db.commit()
     return {"ok": True}
+
+
+class FinishIn(BaseModel):
+    result: str                      # score / no_score
+    player_name: str | None = None
+    player_id: int | None = None
+    ended: str | None = None
+    ft_made: int | None = None
+    ft_att: int | None = None
+
+
+@router.post("/possessions/{call_id}/finish")
+def finish(call_id: int, body: FinishIn, db: Session = Depends(get_db),
+           coach: models.Coach = Depends(get_current_coach)):
+    """+ or − on a possession, with who and how: the stats it implies are
+    linked if already logged, created if not, and the score moves once."""
+    call, game = _owned_call(db, call_id, coach)
+    if body.result not in ("score", "no_score") or (body.ended and body.ended not in pc.ENDINGS):
+        raise HTTPException(status_code=400, detail="result or ending not recognised")
+    if body.result == "score" and body.ended in ("miss2", "miss3", "turnover", "ft_miss"):
+        raise HTTPException(status_code=400, detail="a score cannot end in a miss")
+    for v in (body.ft_made, body.ft_att):
+        if v is not None and not 0 <= v <= 3:
+            raise HTTPException(status_code=400, detail="free throws out of range")
+    pc.finish_possession(db, game, coach, call, result=body.result,
+                         player_name=(body.player_name or "").strip() or None, ended=body.ended,
+                         ft_made=body.ft_made, ft_att=body.ft_att, player_id=body.player_id)
+    db.commit()
+    db.refresh(call)
+    db.refresh(game)
+    from .game_eval import _shown_scores
+    ours, theirs = _shown_scores(game)
+    return {"possession": pc.call_out(call), "our_score": ours, "opponent_score": theirs}
 
 
 class TallyIn(BaseModel):

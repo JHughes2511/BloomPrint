@@ -2081,6 +2081,21 @@ def log_stat(
     coach: models.Coach = Depends(get_current_coach),
 ):
     game = _get_game_trackable(db, game_id, coach)
+    if body.live:
+        from .. import play_calling as pc
+        stat, dup = pc.record_stat(db, game, coach, player_name=body.player_name,
+                                   is_opponent=body.is_opponent, quarter=body.quarter,
+                                   stat_name=body.stat_name, count=body.count,
+                                   player_id=body.player_id, raw_points=body.raw_points)
+        db.commit()
+        db.refresh(game)
+        ours, theirs = _shown_scores(game)
+        call = pc.current_possession(db, game.id)
+        return {"id": stat.id if stat else None, "merged": dup is not None,
+                "duplicate_id": dup.id if dup else None,
+                "weighted_points": stat.weighted_points if stat else 0,
+                "our_score": ours, "opponent_score": theirs,
+                "possession": pc.call_out(call) if call else None}
     multiplier = _quarter_multiplier(body.quarter)
     weighted = body.raw_points * multiplier
     stat = models.GamePlayerStat(
@@ -2095,6 +2110,7 @@ def log_stat(
         quarter_multiplier=multiplier,
         weighted_points=weighted,
         count=body.count,
+        logged_by=coach.id,
     )
     db.add(stat)
     db.commit()
@@ -2105,6 +2121,8 @@ def log_stat(
 @router.delete("/stats/{stat_id}")
 def delete_stat(
     stat_id: int,
+    # Undo from the live tracker: a made shot taken back comes off the score.
+    adjust_score: bool = False,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -2117,7 +2135,17 @@ def delete_stat(
         _get_game_trackable(db, stat.game_id, coach)
     except HTTPException:
         raise HTTPException(status_code=403, detail="Not authorized")
+    from .. import play_calling as pc
+    game = db.get(models.GameSession, stat.game_id)
+    if adjust_score and game is not None and stat.stat_name in pc.POINTS:
+        pc._add_score(db, game, bool(stat.is_opponent), -pc.POINTS[stat.stat_name] * (stat.count or 1))
+    call = db.get(models.PlayCall, stat.possession_id) if stat.possession_id else None
+    # A merged copy of it no longer has an original; it stays, to be counted.
+    db.query(models.StatDuplicate).filter_by(original_id=stat.id).update({"original_id": None})
     db.delete(stat)
+    db.flush()
+    if call is not None:
+        pc.settle_from_stats(db, call, taken_back=stat.stat_name in pc.POINTS)
     db.commit()
     return {"ok": True}
 
@@ -2274,6 +2302,7 @@ def live_beat(
         "clock": _clock_now(game, now),
         "trackers": _trackers(db, game.id, coach.id, now),
         "stats": {"count": count or 0, "last_id": last_id or 0},
+        "recent": _recent(db, game.id, coach.id),
     }
 
 
@@ -2317,6 +2346,34 @@ def _game_team_members(db: Session, game: models.GameSession) -> set[int]:
 
 
 LIVE_NOTIFY_QUIET_MINUTES = 30
+
+
+def _recent(db: Session, game_id: int, me: int) -> list[dict]:
+    from .. import play_calling as pc
+    return pc.recent_activity(db, game_id, me)
+
+
+@router.post("/duplicates/{dup_id}/count")
+def count_duplicate(
+    dup_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """"It really was a second one": make a merged duplicate a real stat."""
+    from .. import play_calling as pc
+    dup = db.get(models.StatDuplicate, dup_id)
+    if not dup or dup.counted:
+        raise HTTPException(status_code=404, detail="Not found")
+    game = _get_game_trackable(db, dup.game_id, coach)
+    p = dup.payload or {}
+    pc.record_stat(db, game, coach, player_name=p.get("player_name", ""), is_opponent=bool(p.get("is_opponent")),
+                   quarter=int(p.get("quarter") or 1), stat_name=p.get("stat_name", ""),
+                   count=int(p.get("count") or 1), player_id=p.get("player_id"), force=True)
+    dup.counted = True
+    db.commit()
+    db.refresh(game)
+    ours, theirs = _shown_scores(game)
+    return {"our_score": ours, "opponent_score": theirs}
 
 
 def on_live_join(background_tasks: BackgroundTasks, db: Session, game: models.GameSession,

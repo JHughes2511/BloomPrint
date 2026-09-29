@@ -1025,6 +1025,25 @@ class DefenseCatalogEntry(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class StatDuplicate(Base):
+    """A stat a second tracker logged that another had already logged.
+
+    Same team, same player, same stat, within seconds, from someone else: the
+    same basket seen twice. It is kept here rather than counted, so the score
+    and the player's grade take it once; "Count it" makes it a real stat for
+    the rare time it really was a second one.
+    """
+    __tablename__ = "stat_duplicates"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    game_id     = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    original_id = Column(Integer, ForeignKey("game_player_stats.id"), nullable=True)
+    payload     = Column(JSON, nullable=False)   # player_name, is_opponent, quarter, stat_name
+    logged_by   = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    counted     = Column(Boolean, default=False)
+    created_at  = Column(DateTime, default=datetime.utcnow)
+
+
 class GameTally(Base):
     """A running count kept per team per quarter: offensive rebounds, from
     play-calling tracking or a sheet's tallies."""

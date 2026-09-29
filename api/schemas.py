@@ -804,6 +804,9 @@ class GameStatEntry(BaseModel):
     stat_category: str
     raw_points: float
     count: int = 1
+    # Tapped in during a live game: counted once across trackers, attached to
+    # the possession being played, and the score moved by the server.
+    live: bool = False
 
 
 class LineupEventCreate(BaseModel):
