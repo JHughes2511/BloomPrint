@@ -78,6 +78,8 @@ app.include_router(decide.router)
 app.include_router(account.router)
 from .routes import play_calling as _play_calling  # noqa: E402
 app.include_router(_play_calling.router)
+from .routes import injuries as _injuries  # noqa: E402
+app.include_router(_injuries.router)
 
 
 @app.on_event("startup")

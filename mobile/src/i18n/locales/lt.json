@@ -3039,5 +3039,59 @@
       "theirPlays": "Varžovų deriniai prieš juos",
       "theirDefense": "Pagal jų žaistą gynybą"
     }
+  },
+  "injuries": {
+    "title": "Traumų žurnalas",
+    "log": "Įrašyti traumą",
+    "current": "Dabartinės",
+    "recent": "Neseniai",
+    "none": "Traumų neįrašyta.",
+    "noneCurrent": "Dabartinių traumų nėra.",
+    "unspecified": "Nepatikslinta trauma",
+    "since": "Nuo {{date}}",
+    "expReturn": "Numat. grįžimas {{date}}",
+    "returned": "Grįžo {{date}}",
+    "markReturned": "Pažymėti grįžimą",
+    "edit": "Redaguoti",
+    "deleteTitle": "Ištrinti šią traumą?",
+    "status": {
+      "out": "NEŽAIS",
+      "dtd": "Kasdien vertinama",
+      "questionable": "Abejotinas",
+      "playing_through": "Žaidžia su trauma",
+      "cleared": "Sveikas"
+    },
+    "parts": {
+      "ankle": "Čiurna",
+      "knee": "Kelias",
+      "hamstring": "Užpakalinis šlaunies raumuo",
+      "groin": "Kirkšnis",
+      "calf": "Blauzda",
+      "foot": "Pėda",
+      "back": "Nugara",
+      "hip": "Klubas",
+      "shoulder": "Petys",
+      "wrist": "Riešas",
+      "hand": "Plaštaka",
+      "concussion": "Smegenų sukrėtimas"
+    },
+    "sides": {
+      "left": "Kairė",
+      "right": "Dešinė",
+      "both": "Abi"
+    },
+    "fields": {
+      "status": "Būsena",
+      "bodyPart": "Kūno dalis",
+      "bodyPartOther": "Arba įrašykite (pvz. Įstrižinis)",
+      "side": "Pusė",
+      "what": "Kas tai",
+      "whatPlaceholder": "pvz. Patempimas, skausmas, sumušimas, 1 laipsnio plyšimas",
+      "injuredOn": "Traumuotas",
+      "expectedReturn": "Numatomas grįžimas",
+      "returnedOn": "Grįžo",
+      "notes": "Pastabos",
+      "notesPlaceholder": "Kas padeda: minučių limitas, ko dar negali, kaip nutiko"
+    }
   }
 }

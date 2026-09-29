@@ -3039,5 +3039,59 @@
       "theirPlays": "Spielzüge der Gegner gegen sie",
       "theirDefense": "Nach ihrer Verteidigung"
     }
+  },
+  "injuries": {
+    "title": "Verletzungsprotokoll",
+    "log": "Verletzung eintragen",
+    "current": "Aktuell",
+    "recent": "Kürzlich",
+    "none": "Keine Verletzungen eingetragen.",
+    "noneCurrent": "Keine aktuellen Verletzungen.",
+    "unspecified": "Nicht näher bezeichnete Verletzung",
+    "since": "Seit {{date}}",
+    "expReturn": "Voraussichtl. zurück {{date}}",
+    "returned": "Zurück seit {{date}}",
+    "markReturned": "Als zurück markieren",
+    "edit": "Bearbeiten",
+    "deleteTitle": "Diese Verletzung löschen?",
+    "status": {
+      "out": "FÄLLT AUS",
+      "dtd": "Täglich neu",
+      "questionable": "Fraglich",
+      "playing_through": "Spielt angeschlagen",
+      "cleared": "Fit"
+    },
+    "parts": {
+      "ankle": "Knöchel",
+      "knee": "Knie",
+      "hamstring": "Oberschenkelrückseite",
+      "groin": "Leiste",
+      "calf": "Wade",
+      "foot": "Fuß",
+      "back": "Rücken",
+      "hip": "Hüfte",
+      "shoulder": "Schulter",
+      "wrist": "Handgelenk",
+      "hand": "Hand",
+      "concussion": "Gehirnerschütterung"
+    },
+    "sides": {
+      "left": "Links",
+      "right": "Rechts",
+      "both": "Beide"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Körperstelle",
+      "bodyPartOther": "Oder eintippen (z. B. Bauchmuskel)",
+      "side": "Seite",
+      "what": "Was es ist",
+      "whatPlaceholder": "z. B. Verstauchung, Schmerzen, Prellung, Zerrung Grad 1",
+      "injuredOn": "Verletzt am",
+      "expectedReturn": "Voraussichtliche Rückkehr",
+      "returnedOn": "Zurück am",
+      "notes": "Notizen",
+      "notesPlaceholder": "Was hilft: Minutenlimit, was noch nicht geht, wie es passiert ist"
+    }
   }
 }

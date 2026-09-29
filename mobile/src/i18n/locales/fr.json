@@ -3039,5 +3039,59 @@
       "theirPlays": "Systèmes adverses contre eux",
       "theirDefense": "Par la défense jouée"
     }
+  },
+  "injuries": {
+    "title": "Suivi des blessures",
+    "log": "Ajouter une blessure",
+    "current": "Actuelles",
+    "recent": "Récentes",
+    "none": "Aucune blessure enregistrée.",
+    "noneCurrent": "Aucune blessure actuelle.",
+    "unspecified": "Blessure non précisée",
+    "since": "Depuis le {{date}}",
+    "expReturn": "Retour prévu {{date}}",
+    "returned": "Revenu le {{date}}",
+    "markReturned": "Marquer comme revenu",
+    "edit": "Modifier",
+    "deleteTitle": "Supprimer cette blessure ?",
+    "status": {
+      "out": "FORFAIT",
+      "dtd": "Au jour le jour",
+      "questionable": "Incertain",
+      "playing_through": "Joue blessé",
+      "cleared": "Rétabli"
+    },
+    "parts": {
+      "ankle": "Cheville",
+      "knee": "Genou",
+      "hamstring": "Ischio-jambier",
+      "groin": "Aine",
+      "calf": "Mollet",
+      "foot": "Pied",
+      "back": "Dos",
+      "hip": "Hanche",
+      "shoulder": "Épaule",
+      "wrist": "Poignet",
+      "hand": "Main",
+      "concussion": "Commotion"
+    },
+    "sides": {
+      "left": "Gauche",
+      "right": "Droit",
+      "both": "Les deux"
+    },
+    "fields": {
+      "status": "Statut",
+      "bodyPart": "Zone",
+      "bodyPartOther": "Ou saisissez-la (ex. Oblique)",
+      "side": "Côté",
+      "what": "De quoi s'agit-il",
+      "whatPlaceholder": "ex. Entorse, douleur, contusion, élongation",
+      "injuredOn": "Blessé le",
+      "expectedReturn": "Retour prévu",
+      "returnedOn": "Revenu le",
+      "notes": "Notes",
+      "notesPlaceholder": "Tout ce qui aide : limite de minutes, ce qu'il ne peut pas encore faire, comment c'est arrivé"
+    }
   }
 }

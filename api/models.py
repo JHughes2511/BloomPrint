@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from sqlalchemy import (
-    Column, Integer, String, Float, Text, DateTime,
+    Column, Integer, String, Float, Text, DateTime, Date,
     ForeignKey, Boolean, JSON, UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
@@ -1291,6 +1291,34 @@ class ScoutInsight(Base):
     created_at  = Column(DateTime, default=datetime.utcnow)
 
     coach = relationship("Coach")
+
+
+class PlayerInjury(Base):
+    """One injury, as a team's injury report lists it.
+
+    A roster player's is keyed by player_id. A player known only by name — an
+    opponent on Scout, a name off a box score — is keyed by the team's name and
+    the player's, within the coach who logged it (coach_id). Current means not
+    cleared and not returned; everything else is the recent history.
+    """
+    __tablename__ = "player_injuries"
+    id = Column(Integer, primary_key=True, index=True)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=True, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)    # who logged it
+    team_name = Column(String, nullable=True)                               # name-keyed players
+    player_name = Column(String, nullable=False)
+    # out / dtd / questionable / playing_through / cleared
+    status = Column(String, nullable=False, default="out")
+    body_part = Column(String, nullable=True)       # "Hamstring"
+    side = Column(String, nullable=True)            # left / right / both
+    description = Column(String, nullable=True)     # "Soreness", "Bruise", "Grade 1 strain"
+    injured_on = Column(Date, nullable=True)
+    expected_return = Column(Date, nullable=True)
+    returned_on = Column(Date, nullable=True)
+    notes = Column(Text, nullable=True)
+    source = Column(String, nullable=True)          # manual / import
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class OpponentPlayer(Base):

@@ -3039,5 +3039,59 @@
       "theirPlays": "Motståndarnas spel mot dem",
       "theirDefense": "Efter försvaret de spelade"
     }
+  },
+  "injuries": {
+    "title": "Skadelogg",
+    "log": "Logga skada",
+    "current": "Aktuella",
+    "recent": "Senaste",
+    "none": "Inga skador loggade.",
+    "noneCurrent": "Inga aktuella skador.",
+    "unspecified": "Ospecificerad skada",
+    "since": "Sedan {{date}}",
+    "expReturn": "Väntas tillbaka {{date}}",
+    "returned": "Tillbaka {{date}}",
+    "markReturned": "Markera som tillbaka",
+    "edit": "Redigera",
+    "deleteTitle": "Ta bort skadan?",
+    "status": {
+      "out": "BORTA",
+      "dtd": "Dag för dag",
+      "questionable": "Osäker",
+      "playing_through": "Spelar skadad",
+      "cleared": "Frisk"
+    },
+    "parts": {
+      "ankle": "Fotled",
+      "knee": "Knä",
+      "hamstring": "Baksida lår",
+      "groin": "Ljumske",
+      "calf": "Vad",
+      "foot": "Fot",
+      "back": "Rygg",
+      "hip": "Höft",
+      "shoulder": "Axel",
+      "wrist": "Handled",
+      "hand": "Hand",
+      "concussion": "Hjärnskakning"
+    },
+    "sides": {
+      "left": "Vänster",
+      "right": "Höger",
+      "both": "Båda"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Kroppsdel",
+      "bodyPartOther": "Eller skriv (t.ex. Sned bukmuskel)",
+      "side": "Sida",
+      "what": "Vad det är",
+      "whatPlaceholder": "t.ex. Stukning, ömhet, blåmärke, grad 1-bristning",
+      "injuredOn": "Skadad",
+      "expectedReturn": "Väntad återkomst",
+      "returnedOn": "Tillbaka",
+      "notes": "Anteckningar",
+      "notesPlaceholder": "Det som hjälper: minutgräns, vad hen inte kan än, hur det hände"
+    }
   }
 }

@@ -27,6 +27,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useAuth } from '../context/AuthContext';
 import SendTrainingModal from '../components/SendTrainingModal';
+import InjuryLog from '../components/InjuryLog';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
@@ -770,9 +771,12 @@ export default function PlayerProfileScreen() {
       )}
       </ActionGrid>
 
+      {/* Training feedback beside the injury log on a wide screen; stacked on a
+          phone, the log under it. Both are context the reports read. */}
+      <View style={isWide ? { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginHorizontal: 20, marginTop: 10 } : undefined}>
       {/* Training feedback / regenerate */}
       <View
-        style={styles.trainingFeedbackBox}
+        style={[styles.trainingFeedbackBox, isWide && { flex: 1, marginHorizontal: 0, marginTop: 0 }]}
         onLayout={e => { trainingFeedbackY.current = e.nativeEvent.layout.y; }}
       >
         <Text style={styles.trainingFeedbackLabel}>{tr('playerProfile.regenTrainingFeedback')}</Text>
@@ -807,6 +811,15 @@ export default function PlayerProfileScreen() {
             ? <ActivityIndicator color={t.ctaText} size="small" />
             : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.regenBtnText}> {tr('playerProfile.regenerate')}</Text></>}
         </TouchableOpacity>
+      </View>
+
+      {/* Injury log: every report that names this player reads it. */}
+      <InjuryLog
+        playerId={player.id}
+        t={t}
+        tr={tr}
+        style={isWide ? { flex: 1 } : { marginHorizontal: 20, marginTop: 10 }}
+      />
       </View>
 
       {/* Invite Code */}

@@ -3039,5 +3039,59 @@
       "theirPlays": "对手针对他们的战术",
       "theirDefense": "按他们使用的防守"
     }
+  },
+  "injuries": {
+    "title": "伤病记录",
+    "log": "记录伤病",
+    "current": "当前",
+    "recent": "近期",
+    "none": "暂无伤病记录。",
+    "noneCurrent": "暂无当前伤病。",
+    "unspecified": "未注明的伤病",
+    "since": "自 {{date}}",
+    "expReturn": "预计复出 {{date}}",
+    "returned": "已于 {{date}} 复出",
+    "markReturned": "标记为已复出",
+    "edit": "编辑",
+    "deleteTitle": "删除这条伤病？",
+    "status": {
+      "out": "缺阵",
+      "dtd": "每日观察",
+      "questionable": "出战成疑",
+      "playing_through": "带伤出战",
+      "cleared": "已康复"
+    },
+    "parts": {
+      "ankle": "脚踝",
+      "knee": "膝盖",
+      "hamstring": "腘绳肌",
+      "groin": "腹股沟",
+      "calf": "小腿",
+      "foot": "脚",
+      "back": "背部",
+      "hip": "髋部",
+      "shoulder": "肩部",
+      "wrist": "手腕",
+      "hand": "手",
+      "concussion": "脑震荡"
+    },
+    "sides": {
+      "left": "左侧",
+      "right": "右侧",
+      "both": "双侧"
+    },
+    "fields": {
+      "status": "状态",
+      "bodyPart": "部位",
+      "bodyPartOther": "或输入（如腹斜肌）",
+      "side": "侧",
+      "what": "伤情",
+      "whatPlaceholder": "如扭伤、酸痛、挫伤、一级拉伤",
+      "injuredOn": "受伤日期",
+      "expectedReturn": "预计复出",
+      "returnedOn": "复出日期",
+      "notes": "备注",
+      "notesPlaceholder": "有用的信息：上场时间限制、暂时不能做的、如何受伤"
+    }
   }
 }

@@ -3039,5 +3039,59 @@
       "theirPlays": "Mga play ng kalaban laban sa kanila",
       "theirDefense": "Ayon sa depensang ginamit nila"
     }
+  },
+  "injuries": {
+    "title": "Tala ng injury",
+    "log": "Magtala ng injury",
+    "current": "Kasalukuyan",
+    "recent": "Kamakailan",
+    "none": "Walang naitalang injury.",
+    "noneCurrent": "Walang kasalukuyang injury.",
+    "unspecified": "Hindi tinukoy na injury",
+    "since": "Mula {{date}}",
+    "expReturn": "Inaasahang balik {{date}}",
+    "returned": "Bumalik {{date}}",
+    "markReturned": "Markahang nakabalik",
+    "edit": "I-edit",
+    "deleteTitle": "Burahin ang injury na ito?",
+    "status": {
+      "out": "HINDI MAKALALARO",
+      "dtd": "Araw-araw",
+      "questionable": "Alanganin",
+      "playing_through": "Naglalaro kahit may injury",
+      "cleared": "Magaling na"
+    },
+    "parts": {
+      "ankle": "Bukung-bukong",
+      "knee": "Tuhod",
+      "hamstring": "Hamstring",
+      "groin": "Singit",
+      "calf": "Binti",
+      "foot": "Paa",
+      "back": "Likod",
+      "hip": "Balakang",
+      "shoulder": "Balikat",
+      "wrist": "Pulso",
+      "hand": "Kamay",
+      "concussion": "Concussion"
+    },
+    "sides": {
+      "left": "Kaliwa",
+      "right": "Kanan",
+      "both": "Pareho"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Bahagi ng katawan",
+      "bodyPartOther": "O i-type (hal. Oblique)",
+      "side": "Gilid",
+      "what": "Ano ito",
+      "whatPlaceholder": "hal. Pilay, pananakit, pasa, grade 1 strain",
+      "injuredOn": "Petsa ng injury",
+      "expectedReturn": "Inaasahang balik",
+      "returnedOn": "Petsa ng balik",
+      "notes": "Mga tala",
+      "notesPlaceholder": "Anumang makakatulong: limitasyon sa minuto, hindi pa kaya, paano nangyari"
+    }
   }
 }

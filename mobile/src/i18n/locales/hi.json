@@ -3039,5 +3039,59 @@
       "theirPlays": "उनके ख़िलाफ़ विरोधियों के प्ले",
       "theirDefense": "उनके खेले डिफेंस के अनुसार"
     }
+  },
+  "injuries": {
+    "title": "चोट लॉग",
+    "log": "चोट दर्ज करें",
+    "current": "मौजूदा",
+    "recent": "हाल की",
+    "none": "कोई चोट दर्ज नहीं।",
+    "noneCurrent": "कोई मौजूदा चोट नहीं।",
+    "unspecified": "अनिर्दिष्ट चोट",
+    "since": "{{date}} से",
+    "expReturn": "संभावित वापसी {{date}}",
+    "returned": "वापसी {{date}}",
+    "markReturned": "वापसी दर्ज करें",
+    "edit": "संपादित करें",
+    "deleteTitle": "यह चोट हटाएँ?",
+    "status": {
+      "out": "बाहर",
+      "dtd": "रोज़ाना तय",
+      "questionable": "संदिग्ध",
+      "playing_through": "चोट के साथ खेल रहा",
+      "cleared": "फिट"
+    },
+    "parts": {
+      "ankle": "टखना",
+      "knee": "घुटना",
+      "hamstring": "हैमस्ट्रिंग",
+      "groin": "जांघ का जोड़",
+      "calf": "पिंडली",
+      "foot": "पैर",
+      "back": "पीठ",
+      "hip": "कूल्हा",
+      "shoulder": "कंधा",
+      "wrist": "कलाई",
+      "hand": "हाथ",
+      "concussion": "कन्कशन"
+    },
+    "sides": {
+      "left": "बायाँ",
+      "right": "दायाँ",
+      "both": "दोनों"
+    },
+    "fields": {
+      "status": "स्थिति",
+      "bodyPart": "शरीर का हिस्सा",
+      "bodyPartOther": "या लिखें (जैसे ऑब्लिक)",
+      "side": "तरफ़",
+      "what": "क्या है",
+      "whatPlaceholder": "जैसे मोच, दर्द, चोट का निशान, ग्रेड 1 खिंचाव",
+      "injuredOn": "चोट की तारीख",
+      "expectedReturn": "संभावित वापसी",
+      "returnedOn": "वापसी की तारीख",
+      "notes": "नोट्स",
+      "notesPlaceholder": "जो भी मददगार हो: मिनट सीमा, अभी क्या नहीं कर सकते, कैसे हुआ"
+    }
   }
 }

@@ -3039,5 +3039,59 @@
       "theirPlays": "Zagrywki rywali przeciw nim",
       "theirDefense": "Według obrony, którą grali"
     }
+  },
+  "injuries": {
+    "title": "Dziennik kontuzji",
+    "log": "Dodaj kontuzję",
+    "current": "Obecne",
+    "recent": "Niedawne",
+    "none": "Brak zapisanych kontuzji.",
+    "noneCurrent": "Brak obecnych kontuzji.",
+    "unspecified": "Nieokreślona kontuzja",
+    "since": "Od {{date}}",
+    "expReturn": "Przewid. powrót {{date}}",
+    "returned": "Wrócił {{date}}",
+    "markReturned": "Oznacz powrót",
+    "edit": "Edytuj",
+    "deleteTitle": "Usunąć tę kontuzję?",
+    "status": {
+      "out": "NIE ZAGRA",
+      "dtd": "Z dnia na dzień",
+      "questionable": "Niepewny",
+      "playing_through": "Gra z urazem",
+      "cleared": "Zdrowy"
+    },
+    "parts": {
+      "ankle": "Kostka",
+      "knee": "Kolano",
+      "hamstring": "Mięsień dwugłowy uda",
+      "groin": "Pachwina",
+      "calf": "Łydka",
+      "foot": "Stopa",
+      "back": "Plecy",
+      "hip": "Biodro",
+      "shoulder": "Bark",
+      "wrist": "Nadgarstek",
+      "hand": "Dłoń",
+      "concussion": "Wstrząśnienie mózgu"
+    },
+    "sides": {
+      "left": "Lewy",
+      "right": "Prawy",
+      "both": "Oba"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Część ciała",
+      "bodyPartOther": "Lub wpisz (np. Skośny brzucha)",
+      "side": "Strona",
+      "what": "Co to jest",
+      "whatPlaceholder": "np. Skręcenie, ból, stłuczenie, naderwanie 1. stopnia",
+      "injuredOn": "Kontuzja od",
+      "expectedReturn": "Przewidywany powrót",
+      "returnedOn": "Wrócił",
+      "notes": "Notatki",
+      "notesPlaceholder": "Co pomoże: limit minut, czego jeszcze nie może, jak to się stało"
+    }
   }
 }

@@ -3039,5 +3039,59 @@
       "theirPlays": "خطط المنافسين ضدهم",
       "theirDefense": "حسب الدفاع الذي لعبوه"
     }
+  },
+  "injuries": {
+    "title": "سجل الإصابات",
+    "log": "تسجيل إصابة",
+    "current": "الحالية",
+    "recent": "الأخيرة",
+    "none": "لا توجد إصابات مسجلة.",
+    "noneCurrent": "لا توجد إصابات حالية.",
+    "unspecified": "إصابة غير محددة",
+    "since": "منذ {{date}}",
+    "expReturn": "العودة المتوقعة {{date}}",
+    "returned": "عاد {{date}}",
+    "markReturned": "تحديد كعائد",
+    "edit": "تعديل",
+    "deleteTitle": "حذف هذه الإصابة؟",
+    "status": {
+      "out": "غائب",
+      "dtd": "يومًا بيوم",
+      "questionable": "مشكوك فيه",
+      "playing_through": "يلعب مصابًا",
+      "cleared": "جاهز"
+    },
+    "parts": {
+      "ankle": "الكاحل",
+      "knee": "الركبة",
+      "hamstring": "أوتار الركبة",
+      "groin": "الفخذ الداخلي",
+      "calf": "ربلة الساق",
+      "foot": "القدم",
+      "back": "الظهر",
+      "hip": "الورك",
+      "shoulder": "الكتف",
+      "wrist": "الرسغ",
+      "hand": "اليد",
+      "concussion": "ارتجاج"
+    },
+    "sides": {
+      "left": "يسار",
+      "right": "يمين",
+      "both": "كلاهما"
+    },
+    "fields": {
+      "status": "الحالة",
+      "bodyPart": "موضع الإصابة",
+      "bodyPartOther": "أو اكتبه (مثل العضلة المائلة)",
+      "side": "الجهة",
+      "what": "ما هي",
+      "whatPlaceholder": "مثل التواء، ألم، كدمة، شد من الدرجة الأولى",
+      "injuredOn": "تاريخ الإصابة",
+      "expectedReturn": "العودة المتوقعة",
+      "returnedOn": "تاريخ العودة",
+      "notes": "ملاحظات",
+      "notesPlaceholder": "كل ما يفيد: حد الدقائق، ما لا يستطيع فعله بعد، كيف حدثت"
+    }
   }
 }

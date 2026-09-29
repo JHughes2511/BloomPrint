@@ -3039,5 +3039,59 @@
       "theirPlays": "Rakiplerin onlara karşı setleri",
       "theirDefense": "Oynadıkları savunmaya göre"
     }
+  },
+  "injuries": {
+    "title": "Sakatlık kaydı",
+    "log": "Sakatlık ekle",
+    "current": "Güncel",
+    "recent": "Son",
+    "none": "Kayıtlı sakatlık yok.",
+    "noneCurrent": "Güncel sakatlık yok.",
+    "unspecified": "Belirtilmemiş sakatlık",
+    "since": "{{date}} tarihinden beri",
+    "expReturn": "Tahmini dönüş {{date}}",
+    "returned": "Döndü {{date}}",
+    "markReturned": "Döndü olarak işaretle",
+    "edit": "Düzenle",
+    "deleteTitle": "Bu sakatlık silinsin mi?",
+    "status": {
+      "out": "YOK",
+      "dtd": "Günlük takip",
+      "questionable": "Şüpheli",
+      "playing_through": "Ağrıyla oynuyor",
+      "cleared": "İyileşti"
+    },
+    "parts": {
+      "ankle": "Ayak bileği",
+      "knee": "Diz",
+      "hamstring": "Arka adale",
+      "groin": "Kasık",
+      "calf": "Baldır",
+      "foot": "Ayak",
+      "back": "Sırt",
+      "hip": "Kalça",
+      "shoulder": "Omuz",
+      "wrist": "El bileği",
+      "hand": "El",
+      "concussion": "Beyin sarsıntısı"
+    },
+    "sides": {
+      "left": "Sol",
+      "right": "Sağ",
+      "both": "İkisi"
+    },
+    "fields": {
+      "status": "Durum",
+      "bodyPart": "Bölge",
+      "bodyPartOther": "Ya da yaz (örn. Oblik)",
+      "side": "Taraf",
+      "what": "Ne olduğu",
+      "whatPlaceholder": "örn. Burkulma, ağrı, darbe, 1. derece zorlanma",
+      "injuredOn": "Sakatlanma tarihi",
+      "expectedReturn": "Tahmini dönüş",
+      "returnedOn": "Dönüş tarihi",
+      "notes": "Notlar",
+      "notesPlaceholder": "Yardımcı olan her şey: dakika sınırı, henüz yapamadıkları, nasıl oldu"
+    }
   }
 }

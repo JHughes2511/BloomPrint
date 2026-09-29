@@ -3039,5 +3039,59 @@
       "theirPlays": "Opponents' plays against them",
       "theirDefense": "By the defense they played"
     }
+  },
+  "injuries": {
+    "title": "Injury log",
+    "log": "Log injury",
+    "current": "Current",
+    "recent": "Recent",
+    "none": "No injuries logged.",
+    "noneCurrent": "No current injuries.",
+    "unspecified": "Unspecified injury",
+    "since": "Since {{date}}",
+    "expReturn": "Exp. return {{date}}",
+    "returned": "Returned {{date}}",
+    "markReturned": "Mark returned",
+    "edit": "Edit",
+    "deleteTitle": "Delete this injury?",
+    "status": {
+      "out": "OUT",
+      "dtd": "Day-to-day",
+      "questionable": "Questionable",
+      "playing_through": "Playing through",
+      "cleared": "Cleared"
+    },
+    "parts": {
+      "ankle": "Ankle",
+      "knee": "Knee",
+      "hamstring": "Hamstring",
+      "groin": "Groin",
+      "calf": "Calf",
+      "foot": "Foot",
+      "back": "Back",
+      "hip": "Hip",
+      "shoulder": "Shoulder",
+      "wrist": "Wrist",
+      "hand": "Hand",
+      "concussion": "Concussion"
+    },
+    "sides": {
+      "left": "Left",
+      "right": "Right",
+      "both": "Both"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Body part",
+      "bodyPartOther": "Or type it (e.g. Oblique)",
+      "side": "Side",
+      "what": "What it is",
+      "whatPlaceholder": "e.g. Sprain, soreness, bruise, grade 1 strain",
+      "injuredOn": "Injured on",
+      "expectedReturn": "Expected return",
+      "returnedOn": "Returned on",
+      "notes": "Notes",
+      "notesPlaceholder": "Anything that helps: minutes limit, what they can't do yet, how it happened"
+    }
   }
 }

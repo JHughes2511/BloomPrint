@@ -3039,5 +3039,59 @@
       "theirPlays": "Giochi avversari contro di loro",
       "theirDefense": "Per difesa usata"
     }
+  },
+  "injuries": {
+    "title": "Registro infortuni",
+    "log": "Registra infortunio",
+    "current": "Attuali",
+    "recent": "Recenti",
+    "none": "Nessun infortunio registrato.",
+    "noneCurrent": "Nessun infortunio attuale.",
+    "unspecified": "Infortunio non specificato",
+    "since": "Dal {{date}}",
+    "expReturn": "Rientro prev. {{date}}",
+    "returned": "Rientrato il {{date}}",
+    "markReturned": "Segna rientro",
+    "edit": "Modifica",
+    "deleteTitle": "Eliminare questo infortunio?",
+    "status": {
+      "out": "FUORI",
+      "dtd": "Giorno per giorno",
+      "questionable": "In dubbio",
+      "playing_through": "Gioca con dolore",
+      "cleared": "Recuperato"
+    },
+    "parts": {
+      "ankle": "Caviglia",
+      "knee": "Ginocchio",
+      "hamstring": "Bicipite femorale",
+      "groin": "Inguine",
+      "calf": "Polpaccio",
+      "foot": "Piede",
+      "back": "Schiena",
+      "hip": "Anca",
+      "shoulder": "Spalla",
+      "wrist": "Polso",
+      "hand": "Mano",
+      "concussion": "Commozione"
+    },
+    "sides": {
+      "left": "Sinistro",
+      "right": "Destro",
+      "both": "Entrambi"
+    },
+    "fields": {
+      "status": "Stato",
+      "bodyPart": "Zona",
+      "bodyPartOther": "O scrivila (es. Obliquo)",
+      "side": "Lato",
+      "what": "Cos'è",
+      "whatPlaceholder": "es. Distorsione, dolore, contusione, stiramento di 1° grado",
+      "injuredOn": "Infortunato il",
+      "expectedReturn": "Rientro previsto",
+      "returnedOn": "Rientrato il",
+      "notes": "Note",
+      "notesPlaceholder": "Ciò che aiuta: limite di minuti, cosa non può ancora fare, come è successo"
+    }
   }
 }

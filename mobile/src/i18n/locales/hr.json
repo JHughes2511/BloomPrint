@@ -3039,5 +3039,59 @@
       "theirPlays": "Akcije protivnika protiv njih",
       "theirDefense": "Po obrani koju su igrali"
     }
+  },
+  "injuries": {
+    "title": "Dnevnik ozljeda",
+    "log": "Unesi ozljedu",
+    "current": "Trenutne",
+    "recent": "Nedavne",
+    "none": "Nema unesenih ozljeda.",
+    "noneCurrent": "Nema trenutnih ozljeda.",
+    "unspecified": "Nespecificirana ozljeda",
+    "since": "Od {{date}}",
+    "expReturn": "Očekivani povratak {{date}}",
+    "returned": "Vratio se {{date}}",
+    "markReturned": "Označi povratak",
+    "edit": "Uredi",
+    "deleteTitle": "Izbrisati ovu ozljedu?",
+    "status": {
+      "out": "IZVAN",
+      "dtd": "Iz dana u dan",
+      "questionable": "Upitan",
+      "playing_through": "Igra ozlijeđen",
+      "cleared": "Spreman"
+    },
+    "parts": {
+      "ankle": "Gležanj",
+      "knee": "Koljeno",
+      "hamstring": "Stražnja loža",
+      "groin": "Prepone",
+      "calf": "List",
+      "foot": "Stopalo",
+      "back": "Leđa",
+      "hip": "Kuk",
+      "shoulder": "Rame",
+      "wrist": "Zapešće",
+      "hand": "Šaka",
+      "concussion": "Potres mozga"
+    },
+    "sides": {
+      "left": "Lijevo",
+      "right": "Desno",
+      "both": "Oboje"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Dio tijela",
+      "bodyPartOther": "Ili upiši (npr. Kosi mišić)",
+      "side": "Strana",
+      "what": "Što je",
+      "whatPlaceholder": "npr. Uganuće, bol, kontuzija, istegnuće 1. stupnja",
+      "injuredOn": "Ozlijeđen",
+      "expectedReturn": "Očekivani povratak",
+      "returnedOn": "Vratio se",
+      "notes": "Bilješke",
+      "notesPlaceholder": "Što pomaže: ograničenje minuta, što još ne može, kako se dogodilo"
+    }
   }
 }

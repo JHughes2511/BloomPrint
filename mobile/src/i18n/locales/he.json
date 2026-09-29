@@ -3039,5 +3039,59 @@
       "theirPlays": "מהלכי יריבים מולם",
       "theirDefense": "לפי ההגנה ששיחקו"
     }
+  },
+  "injuries": {
+    "title": "יומן פציעות",
+    "log": "רישום פציעה",
+    "current": "נוכחיות",
+    "recent": "אחרונות",
+    "none": "אין פציעות רשומות.",
+    "noneCurrent": "אין פציעות נוכחיות.",
+    "unspecified": "פציעה לא מוגדרת",
+    "since": "מאז {{date}}",
+    "expReturn": "חזרה צפויה {{date}}",
+    "returned": "חזר {{date}}",
+    "markReturned": "סימון חזרה",
+    "edit": "עריכה",
+    "deleteTitle": "למחוק פציעה זו?",
+    "status": {
+      "out": "לא ישחק",
+      "dtd": "יום-יום",
+      "questionable": "בספק",
+      "playing_through": "משחק פצוע",
+      "cleared": "כשיר"
+    },
+    "parts": {
+      "ankle": "קרסול",
+      "knee": "ברך",
+      "hamstring": "שריר ירך אחורי",
+      "groin": "מפשעה",
+      "calf": "שוק",
+      "foot": "כף רגל",
+      "back": "גב",
+      "hip": "ירך",
+      "shoulder": "כתף",
+      "wrist": "שורש כף יד",
+      "hand": "כף יד",
+      "concussion": "זעזוע מוח"
+    },
+    "sides": {
+      "left": "שמאל",
+      "right": "ימין",
+      "both": "שניהם"
+    },
+    "fields": {
+      "status": "סטטוס",
+      "bodyPart": "איבר",
+      "bodyPartOther": "או הקלידו (למשל שריר אלכסוני)",
+      "side": "צד",
+      "what": "מה זה",
+      "whatPlaceholder": "למשל נקע, כאב, חבלה, מתיחה דרגה 1",
+      "injuredOn": "נפצע ב",
+      "expectedReturn": "חזרה צפויה",
+      "returnedOn": "חזר ב",
+      "notes": "הערות",
+      "notesPlaceholder": "כל מה שעוזר: הגבלת דקות, מה עוד אי אפשר, איך זה קרה"
+    }
   }
 }

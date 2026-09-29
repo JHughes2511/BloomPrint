@@ -3039,5 +3039,59 @@
       "theirPlays": "相手チームが彼らに使ったプレー",
       "theirDefense": "彼らのディフェンス別"
     }
+  },
+  "injuries": {
+    "title": "ケガの記録",
+    "log": "ケガを記録",
+    "current": "現在",
+    "recent": "最近",
+    "none": "記録されたケガはありません。",
+    "noneCurrent": "現在のケガはありません。",
+    "unspecified": "詳細不明のケガ",
+    "since": "{{date}}から",
+    "expReturn": "復帰予定 {{date}}",
+    "returned": "{{date}}に復帰",
+    "markReturned": "復帰済みにする",
+    "edit": "編集",
+    "deleteTitle": "このケガを削除しますか？",
+    "status": {
+      "out": "欠場",
+      "dtd": "日々判断",
+      "questionable": "出場微妙",
+      "playing_through": "痛みを抱えて出場",
+      "cleared": "完治"
+    },
+    "parts": {
+      "ankle": "足首",
+      "knee": "膝",
+      "hamstring": "ハムストリング",
+      "groin": "股関節周り",
+      "calf": "ふくらはぎ",
+      "foot": "足",
+      "back": "背中",
+      "hip": "臀部",
+      "shoulder": "肩",
+      "wrist": "手首",
+      "hand": "手",
+      "concussion": "脳しんとう"
+    },
+    "sides": {
+      "left": "左",
+      "right": "右",
+      "both": "両方"
+    },
+    "fields": {
+      "status": "状態",
+      "bodyPart": "部位",
+      "bodyPartOther": "または入力（例：腹斜筋）",
+      "side": "左右",
+      "what": "内容",
+      "whatPlaceholder": "例：捻挫、痛み、打撲、軽度の肉離れ",
+      "injuredOn": "受傷日",
+      "expectedReturn": "復帰予定",
+      "returnedOn": "復帰日",
+      "notes": "メモ",
+      "notesPlaceholder": "役立つこと：出場時間制限、まだできないこと、経緯"
+    }
   }
 }

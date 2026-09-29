@@ -3039,5 +3039,59 @@
       "theirPlays": "Spellen van tegenstanders tegen hen",
       "theirDefense": "Per verdediging die zij speelden"
     }
+  },
+  "injuries": {
+    "title": "Blessurelogboek",
+    "log": "Blessure registreren",
+    "current": "Huidig",
+    "recent": "Recent",
+    "none": "Geen blessures geregistreerd.",
+    "noneCurrent": "Geen huidige blessures.",
+    "unspecified": "Onbekende blessure",
+    "since": "Sinds {{date}}",
+    "expReturn": "Verw. terug {{date}}",
+    "returned": "Terug {{date}}",
+    "markReturned": "Markeer als terug",
+    "edit": "Bewerken",
+    "deleteTitle": "Deze blessure verwijderen?",
+    "status": {
+      "out": "UIT",
+      "dtd": "Dag tot dag",
+      "questionable": "Twijfelachtig",
+      "playing_through": "Speelt door pijn heen",
+      "cleared": "Hersteld"
+    },
+    "parts": {
+      "ankle": "Enkel",
+      "knee": "Knie",
+      "hamstring": "Hamstring",
+      "groin": "Lies",
+      "calf": "Kuit",
+      "foot": "Voet",
+      "back": "Rug",
+      "hip": "Heup",
+      "shoulder": "Schouder",
+      "wrist": "Pols",
+      "hand": "Hand",
+      "concussion": "Hersenschudding"
+    },
+    "sides": {
+      "left": "Links",
+      "right": "Rechts",
+      "both": "Beide"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Lichaamsdeel",
+      "bodyPartOther": "Of typ het (bijv. Schuine buikspier)",
+      "side": "Kant",
+      "what": "Wat het is",
+      "whatPlaceholder": "bijv. Verstuiking, pijn, kneuzing, verrekking graad 1",
+      "injuredOn": "Geblesseerd op",
+      "expectedReturn": "Verwachte terugkeer",
+      "returnedOn": "Terug op",
+      "notes": "Notities",
+      "notesPlaceholder": "Wat helpt: minutenlimiet, wat nog niet kan, hoe het gebeurde"
+    }
   }
 }

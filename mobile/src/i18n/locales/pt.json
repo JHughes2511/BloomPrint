@@ -3039,5 +3039,59 @@
       "theirPlays": "Jogadas adversárias contra eles",
       "theirDefense": "Pela defesa que usaram"
     }
+  },
+  "injuries": {
+    "title": "Registro de lesões",
+    "log": "Registrar lesão",
+    "current": "Atuais",
+    "recent": "Recentes",
+    "none": "Nenhuma lesão registrada.",
+    "noneCurrent": "Nenhuma lesão atual.",
+    "unspecified": "Lesão não especificada",
+    "since": "Desde {{date}}",
+    "expReturn": "Retorno prev. {{date}}",
+    "returned": "Voltou {{date}}",
+    "markReturned": "Marcar retorno",
+    "edit": "Editar",
+    "deleteTitle": "Excluir esta lesão?",
+    "status": {
+      "out": "FORA",
+      "dtd": "Dia a dia",
+      "questionable": "Dúvida",
+      "playing_through": "Joga com dor",
+      "cleared": "Liberado"
+    },
+    "parts": {
+      "ankle": "Tornozelo",
+      "knee": "Joelho",
+      "hamstring": "Posterior da coxa",
+      "groin": "Virilha",
+      "calf": "Panturrilha",
+      "foot": "Pé",
+      "back": "Costas",
+      "hip": "Quadril",
+      "shoulder": "Ombro",
+      "wrist": "Punho",
+      "hand": "Mão",
+      "concussion": "Concussão"
+    },
+    "sides": {
+      "left": "Esquerdo",
+      "right": "Direito",
+      "both": "Ambos"
+    },
+    "fields": {
+      "status": "Status",
+      "bodyPart": "Região",
+      "bodyPartOther": "Ou digite (ex. Oblíquo)",
+      "side": "Lado",
+      "what": "O que é",
+      "whatPlaceholder": "ex. Entorse, dor, contusão, estiramento grau 1",
+      "injuredOn": "Lesionado em",
+      "expectedReturn": "Retorno previsto",
+      "returnedOn": "Voltou em",
+      "notes": "Observações",
+      "notesPlaceholder": "O que ajudar: limite de minutos, o que ainda não pode fazer, como aconteceu"
+    }
   }
 }

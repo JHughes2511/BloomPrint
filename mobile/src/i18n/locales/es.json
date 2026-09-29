@@ -3039,5 +3039,59 @@
       "theirPlays": "Jugadas rivales contra ellos",
       "theirDefense": "Por la defensa que jugaron"
     }
+  },
+  "injuries": {
+    "title": "Registro de lesiones",
+    "log": "Registrar lesión",
+    "current": "Actual",
+    "recent": "Recientes",
+    "none": "Sin lesiones registradas.",
+    "noneCurrent": "Sin lesiones actuales.",
+    "unspecified": "Lesión sin especificar",
+    "since": "Desde {{date}}",
+    "expReturn": "Regreso est. {{date}}",
+    "returned": "Regresó {{date}}",
+    "markReturned": "Marcar regreso",
+    "edit": "Editar",
+    "deleteTitle": "¿Eliminar esta lesión?",
+    "status": {
+      "out": "BAJA",
+      "dtd": "Día a día",
+      "questionable": "Duda",
+      "playing_through": "Juega con molestias",
+      "cleared": "Alta"
+    },
+    "parts": {
+      "ankle": "Tobillo",
+      "knee": "Rodilla",
+      "hamstring": "Isquiotibial",
+      "groin": "Ingle",
+      "calf": "Gemelo",
+      "foot": "Pie",
+      "back": "Espalda",
+      "hip": "Cadera",
+      "shoulder": "Hombro",
+      "wrist": "Muñeca",
+      "hand": "Mano",
+      "concussion": "Conmoción"
+    },
+    "sides": {
+      "left": "Izquierdo",
+      "right": "Derecho",
+      "both": "Ambos"
+    },
+    "fields": {
+      "status": "Estado",
+      "bodyPart": "Zona",
+      "bodyPartOther": "O escríbela (p. ej. Oblicuo)",
+      "side": "Lado",
+      "what": "Qué es",
+      "whatPlaceholder": "p. ej. Esguince, molestia, contusión, distensión grado 1",
+      "injuredOn": "Lesionado el",
+      "expectedReturn": "Regreso estimado",
+      "returnedOn": "Regresó el",
+      "notes": "Notas",
+      "notesPlaceholder": "Lo que ayude: límite de minutos, qué no puede hacer aún, cómo pasó"
+    }
   }
 }

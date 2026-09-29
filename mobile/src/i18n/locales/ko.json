@@ -3039,5 +3039,59 @@
       "theirPlays": "상대 팀이 그들에게 쓴 플레이",
       "theirDefense": "그들이 쓴 수비별"
     }
+  },
+  "injuries": {
+    "title": "부상 기록",
+    "log": "부상 기록하기",
+    "current": "현재",
+    "recent": "최근",
+    "none": "기록된 부상이 없습니다.",
+    "noneCurrent": "현재 부상이 없습니다.",
+    "unspecified": "미상 부상",
+    "since": "{{date}}부터",
+    "expReturn": "복귀 예정 {{date}}",
+    "returned": "{{date}} 복귀",
+    "markReturned": "복귀 처리",
+    "edit": "편집",
+    "deleteTitle": "이 부상을 삭제할까요?",
+    "status": {
+      "out": "결장",
+      "dtd": "매일 판단",
+      "questionable": "출전 불투명",
+      "playing_through": "부상 안고 출전",
+      "cleared": "회복"
+    },
+    "parts": {
+      "ankle": "발목",
+      "knee": "무릎",
+      "hamstring": "햄스트링",
+      "groin": "사타구니",
+      "calf": "종아리",
+      "foot": "발",
+      "back": "허리",
+      "hip": "엉덩이",
+      "shoulder": "어깨",
+      "wrist": "손목",
+      "hand": "손",
+      "concussion": "뇌진탕"
+    },
+    "sides": {
+      "left": "왼쪽",
+      "right": "오른쪽",
+      "both": "양쪽"
+    },
+    "fields": {
+      "status": "상태",
+      "bodyPart": "부위",
+      "bodyPartOther": "또는 직접 입력 (예: 복사근)",
+      "side": "방향",
+      "what": "무엇인지",
+      "whatPlaceholder": "예: 염좌, 통증, 타박상, 1도 긴장",
+      "injuredOn": "부상일",
+      "expectedReturn": "복귀 예정일",
+      "returnedOn": "복귀일",
+      "notes": "메모",
+      "notesPlaceholder": "도움이 되는 것: 출전 시간 제한, 아직 못 하는 것, 경위"
+    }
   }
 }

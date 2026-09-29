@@ -384,6 +384,16 @@ export const playersAPI = {
 const UPLOAD_TIMEOUT = 1800000;
 
 /** Play calling: possessions, catalogs, numbers. */
+/** A player's injury log: a roster player by id, or a player known by name (an opponent). */
+export const injuriesAPI = {
+  forPlayer: (playerId: number) => api.get(`/injuries/players/${playerId}`).then(r => r.data),
+  named: (playerName: string, teamName?: string) =>
+    api.get('/injuries/named', { params: { player_name: playerName, team_name: teamName } }).then(r => r.data),
+  add: (data: any) => api.post('/injuries', data).then(r => r.data),
+  edit: (id: number, data: any) => api.patch(`/injuries/${id}`, data).then(r => r.data),
+  remove: (id: number) => api.delete(`/injuries/${id}`).then(r => r.data),
+};
+
 export const playCallingAPI = {
   game: (gameId: number) => api.get(`/play-calling/games/${gameId}`).then(r => r.data),
   add: (gameId: number, data: { side: 'our' | 'opponent'; quarter: number; play: string; play_type?: string; defense?: string | null }) =>

@@ -3039,5 +3039,59 @@
       "theirPlays": "Sistemele adversarilor împotriva lor",
       "theirDefense": "După apărarea jucată"
     }
+  },
+  "injuries": {
+    "title": "Jurnal accidentări",
+    "log": "Adaugă accidentare",
+    "current": "Actuale",
+    "recent": "Recente",
+    "none": "Nicio accidentare înregistrată.",
+    "noneCurrent": "Nicio accidentare actuală.",
+    "unspecified": "Accidentare nespecificată",
+    "since": "Din {{date}}",
+    "expReturn": "Revenire estim. {{date}}",
+    "returned": "Revenit {{date}}",
+    "markReturned": "Marchează revenirea",
+    "edit": "Editează",
+    "deleteTitle": "Ștergi această accidentare?",
+    "status": {
+      "out": "INDISPONIBIL",
+      "dtd": "De la o zi la alta",
+      "questionable": "Incert",
+      "playing_through": "Joacă accidentat",
+      "cleared": "Refăcut"
+    },
+    "parts": {
+      "ankle": "Gleznă",
+      "knee": "Genunchi",
+      "hamstring": "Ischiogambier",
+      "groin": "Inghinal",
+      "calf": "Gambă",
+      "foot": "Picior",
+      "back": "Spate",
+      "hip": "Șold",
+      "shoulder": "Umăr",
+      "wrist": "Încheietură",
+      "hand": "Mână",
+      "concussion": "Comoție"
+    },
+    "sides": {
+      "left": "Stânga",
+      "right": "Dreapta",
+      "both": "Ambele"
+    },
+    "fields": {
+      "status": "Stare",
+      "bodyPart": "Zonă",
+      "bodyPartOther": "Sau scrie (ex. Oblic)",
+      "side": "Parte",
+      "what": "Ce este",
+      "whatPlaceholder": "ex. Entorsă, durere, contuzie, întindere grad 1",
+      "injuredOn": "Accidentat pe",
+      "expectedReturn": "Revenire estimată",
+      "returnedOn": "Revenit pe",
+      "notes": "Note",
+      "notesPlaceholder": "Orice ajută: limită de minute, ce nu poate face încă, cum s-a întâmplat"
+    }
   }
 }
