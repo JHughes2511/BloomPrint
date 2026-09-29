@@ -2966,6 +2966,9 @@
       "miss3": "Errou de 3",
       "turnover": "Erro de posse",
       "none": "Só não pontuou"
-    }
+    },
+    "done": "Pronto",
+    "whoFor": "Quem? {{stat}}",
+    "noPlayers": "Adicione jogadores na seção de estatísticas acima."
   }
 }

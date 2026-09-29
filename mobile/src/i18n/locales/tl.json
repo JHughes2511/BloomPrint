@@ -2966,6 +2966,9 @@
       "miss3": "Mintis na 3",
       "turnover": "Turnover",
       "none": "Walang score lang"
-    }
+    },
+    "done": "Tapos",
+    "whoFor": "Sino? {{stat}}",
+    "noPlayers": "Magdagdag ng player sa Stats sa itaas."
   }
 }

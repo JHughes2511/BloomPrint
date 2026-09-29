@@ -393,6 +393,9 @@ export const playCallingAPI = {
   finish: (callId: number, data: { result: 'score' | 'no_score'; player_name?: string | null; ended?: string | null;
                                    ft_made?: number | null; ft_att?: number | null }) =>
     api.post(`/play-calling/possessions/${callId}/finish`, data).then(r => r.data),
+  outcome: (callId: number, stat_name: string, player_name: string) =>
+    api.post(`/play-calling/possessions/${callId}/outcome`, { stat_name, player_name }).then(r => r.data),
+  close: (callId: number) => api.post(`/play-calling/possessions/${callId}/close`).then(r => r.data),
   orb: (gameId: number, side: 'our' | 'opponent', quarter: number, delta: number) =>
     api.post(`/play-calling/games/${gameId}/orb`, { side, quarter, delta }).then(r => r.data),
   countDuplicate: (dupId: number) => api.post(`/game-eval/duplicates/${dupId}/count`).then(r => r.data),

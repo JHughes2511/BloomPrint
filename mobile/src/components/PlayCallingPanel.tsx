@@ -8,8 +8,10 @@
  * a Q3 possession under Q1.
  *
  * A possession opens when its play is tapped and closes when the next one is
- * called. + and − ask who and how; the stats they imply are linked if already
- * logged in Stats, so a basket is counted once (see api/play_calling.py).
+ * called. What happened in it is tapped as real stats — 2 FG Made, 3 FG
+ * Missed, FT Made, Turnover — each for a player, so reading a possession back
+ * says who did what. The same basket tapped in Stats is claimed, not added,
+ * so it is counted once (see api/play_calling.py).
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native';
@@ -31,20 +33,15 @@ interface Props {
   players: { our: Person[]; opponent: Person[] };
   refreshKey: number;                      // bumped when anyone's stats change
   onScores: (our: number | null, opp: number | null) => void;
+  statLabel: (k: string) => string;
   t: ThemeTokens;
   tr: (k: string, o?: any) => string;
 }
 
-const SCORE_HOWS: { ended: string; ft?: [number, number] }[] = [
-  { ended: 'made2' }, { ended: 'made3' }, { ended: 'and1_2' }, { ended: 'and1_3' },
-  { ended: 'ft', ft: [2, 2] }, { ended: 'ft', ft: [1, 2] }, { ended: 'ft', ft: [1, 1] },
-  { ended: 'ft', ft: [3, 3] }, { ended: 'ft', ft: [2, 3] }, { ended: 'ft', ft: [1, 3] },
-];
-const MISS_HOWS: { ended: string | null; ft?: [number, number] }[] = [
-  { ended: 'miss2' }, { ended: 'miss3' }, { ended: 'turnover' }, { ended: 'ft_miss', ft: [0, 2] }, { ended: null },
-];
+const OUTCOMES = ['2 FG Made', '2 FG Missed', '3 FG Made', '3 FG Missed', 'FT Made', 'FT Missed', 'Turnover'];
+const isMade = (k: string) => /Made$/.test(k);
 
-export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames, players, refreshKey, onScores, t, tr }: Props) {
+export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames, players, refreshKey, onScores, statLabel, t, tr }: Props) {
   const s = makeStyles(t);
   const [data, setData] = useState<any | null>(null);
   const [side, setSide] = useState<Side>('our');
@@ -52,7 +49,10 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
   const [newPlay, setNewPlay] = useState('');
   const [busy, setBusy] = useState(false);
   const [viewQ, setViewQ] = useState<number | 'all' | null>(null);   // null: follow the live quarter
-  const [finishing, setFinishing] = useState<{ call: any; result: 'score' | 'no_score'; player: string | null } | null>(null);
+  // An outcome tapped, waiting for its player.
+  const [pick, setPick] = useState<{ call: any; stat: string } | null>(null);
+  // A past possession opened to add to or correct; otherwise the open one.
+  const [editId, setEditId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     playCallingAPI.game(game.id).then(setData).catch(() => {});
@@ -62,6 +62,10 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
   const possessions: any[] = data?.possessions ?? [];
   const current = possessions.length ? possessions[possessions.length - 1] : null;
   const open = current && current.result == null ? current : null;
+  const editing = editId != null ? possessions.find(p => p.id === editId) ?? null : null;
+  // The trip being played stays open to add to (the free throw after an
+  // and-1, a putback after a miss) until the next play is called.
+  const target = editing ?? current;
   const shownQ = viewQ ?? liveQuarter;
   const shown = shownQ === 'all' ? possessions : possessions.filter(p => p.quarter === shownQ);
   const quarters = useMemo(() => {
@@ -71,10 +75,6 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
   }, [possessions, liveQuarter]);
 
   const typeLabel = (k: string) => tr(`playCalling.types.${k}`, { defaultValue: k });
-  const howLabel = (ended: string | null, ft?: [number, number] | null) =>
-    ended === 'ft' || ended === 'ft_miss'
-      ? tr('playCalling.hows.ft', { made: ft?.[0] ?? 0, att: ft?.[1] ?? 2 })
-      : ended ? tr(`playCalling.hows.${ended}`) : tr('playCalling.hows.none');
 
   const callPlay = async (name: string) => {
     if (!name.trim() || busy) return;
@@ -83,6 +83,7 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
       await playCallingAPI.add(game.id, { side, quarter: liveQuarter, play: name.trim(), defense: defense[side] });
       setNewPlay('');
       setViewQ(null);
+      setEditId(null);
       load();
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('common.somethingWentWrong'));
@@ -101,19 +102,31 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
     }
   };
 
-  const finish = async (ended: string | null, ft?: [number, number] | null) => {
-    if (!finishing) return;
-    const { call, result, player } = finishing;
-    setFinishing(null);
+  const logOutcome = async (player: string) => {
+    if (!pick) return;
+    const { call, stat } = pick;
+    setPick(null);
     try {
-      const r = await playCallingAPI.finish(call.id, {
-        result, player_name: player, ended, ft_made: ft ? ft[0] : null, ft_att: ft ? ft[1] : null,
-      });
+      const r = await playCallingAPI.outcome(call.id, stat, player);
       onScores(r.our_score ?? null, r.opponent_score ?? null);
       load();
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('common.somethingWentWrong'));
     }
+  };
+
+  const closeTrip = async (call: any) => {
+    await playCallingAPI.close(call.id).catch(() => {});
+    load();
+  };
+
+  const undoEvent = async (ev: any) => {
+    try {
+      await playCallingAPI.undoStat(ev.id);
+      const g = await playCallingAPI.game(game.id);
+      setData(g);
+      load();
+    } catch { /* gone already */ }
   };
 
   const orb = async (sd: Side, delta: number) => {
@@ -138,17 +151,17 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
   const shownDone = shown.filter(p => p.result).length;
   const shownPts = shown.reduce((a, p) => a + (p.points ?? 0), 0);
 
+  const offenseEvents = (p: any) => (p.events ?? []).filter((e: any) => e.is_opponent === (p.side === 'opponent'));
+  const eventText = (e: any) => `${e.player_name} ${statLabel(e.stat_name)}${e.points ? ` (+${e.points})` : ''}`;
   const resultText = (p: any) => {
+    const evs = offenseEvents(p);
+    if (evs.length) return evs.map(eventText).join(' · ');
     if (p.result == null) return tr('playCalling.open');
-    if (p.result === 'score') {
-      const how = p.ended ? howLabel(p.ended, p.ended === 'ft' ? [p.ft_made ?? 0, p.ft_att ?? 0] : null) : '';
-      return `+${p.points ?? ''} ${[how, p.player_name].filter(Boolean).join(' · ')}`.trim();
-    }
-    const how = p.ended ? howLabel(p.ended, p.ended === 'ft_miss' ? [0, p.ft_att ?? 2] : null) : '';
-    return `− ${[how, p.player_name].filter(Boolean).join(' · ')}`.trim();
+    if (p.result === 'score') return `+${p.points ?? ''}${p.player_name ? ` ${p.player_name}` : ''}`;
+    return `− ${tr('playCalling.noScore')}`;
   };
 
-  const roster = finishing ? players[finishing.call.side as Side] : [];
+  const roster = pick ? players[pick.call.side as Side] : [];
 
   return (
     <View style={s.panel}>
@@ -165,22 +178,51 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
         ))}
       </View>
 
-      {/* The trip being played */}
-      {open ? (
+      {/* The trip being played (or a past one opened to correct): what
+          happened in it, as stats for a player. */}
+      {target ? (
         <View style={s.openCard}>
-          <Text style={s.openText} numberOfLines={1}>
-            {qLabel(open.quarter)} · {sideNames[open.side as Side]} · {open.play}
-            {open.defense ? ` ${tr('playCalling.vs')} ${open.defense}` : ''}
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TouchableOpacity style={[s.resultBtn, { backgroundColor: t.positiveSoft, borderColor: t.positive }]}
-                              onPress={() => setFinishing({ call: open, result: 'score', player: null })}>
-              <Text style={[s.resultText, { color: t.positive }]}>+ {tr('playCalling.score')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[s.resultBtn, { backgroundColor: t.negativeSoft, borderColor: t.negative }]}
-                              onPress={() => setFinishing({ call: open, result: 'no_score', player: null })}>
-              <Text style={[s.resultText, { color: t.negative }]}>− {tr('playCalling.noScore')}</Text>
-            </TouchableOpacity>
+          <View style={[s.row, { alignItems: 'center' }]}>
+            <Text style={[s.openText, { flex: 1 }]} numberOfLines={1}>
+              {qLabel(target.quarter)} · {sideNames[target.side as Side]} · {target.play}
+              {target.defense ? ` ${tr('playCalling.vs')} ${target.defense}` : ''}
+            </Text>
+            {editing && (
+              <TouchableOpacity onPress={() => setEditId(null)}>
+                <Text style={s.backLive}>{tr('playCalling.done')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {offenseEvents(target).length > 0 && (
+            <View style={{ gap: 4 }}>
+              {offenseEvents(target).map((e: any) => (
+                <View key={e.id} style={[s.row, { alignItems: 'center' }]}>
+                  <Text style={[s.eventText, { color: isMade(e.stat_name) ? t.positive : t.negative }]} numberOfLines={1}>
+                    {eventText(e)}
+                  </Text>
+                  <TouchableOpacity onPress={() => undoEvent(e)} accessibilityLabel={tr('playCalling.undo')}>
+                    <Ionicons name="arrow-undo-outline" size={14} color={t.muted} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+          <View style={s.chips}>
+            {OUTCOMES.map(k => {
+              const good = isMade(k);
+              return (
+                <TouchableOpacity key={k} onPress={() => setPick({ call: target, stat: k })}
+                                  style={[s.outcomeBtn, { borderColor: good ? t.positive : t.negative,
+                                                          backgroundColor: good ? t.positiveSoft : t.negativeSoft }]}>
+                  <Text style={[s.outcomeText, { color: good ? t.positive : t.negative }]}>{statLabel(k)}</Text>
+                </TouchableOpacity>
+              );
+            })}
+            {target.result == null && (
+              <TouchableOpacity onPress={() => closeTrip(target)} style={[s.outcomeBtn, { borderColor: t.line }]}>
+                <Text style={[s.outcomeText, { color: t.muted }]}>{tr('playCalling.noScore')}</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       ) : null}
@@ -263,69 +305,36 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
         <Text style={s.empty}>{tr('playCalling.none')}</Text>
       ) : shown.slice().reverse().map(p => (
         <TouchableOpacity key={p.id} style={s.item} onLongPress={() => removeCall(p)}
-                          onPress={() => setFinishing({ call: p, result: p.result === 'no_score' ? 'no_score' : 'score', player: p.player_name })}>
+                          onPress={() => setEditId(p.id === open?.id ? null : p.id)}>
           <Text style={s.itemQ}>{qLabel(p.quarter)}</Text>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={s.itemPlay} numberOfLines={1}>
               {sideNames[p.side as Side]} · {p.play}{p.defense ? ` ${tr('playCalling.vs')} ${p.defense}` : ''}
             </Text>
             <Text style={[s.itemResult, { color: p.result === 'score' ? t.positive : p.result === 'no_score' ? t.negative : t.muted }]}
-                  numberOfLines={1}>{resultText(p)}</Text>
+                  numberOfLines={2}>{resultText(p)}</Text>
           </View>
         </TouchableOpacity>
       ))}
 
-      {/* Who and how, for + and − */}
-      <Sheet visible={!!finishing} transparent animationType="slide" onRequestClose={() => setFinishing(null)}>
+      {/* Who: the player for the outcome just tapped. */}
+      <Sheet visible={!!pick} transparent animationType="slide" onRequestClose={() => setPick(null)}>
         <View style={s.overlay}>
           <View style={s.sheet}>
-            <View style={[s.row, { alignItems: 'center', marginBottom: 8 }]}>
-              <Text style={s.sheetTitle}>
-                {finishing?.result === 'score' ? tr('playCalling.whoScored') : tr('playCalling.howEnded')}
-              </Text>
-              <TouchableOpacity onPress={() => setFinishing(null)} style={{ marginLeft: 'auto' }}>
+            <View style={[s.row, { alignItems: 'center', marginBottom: 10 }]}>
+              <Text style={s.sheetTitle}>{pick ? tr('playCalling.whoFor', { stat: statLabel(pick.stat) }) : ''}</Text>
+              <TouchableOpacity onPress={() => setPick(null)} style={{ marginLeft: 'auto' }}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
-            <View style={[s.row, { marginBottom: 10 }]}>
-              {(['score', 'no_score'] as const).map(r => (
-                <TouchableOpacity key={r} style={[s.chip, finishing?.result === r && s.chipOn]}
-                                  onPress={() => setFinishing(prev => prev && ({ ...prev, result: r }))}>
-                  <Text style={[s.chipText, finishing?.result === r && s.chipTextOn]}>
-                    {r === 'score' ? `+ ${tr('playCalling.score')}` : `− ${tr('playCalling.noScore')}`}
-                  </Text>
+            <ScrollView style={{ maxHeight: 320 }} contentContainerStyle={s.chips}>
+              {roster.map(p => (
+                <TouchableOpacity key={p.name} style={s.howBtn} onPress={() => logOutcome(p.name)}>
+                  <Text style={s.howText}>{p.jersey ? `#${p.jersey} ` : ''}{p.name}</Text>
                 </TouchableOpacity>
               ))}
-            </View>
-            <Text style={s.label}>
-              {finishing?.result === 'score' ? tr('playCalling.player') : tr('playCalling.playerOptional')}
-            </Text>
-            <ScrollView style={{ maxHeight: 160 }} contentContainerStyle={s.chips}>
-              {roster.map(p => {
-                const on = finishing?.player === p.name;
-                return (
-                  <TouchableOpacity key={p.name} style={[s.chip, on && s.chipOn]}
-                                    onPress={() => setFinishing(prev => prev && ({ ...prev, player: on ? null : p.name }))}>
-                    <Text style={[s.chipText, on && s.chipTextOn]}>{p.jersey ? `#${p.jersey} ` : ''}{p.name}</Text>
-                  </TouchableOpacity>
-                );
-              })}
+              {!roster.length && <Text style={s.empty}>{tr('playCalling.noPlayers')}</Text>}
             </ScrollView>
-            <Text style={[s.label, { marginTop: 10 }]}>{tr('playCalling.how')}</Text>
-            <View style={s.chips}>
-              {(finishing?.result === 'score' ? SCORE_HOWS : MISS_HOWS).map((h, i) => {
-                const needsPlayer = finishing?.result === 'score' && !finishing?.player;
-                return (
-                  <TouchableOpacity key={i} style={[s.howBtn, needsPlayer && { opacity: 0.4 }]} disabled={needsPlayer}
-                                    onPress={() => finish(h.ended, h.ft ?? null)}>
-                    <Text style={s.howText}>{howLabel(h.ended, h.ft ?? null)}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-            {finishing?.result === 'score' && !finishing?.player && (
-              <Text style={[s.empty, { marginTop: 6 }]}>{tr('playCalling.pickPlayerFirst')}</Text>
-            )}
           </View>
         </View>
       </Sheet>
@@ -347,8 +356,9 @@ const makeStyles = (t: ThemeTokens) => ({
   openCard: { marginTop: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: t.cardBorder,
               backgroundColor: t.card, gap: 10 },
   openText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
-  resultBtn: { flex: 1, borderWidth: 1.5, borderRadius: 10, paddingVertical: 11, alignItems: 'center' as const },
-  resultText: { fontFamily: fonts[800], fontSize: 14 },
+  outcomeBtn: { borderWidth: 1.5, borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8 },
+  outcomeText: { fontFamily: fonts[800], fontSize: 12.5 },
+  eventText: { flex: 1, fontSize: 12.5, fontFamily: fonts[700] },
   chips: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 6 },
   chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, backgroundColor: t.card },
   qChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },

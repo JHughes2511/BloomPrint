@@ -2966,6 +2966,9 @@
       "miss3": "3 gemist",
       "turnover": "Balverlies",
       "none": "Gewoon geen score"
-    }
+    },
+    "done": "Klaar",
+    "whoFor": "Wie? {{stat}}",
+    "noPlayers": "Voeg spelers toe in het statistiekengedeelte hierboven."
   }
 }

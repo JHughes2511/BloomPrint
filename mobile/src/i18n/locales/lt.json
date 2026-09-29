@@ -2966,6 +2966,9 @@
       "miss3": "Nepataikytas tritaškis",
       "turnover": "Klaida",
       "none": "Tiesiog be taškų"
-    }
+    },
+    "done": "Baigta",
+    "whoFor": "Kas? {{stat}}",
+    "noPlayers": "Pridėkite žaidėjų statistikos skiltyje aukščiau."
   }
 }

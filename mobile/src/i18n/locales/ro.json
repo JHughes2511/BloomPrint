@@ -2966,6 +2966,9 @@
       "miss3": "Ratat de 3",
       "turnover": "Pierdere",
       "none": "Doar fără puncte"
-    }
+    },
+    "done": "Gata",
+    "whoFor": "Cine? {{stat}}",
+    "noPlayers": "Adaugă jucători în secțiunea de statistici de mai sus."
   }
 }

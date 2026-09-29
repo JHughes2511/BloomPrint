@@ -2966,6 +2966,9 @@
       "miss3": "Kaçan üçlük",
       "turnover": "Top kaybı",
       "none": "Sadece sayı yok"
-    }
+    },
+    "done": "Tamam",
+    "whoFor": "Kim? {{stat}}",
+    "noPlayers": "Yukarıdaki istatistik bölümünden oyuncu ekle."
   }
 }

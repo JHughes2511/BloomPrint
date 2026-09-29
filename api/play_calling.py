@@ -220,6 +220,22 @@ def tallies(db: Session, game_id: int) -> dict:
     return out
 
 
+OUTCOMES = ["2 FG Made", "2 FG Missed", "3 FG Made", "3 FG Missed", "FT Made", "FT Missed", "Turnover"]
+
+
+def events_by_call(db: Session, game_id: int) -> dict[int, list[dict]]:
+    """What happened in each possession, in order: the stats linked to it."""
+    out: dict[int, list[dict]] = {}
+    for s in (db.query(models.GamePlayerStat)
+              .filter(models.GamePlayerStat.game_id == game_id,
+                      models.GamePlayerStat.possession_id.isnot(None))
+              .order_by(models.GamePlayerStat.id).all()):
+        out.setdefault(s.possession_id, []).append(
+            {"id": s.id, "stat_name": s.stat_name, "player_name": s.player_name,
+             "is_opponent": bool(s.is_opponent), "points": POINTS.get(s.stat_name, 0) * (s.count or 1)})
+    return out
+
+
 def call_out(c: models.PlayCall) -> dict:
     return {"id": c.id, "side": c.side, "quarter": c.quarter, "seq": c.seq, "play": c.play,
             "play_type": c.play_type, "defense": c.defense, "result": c.result, "points": c.points,
@@ -308,17 +324,32 @@ def _add_score(db: Session, game: models.GameSession, is_opponent: bool, delta: 
 def record_stat(db: Session, game: models.GameSession, coach, *, player_name: str, is_opponent: bool,
                 quarter: int, stat_name: str, count: int = 1, player_id: int | None = None,
                 apply_score: bool = True, raw_points: float | None = None,
-                force: bool = False) -> tuple[models.GamePlayerStat | None, models.StatDuplicate | None]:
+                force: bool = False, source: str | None = None,
+                call: models.PlayCall | None = None) -> tuple[models.GamePlayerStat | None, models.StatDuplicate | None]:
     """Log one stat live, once.
 
-    Merged instead of counted when someone ELSE logged the same stat for the
-    same player in the last few seconds (unless `force`: "Count it"). Otherwise
-    stored, attached to the possession being played, the score moved for a
-    made shot, and the possession's result brought up to date.
+    The same stat for the same player already in this possession, tapped in
+    the OTHER place (Stats vs Play Calling), is the same event: it is claimed,
+    not added. Merged instead of counted when someone ELSE logged the same stat
+    for the same player in the last few seconds (unless `force`: "Count it").
+    Otherwise stored, attached to the possession (`call`, else the one being
+    played), the score moved for a made shot, and the possession brought up to
+    date.
     """
     from datetime import datetime, timedelta
     from .routes.game_eval import _import_raw, _quarter_multiplier, stat_category
     now = datetime.utcnow()
+    target = call if call is not None else current_possession(db, game.id)
+    if source and target is not None:
+        for s in (db.query(models.GamePlayerStat)
+                  .filter_by(possession_id=target.id, is_opponent=is_opponent,
+                             player_name=player_name, stat_name=stat_name)
+                  .order_by(models.GamePlayerStat.id).all()):
+            have = set((s.sources or "").split(",")) - {""}
+            if have and source not in have:
+                s.sources = ",".join(sorted(have | {source}))
+                settle_from_stats(db, target)
+                return s, None
     if not force:
         twin = (db.query(models.GamePlayerStat)
                 .filter(models.GamePlayerStat.game_id == game.id,
@@ -338,18 +369,18 @@ def record_stat(db: Session, game: models.GameSession, coach, *, player_name: st
             return None, dup
     raw = _import_raw(stat_name, count) if raw_points is None else raw_points
     mult = _quarter_multiplier(quarter)
-    call = current_possession(db, game.id)
     stat = models.GamePlayerStat(
         game_id=game.id, player_id=player_id, player_name=player_name, is_opponent=is_opponent,
         quarter=quarter, stat_name=stat_name, stat_category=stat_category(stat_name),
         raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
-        logged_by=coach.id, possession_id=call.id if call is not None else None, created_at=now)
+        logged_by=coach.id, possession_id=target.id if target is not None else None, created_at=now,
+        sources=source)
     db.add(stat)
     db.flush()
     if apply_score and stat_name in POINTS:
         _add_score(db, game, is_opponent, POINTS[stat_name] * count)
-    if call is not None:
-        settle_from_stats(db, call)
+    if target is not None:
+        settle_from_stats(db, target)
     return stat, None
 
 

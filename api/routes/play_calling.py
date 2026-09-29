@@ -94,7 +94,8 @@ def game_play_calling(game_id: int, db: Session = Depends(get_db),
     game = _get_game_readable(db, game_id, coach)
     calls = (db.query(models.PlayCall).filter_by(game_id=game.id)
              .order_by(models.PlayCall.seq, models.PlayCall.id).all())
-    return {"possessions": [pc.call_out(c) for c in calls],
+    events = pc.events_by_call(db, game.id)
+    return {"possessions": [{**pc.call_out(c), "events": events.get(c.id, [])} for c in calls],
             "summary": pc.summary(calls, game),
             "orb": pc.tallies(db, game.id),
             "catalog": pc.catalog_for_game(db, game)}
@@ -187,6 +188,48 @@ def finish(call_id: int, body: FinishIn, db: Session = Depends(get_db),
     from .game_eval import _shown_scores
     ours, theirs = _shown_scores(game)
     return {"possession": pc.call_out(call), "our_score": ours, "opponent_score": theirs}
+
+
+class OutcomeIn(BaseModel):
+    stat_name: str
+    player_name: str
+    player_id: int | None = None
+
+
+@router.post("/possessions/{call_id}/outcome")
+def outcome(call_id: int, body: OutcomeIn, db: Session = Depends(get_db),
+            coach: models.Coach = Depends(get_current_coach)):
+    """2 FG Made, 3 FG Missed, FT Made, Turnover... for a player, in a
+    possession: a real stat, counted once — one already tapped in Stats for the
+    same player in this possession is claimed, not added again."""
+    call, game = _owned_call(db, call_id, coach)
+    if body.stat_name not in pc.OUTCOMES or not body.player_name.strip():
+        raise HTTPException(status_code=400, detail="an outcome and a player are required")
+    stat, dup = pc.record_stat(db, game, coach, player_name=body.player_name.strip(),
+                               is_opponent=call.side == "opponent", quarter=call.quarter,
+                               stat_name=body.stat_name, player_id=body.player_id,
+                               source="pc", call=call)
+    if body.stat_name == "Turnover":
+        # A turnover ends the trip.
+        pc.settle_from_stats(db, call, closing=True)
+    db.commit()
+    db.refresh(call)
+    db.refresh(game)
+    from .game_eval import _shown_scores
+    ours, theirs = _shown_scores(game)
+    return {"possession": pc.call_out(call), "merged": dup is not None,
+            "our_score": ours, "opponent_score": theirs}
+
+
+@router.post("/possessions/{call_id}/close")
+def close(call_id: int, db: Session = Depends(get_db),
+          coach: models.Coach = Depends(get_current_coach)):
+    """No score, nothing more to say: close the trip."""
+    call, _ = _owned_call(db, call_id, coach)
+    pc.settle_from_stats(db, call, closing=True)
+    db.commit()
+    db.refresh(call)
+    return pc.call_out(call)
 
 
 class TallyIn(BaseModel):

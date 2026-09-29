@@ -2086,7 +2086,8 @@ def log_stat(
         stat, dup = pc.record_stat(db, game, coach, player_name=body.player_name,
                                    is_opponent=body.is_opponent, quarter=body.quarter,
                                    stat_name=body.stat_name, count=body.count,
-                                   player_id=body.player_id, raw_points=body.raw_points)
+                                   player_id=body.player_id, raw_points=body.raw_points,
+                                   source="pad")
         db.commit()
         db.refresh(game)
         ours, theirs = _shown_scores(game)

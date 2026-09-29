@@ -2966,6 +2966,9 @@
       "miss3": "Pudło za 3",
       "turnover": "Strata",
       "none": "Po prostu bez punktów"
-    }
+    },
+    "done": "Gotowe",
+    "whoFor": "Kto? {{stat}}",
+    "noPlayers": "Dodaj zawodników w sekcji statystyk powyżej."
   }
 }

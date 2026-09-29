@@ -2966,6 +2966,9 @@
       "miss3": "Promašaj za 3",
       "turnover": "Izgubljena lopta",
       "none": "Samo bez poena"
-    }
+    },
+    "done": "Gotovo",
+    "whoFor": "Ko? {{stat}}",
+    "noPlayers": "Dodaj igrače u delu za statistiku iznad."
   }
 }

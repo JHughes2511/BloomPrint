@@ -2966,6 +2966,9 @@
       "miss3": "Triple fallado",
       "turnover": "Pérdida",
       "none": "Solo no anota"
-    }
+    },
+    "done": "Listo",
+    "whoFor": "¿Quién? {{stat}}",
+    "noPlayers": "Añade jugadores en la sección de estadísticas de arriba."
   }
 }

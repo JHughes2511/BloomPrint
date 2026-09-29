@@ -3316,6 +3316,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 }}
                 refreshKey={pcKey}
                 onScores={(o, p) => { if (o != null) setOurScore(o); if (p != null) setOppScore(p); }}
+                statLabel={statLabel}
                 t={t}
                 tr={tr}
               />

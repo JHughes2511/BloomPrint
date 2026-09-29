@@ -2966,6 +2966,9 @@
       "miss3": "Dreier daneben",
       "turnover": "Ballverlust",
       "none": "Nur keine Punkte"
-    }
+    },
+    "done": "Fertig",
+    "whoFor": "Wer? {{stat}}",
+    "noPlayers": "Füge oben im Statistikbereich Spieler hinzu."
   }
 }

@@ -2966,6 +2966,9 @@
       "miss3": "Missad trea",
       "turnover": "Bolltapp",
       "none": "Bara ingen poäng"
-    }
+    },
+    "done": "Klar",
+    "whoFor": "Vem? {{stat}}",
+    "noPlayers": "Lägg till spelare i statistikdelen ovan."
   }
 }

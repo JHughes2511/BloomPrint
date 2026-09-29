@@ -2966,6 +2966,9 @@
       "miss3": "3 manqué",
       "turnover": "Perte de balle",
       "none": "Juste pas marqué"
-    }
+    },
+    "done": "Terminé",
+    "whoFor": "Qui ? {{stat}}",
+    "noPlayers": "Ajoutez des joueurs dans la section Stats ci-dessus."
   }
 }

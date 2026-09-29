@@ -2966,6 +2966,9 @@
       "miss3": "3 sbagliato",
       "turnover": "Palla persa",
       "none": "Solo non segna"
-    }
+    },
+    "done": "Fatto",
+    "whoFor": "Chi? {{stat}}",
+    "noPlayers": "Aggiungi giocatori nella sezione statistiche qui sopra."
   }
 }

@@ -1086,6 +1086,9 @@ class GamePlayerStat(Base):
     # basket be told apart from two baskets.
     possession_id = Column(Integer, ForeignKey("play_calls.id"), nullable=True)
     logged_by = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    # Where it was tapped live: "pad" (Stats), "pc" (Play Calling), or both —
+    # the same basket tapped in each is one stat that both have claimed.
+    sources = Column(String, nullable=True)
 
     game = relationship("GameSession", back_populates="player_stats")
     player = relationship("Player")

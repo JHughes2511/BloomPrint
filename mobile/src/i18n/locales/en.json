@@ -2966,6 +2966,9 @@
       "miss3": "Missed 3",
       "turnover": "Turnover",
       "none": "Just no score"
-    }
+    },
+    "done": "Done",
+    "whoFor": "Who? {{stat}}",
+    "noPlayers": "Add players in the Stats section above."
   }
 }
