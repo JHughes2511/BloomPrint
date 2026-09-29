@@ -206,6 +206,7 @@ class OutcomeIn(BaseModel):
     stat_name: str
     player_name: str
     player_id: int | None = None
+    clock: int | None = None          # seconds left on the tracker's clock
 
 
 @router.post("/possessions/{call_id}/outcome")
@@ -220,7 +221,7 @@ def outcome(call_id: int, body: OutcomeIn, db: Session = Depends(get_db),
     stat, dup = pc.record_stat(db, game, coach, player_name=body.player_name.strip(),
                                is_opponent=call.side == "opponent", quarter=call.quarter,
                                stat_name=body.stat_name, player_id=body.player_id,
-                               source="pc", call=call)
+                               source="pc", call=call, clock=body.clock)
     if body.stat_name == "Turnover":
         # A turnover ends the trip.
         pc.settle_from_stats(db, call, closing=True)

@@ -34,7 +34,8 @@ interface Props {
   players: { our: Person[]; opponent: Person[] };
   refreshKey: number;                      // bumped when anyone's stats change
   onScores: (our: number | null, opp: number | null) => void;
-  onScoreBump: (side: Side, points: number) => void;   // a basket on the scoreboard now, before the server says so
+  onScoreBump: (side: Side, points: number) => void;
+  clock?: () => number | null;             // seconds left on the tracker's clock, stamped on each stat   // a basket on the scoreboard now, before the server says so
   statLabel: (k: string) => string;
   t: ThemeTokens;
   tr: (k: string, o?: any) => string;
@@ -46,7 +47,7 @@ const isMade = (k: string) => /Made$/.test(k);
 const PTS: Record<string, number> = { '2 FG Made': 2, '3 FG Made': 3, 'FT Made': 1 };
 
 export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames, players, refreshKey, onScores, onScoreBump,
-                                           statLabel, t, tr }: Props) {
+                                           clock, statLabel, t, tr }: Props) {
   const s = makeStyles(t);
   const [data, setData] = useState<any | null>(null);
   const [side, setSide] = useState<Side>('our');
@@ -134,6 +135,7 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
     if (!pick) return;
     const { call, stat } = pick;
     setPick(null);
+    const at = clock?.() ?? null;       // the clock when tapped, not when sent
     const pts = PTS[stat] ?? 0;
     const ev = { id: -Date.now(), player_name: player, stat_name: stat, points: pts || null,
                  is_opponent: call.side === 'opponent' };
@@ -145,7 +147,7 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
     if (pts) onScoreBump(call.side, pts);
     send(async () => {
       try {
-        const r = await playCallingAPI.outcome(await idOf(call), stat, player);
+        const r = await playCallingAPI.outcome(await idOf(call), stat, player, at);
         onScores(r.our_score ?? null, r.opponent_score ?? null);
       } catch (e) {
         if (pts) onScoreBump(call.side, -pts);
@@ -157,12 +159,6 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
   const closeTrip = (call: any) => {
     patch(call.id, p => ({ ...p, result: 'no_score' }));
     send(async () => playCallingAPI.close(await idOf(call)));
-  };
-
-  const undoEvent = (call: any, ev: any) => {
-    patch(call.id, p => ({ ...p, events: (p.events ?? []).filter((e: any) => e.id !== ev.id) }));
-    if (ev.points) onScoreBump(call.side, -ev.points);
-    send(() => playCallingAPI.undoStat(ev.id));
   };
 
   const orb = async (sd: Side, delta: number) => {
@@ -207,6 +203,10 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
     if (p.result === 'score') return `+${p.points ?? ''}${p.player_name ? ` ${p.player_name}` : ''}`;
     return `− ${tr('playCalling.noScore')}`;
   };
+  // The trip waiting for its shot. Once something is logged for it, it has
+  // gone to the list below and this clears for the next play (a putback or
+  // the free throw of an and-1 still attaches to it from the stat pad).
+  const waiting = current && current.result == null && offenseEvents(current).length === 0 ? current : null;
   const callLine = (p: any) =>
     `${sideNames[p.side as Side]} · ${p.play}${p.defense ? ` ${tr('playCalling.vs')} ${p.defense}` : ''}`;
 
@@ -233,7 +233,7 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
       </View>
 
       {/* 1. Defense faced (remembered per side) */}
-      <Text style={s.label}>{tr('playCalling.defense')}</Text>
+      <Text style={[s.label, s.section]}>{tr('playCalling.defense')}</Text>
       <View style={s.chips}>
         {defenses.map(d => (
           <TouchableOpacity key={d} style={[s.chip, defense[side] === d && s.chipOn]} onPress={() => pickDefense(d)}>
@@ -243,13 +243,18 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
       </View>
 
       {/* 2. The call: tap to start the next trip */}
-      <Text style={s.label}>{tr('playCalling.play')}</Text>
+      <Text style={[s.label, s.section]}>{tr('playCalling.play')}</Text>
       <View style={s.chips}>
-        {catalog.slice(0, 16).map((p: any) => (
-          <TouchableOpacity key={p.name} style={s.chip} onPress={() => callPlay(p.name)} accessibilityHint={typeLabel(p.type)}>
-            <Text style={s.chipText}>{p.name}</Text>
-          </TouchableOpacity>
-        ))}
+        {/* The play being run lights up, the way the defense does. */}
+        {catalog.slice(0, 16).map((p: any) => {
+          const on = !!waiting && waiting.side === side && waiting.play === p.name;
+          return (
+            <TouchableOpacity key={p.name} style={[s.chip, on && s.chipOn]} onPress={() => callPlay(p.name)}
+                              accessibilityHint={typeLabel(p.type)} accessibilityState={{ selected: on }}>
+              <Text style={[s.chipText, on && s.chipTextOn]}>{p.name}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
       <View style={[s.row, { marginTop: 6 }]}>
         <TextInput
@@ -269,47 +274,29 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
 
       {/* 3. The shot: what happened on the trip just called, as a stat for a
           player. It lands in the list below as it is tapped. */}
-      <Text style={s.label}>{tr('playCalling.result')}</Text>
-      {current ? (
+      <Text style={[s.label, s.section]}>{tr('playCalling.result')}</Text>
+      {waiting ? (
         <View style={s.openCard}>
           <View style={[s.row, { alignItems: 'center' }]}>
-            <Text style={[s.openText, { flex: 1 }]} numberOfLines={1}>{qLabel(current.quarter)} · {callLine(current)}</Text>
-            <TouchableOpacity onPress={() => removeCall(current)} accessibilityLabel={tr('playCalling.deleteTitle')} hitSlop={8}>
+            <Text style={[s.openText, { flex: 1 }]} numberOfLines={1}>{qLabel(waiting.quarter)} · {callLine(waiting)}</Text>
+            <TouchableOpacity onPress={() => removeCall(waiting)} accessibilityLabel={tr('playCalling.deleteTitle')} hitSlop={8}>
               <Ionicons name="trash-outline" size={16} color={t.muted} />
             </TouchableOpacity>
           </View>
-          {offenseEvents(current).length > 0 && (
-            <View style={{ gap: 4 }}>
-              {offenseEvents(current).map((e: any) => (
-                <View key={e.id} style={[s.row, { alignItems: 'center' }]}>
-                  <Text style={[s.eventText, { color: isMade(e.stat_name) ? t.positive : t.negative }]} numberOfLines={1}>
-                    {eventText(e)}
-                  </Text>
-                  {e.id > 0 && (
-                    <TouchableOpacity onPress={() => undoEvent(current, e)} accessibilityLabel={tr('playCalling.undo')} hitSlop={8}>
-                      <Ionicons name="arrow-undo-outline" size={14} color={t.muted} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
-            </View>
-          )}
           <View style={s.chips}>
             {OUTCOMES.map(k => {
               const good = isMade(k);
               return (
-                <TouchableOpacity key={k} onPress={() => setPick({ call: current, stat: k })}
+                <TouchableOpacity key={k} onPress={() => setPick({ call: waiting, stat: k })}
                                   style={[s.outcomeBtn, { borderColor: good ? t.positive : t.negative,
                                                           backgroundColor: good ? t.positiveSoft : t.negativeSoft }]}>
                   <Text style={[s.outcomeText, { color: good ? t.positive : t.negative }]}>{statLabel(k)}</Text>
                 </TouchableOpacity>
               );
             })}
-            {current.result == null && (
-              <TouchableOpacity onPress={() => closeTrip(current)} style={[s.outcomeBtn, { borderColor: t.line }]}>
-                <Text style={[s.outcomeText, { color: t.muted }]}>{tr('playCalling.noScore')}</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity onPress={() => closeTrip(waiting)} style={[s.outcomeBtn, { borderColor: t.line }]}>
+              <Text style={[s.outcomeText, { color: t.muted }]}>{tr('playCalling.noScore')}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       ) : (
@@ -414,12 +401,14 @@ const makeStyles = (t: ThemeTokens) => ({
            marginBottom: 10 },
   label: { color: t.muted, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1, textTransform: 'uppercase' as const,
            marginTop: 10, marginBottom: 6, marginRight: 8 },
+  // A section's own heading: clear of the one above, close to what it heads.
+  section: { marginTop: 18, marginBottom: 8 },
   row: { flexDirection: 'row' as const, gap: 8 },
   sideBtn: { flex: 1, borderWidth: 1, borderColor: t.line, borderRadius: 10, paddingVertical: 9, alignItems: 'center' as const },
   sideBtnOn: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   sideText: { color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 },
   sideTextOn: { color: t.ctaText },
-  openCard: { marginTop: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: t.cardBorder,
+  openCard: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: t.cardBorder,
               backgroundColor: t.card, gap: 10 },
   openText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   outcomeBtn: { borderWidth: 1.5, borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8 },

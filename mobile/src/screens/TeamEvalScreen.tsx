@@ -1234,6 +1234,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         raw_points: rawPoints,
         count,
         live: true,
+        clock: clockRemaining,
       });
       scoreInFlight.current -= 1;
       // The server's score counts everyone's taps; show it once mine are in.
@@ -1512,6 +1513,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     && ((game.coach_id === coach?.id) || !!game.can_track);
   // Who may correct a game's stats: the owner, and while it is live anyone
   // tracking it (they are the ones who logged them).
+  // The Lineup sheet names players the way the stat pad does: by number.
+  const lineupJersey = (name: string): string | null => (entryMode === 'our'
+    ? (roster as any[]).find(p => p.name === name)?.jersey_number
+    : (opponentRoster as any[]).find(p => p.player_name === name)?.jersey_number) ?? null;
   const canEditStats = (game: any) => isOwnedGame(game) || (game?.status === 'in_progress' && canTrack(game));
 
   const openPlayerStats = (playerName: string) => {
@@ -1579,7 +1584,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         stat_category: category,
         raw_points: rawPoints,
         count: 1,
+        // A game still being played: a made shot goes on the score, the same
+        // as taking one out takes it off.
+        adjust_score: detailGame.status === 'in_progress',
       });
+      if (detailGame.status === 'in_progress') {
+        gameEvalAPI.getSession(detailGame.id).then(setDetailGame).catch(() => {});
+      }
       // refresh stats and summary
       const [newStats, newSummary] = await Promise.all([
         gameEvalAPI.listStats(detailGame.id),
@@ -3018,8 +3029,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 16 }}>
               <Text style={s.trackerBarLabel}>{tr('playCalling.recent')}</Text>
               {recent.map((x: any) => {
+                // When in the game, as the clock read: "Q1 5:32". Only a stat
+                // from before the clock was recorded falls back to how long ago.
                 const secs = Math.max(0, Math.round((Date.now() - Date.parse(x.at)) / 1000));
-                const ago = secs < 60 ? `${secs}s` : `${Math.round(secs / 60)}m`;
+                const ago = x.clock != null && x.quarter
+                  ? `${qLabel(x.quarter)} ${formatClock(x.clock)}`
+                  : secs < 60 ? `${secs}s` : `${Math.round(secs / 60)}m`;
                 const merged = x.kind === 'merged';
                 return (
                   <View key={`${x.kind}-${x.id}`} style={[s.recentItem, merged && { opacity: 0.6 }]}>
@@ -3387,6 +3402,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 }}
                 refreshKey={pcKey}
                 onScores={(o, p) => { if (o != null) setOurScore(o); if (p != null) setOppScore(p); }}
+                clock={() => clockNow.current.clockRemaining}
                 onScoreBump={(sd, pts) => {
                   scoreSeq.current += 1;
                   (sd === 'opponent' ? setOppScore : setOurScore)(prev => Math.max(0, prev + pts));
@@ -5046,7 +5062,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
                   {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers)
                     .filter(n => n !== subOutPlayer)
-                    .map(name => (
+                    .map(name => ({ name, jersey: lineupJersey(name) }))
+                    .map(({ name, jersey }) => (
                       <TouchableOpacity
                         key={name}
                         style={{ padding: 13, borderRadius: 10, backgroundColor: t.chip, marginBottom: 8, borderWidth: 1, borderColor: t.line }}
@@ -5068,7 +5085,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           setSubOutPlayer(null);
                         }}
                       >
-                        <Text style={{ color: t.inkSoft, fontSize: 14, fontFamily: fonts[600] }}>{name}</Text>
+                        <Text style={{ color: t.inkSoft, fontSize: 14, fontFamily: fonts[600] }}>{jersey ? `#${jersey}  ` : ''}{name}</Text>
                       </TouchableOpacity>
                     ))
                   }
@@ -5086,7 +5103,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {tr('teamGrade.lineupHint')}
                 </Text>
                 <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
-                  {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers).map(name => (
+                  {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers)
+                    .map(name => ({ name, jersey: lineupJersey(name) }))
+                    .map(({ name, jersey }) => (
                     <View key={name} style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' }}>
                       <TouchableOpacity
                         style={[s.modalBtn, { flex: 1, backgroundColor: t.positiveSoft, borderWidth: 1, borderColor: t.positive }]}
@@ -5103,7 +5122,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       >
                         <Text style={{ color: t.positive, fontFamily: fonts[600] }}>{tr('teamGrade.inShort')}</Text>
                       </TouchableOpacity>
-                      <Text style={{ color: t.ink, fontSize: 13, flex: 2, textAlign: 'center' }}>{name}</Text>
+                      <Text style={{ color: t.ink, fontSize: 13, flex: 2, textAlign: 'center' }}>{jersey ? `#${jersey}  ` : ''}{name}</Text>
                       <TouchableOpacity
                         style={[s.modalBtn, { flex: 1, backgroundColor: t.negativeSoft, borderWidth: 1, borderColor: t.negative }]}
                         onPress={() => setSubOutPlayer(name)}

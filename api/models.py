@@ -1103,6 +1103,9 @@ class GamePlayerStat(Base):
     # Where it was tapped live: "pad" (Stats), "pc" (Play Calling), or both —
     # the same basket tapped in each is one stat that both have claimed.
     sources = Column(String, nullable=True)
+    # What the game clock read when it was tapped live (seconds left in the
+    # period), so Recent can say "Q1 5:32" rather than how long ago.
+    game_clock = Column(Integer, nullable=True)
 
     game = relationship("GameSession", back_populates="player_stats")
     player = relationship("Player")

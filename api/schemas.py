@@ -807,6 +807,12 @@ class GameStatEntry(BaseModel):
     # Tapped in during a live game: counted once across trackers, attached to
     # the possession being played, and the score moved by the server.
     live: bool = False
+    # Added afterwards (Edit stats) to a game still being played: a made shot
+    # goes on the score, as it would have if tapped live. Not attached to a
+    # possession — it was not tapped during one.
+    adjust_score: bool = False
+    # Seconds left on the tracker's clock when tapped (live), for Recent.
+    clock: int | None = None
 
 
 class LineupEventCreate(BaseModel):

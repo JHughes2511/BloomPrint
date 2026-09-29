@@ -2087,7 +2087,7 @@ def log_stat(
                                    is_opponent=body.is_opponent, quarter=body.quarter,
                                    stat_name=body.stat_name, count=body.count,
                                    player_id=body.player_id, raw_points=body.raw_points,
-                                   source="pad")
+                                   source="pad", clock=body.clock)
         db.commit()
         db.refresh(game)
         ours, theirs = _shown_scores(game)
@@ -2097,6 +2097,24 @@ def log_stat(
                 "weighted_points": stat.weighted_points if stat else 0,
                 "our_score": ours, "opponent_score": theirs,
                 "possession": pc.call_out(call) if call else None}
+    if body.adjust_score:
+        # Added in Edit stats while the game is live: the same as a tap on the
+        # pad for the possession being played, if it is in that quarter — on
+        # the score, and under the play in Play Calling. Not merged with another
+        # coach's tap: adding it by hand is deliberate.
+        from .. import play_calling as pc
+        cur = pc.current_possession(db, game.id)
+        if cur is not None and cur.quarter == body.quarter:
+            stat, _ = pc.record_stat(db, game, coach, player_name=body.player_name,
+                                     is_opponent=body.is_opponent, quarter=body.quarter,
+                                     stat_name=body.stat_name, count=body.count,
+                                     player_id=body.player_id, raw_points=body.raw_points,
+                                     force=True, call=cur)
+            db.commit()
+            db.refresh(game)
+            ours, theirs = _shown_scores(game)
+            return {"id": stat.id, "weighted_points": stat.weighted_points,
+                    "our_score": ours, "opponent_score": theirs}
     multiplier = _quarter_multiplier(body.quarter)
     weighted = body.raw_points * multiplier
     stat = models.GamePlayerStat(
@@ -2114,9 +2132,14 @@ def log_stat(
         logged_by=coach.id,
     )
     db.add(stat)
+    from .. import play_calling as pc
+    if body.adjust_score and body.stat_name in pc.POINTS:
+        pc._add_score(db, game, body.is_opponent, pc.POINTS[body.stat_name] * (body.count or 1))
     db.commit()
     db.refresh(stat)
-    return {"id": stat.id, "weighted_points": weighted}
+    db.refresh(game)
+    ours, theirs = _shown_scores(game)
+    return {"id": stat.id, "weighted_points": weighted, "our_score": ours, "opponent_score": theirs}
 
 
 @router.delete("/stats/{stat_id}")

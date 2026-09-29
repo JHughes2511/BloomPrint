@@ -306,11 +306,18 @@ def _add_score(db: Session, game: models.GameSession, is_opponent: bool, delta: 
                .values({col.key: case((new < 0, 0), else_=new)}))
 
 
+def _clock_reading(game: models.GameSession, now) -> int | None:
+    """Seconds left on the shared clock right now, if it has been set."""
+    from .routes.game_eval import _clock_now
+    c = _clock_now(game, now)
+    return c["remaining"] if c else None
+
+
 def record_stat(db: Session, game: models.GameSession, coach, *, player_name: str, is_opponent: bool,
                 quarter: int, stat_name: str, count: int = 1, player_id: int | None = None,
                 apply_score: bool = True, raw_points: float | None = None,
                 force: bool = False, source: str | None = None,
-                call: models.PlayCall | None = None) -> tuple[models.GamePlayerStat | None, models.StatDuplicate | None]:
+                call: models.PlayCall | None = None, clock: int | None = None) -> tuple[models.GamePlayerStat | None, models.StatDuplicate | None]:
     """Log one stat live, once.
 
     The same stat for the same player already in this possession, tapped in
@@ -349,7 +356,8 @@ def record_stat(db: Session, game: models.GameSession, coach, *, player_name: st
             dup = models.StatDuplicate(game_id=game.id, original_id=twin.id, logged_by=coach.id,
                                        payload={"player_name": player_name, "is_opponent": is_opponent,
                                                 "quarter": quarter, "stat_name": stat_name, "count": count,
-                                                "player_id": player_id})
+                                                "player_id": player_id,
+                                                "clock": clock if clock is not None else _clock_reading(game, now)})
             db.add(dup)
             return None, dup
     raw = _import_raw(stat_name, count) if raw_points is None else raw_points
@@ -359,7 +367,7 @@ def record_stat(db: Session, game: models.GameSession, coach, *, player_name: st
         quarter=quarter, stat_name=stat_name, stat_category=stat_category(stat_name),
         raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
         logged_by=coach.id, possession_id=target.id if target is not None else None, created_at=now,
-        sources=source)
+        sources=source, game_clock=clock if clock is not None else _clock_reading(game, now))
     db.add(stat)
     db.flush()
     if apply_score and stat_name in POINTS:
@@ -437,6 +445,7 @@ def recent_activity(db: Session, game_id: int, me: int, limit: int = 6) -> list[
         return names[cid]
     rows = [{"kind": "stat", "id": s.id, "player_name": s.player_name, "stat_name": s.stat_name,
              "is_opponent": bool(s.is_opponent), "by": who(s.logged_by), "you": s.logged_by == me,
+             "quarter": s.quarter, "clock": s.game_clock,
              "at": s.created_at.isoformat() + "Z"}
             for s in (db.query(models.GamePlayerStat)
                       .filter(models.GamePlayerStat.game_id == game_id,
@@ -446,6 +455,7 @@ def recent_activity(db: Session, game_id: int, me: int, limit: int = 6) -> list[
               .order_by(models.StatDuplicate.id.desc()).limit(limit).all()):
         orig = db.get(models.GamePlayerStat, d.original_id) if d.original_id else None
         rows.append({"kind": "merged", "id": d.id, "player_name": d.payload.get("player_name"),
+                     "quarter": d.payload.get("quarter"), "clock": d.payload.get("clock"),
                      "stat_name": d.payload.get("stat_name"), "is_opponent": bool(d.payload.get("is_opponent")),
                      "by": who(d.logged_by), "you": d.logged_by == me,
                      "merged_with": who(orig.logged_by) if orig else "",
