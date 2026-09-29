@@ -47,6 +47,13 @@ def _resolve(db: Session, coach: models.Coach, kind: str, ref_id: int) -> tuple[
         v = db.get(models.GameReportVersion, ref_id)
         if v is not None and "team_training" in sv._types(v.output_type):
             kind, ref_id = "packet_training", v.game_report_id
+    if kind in ("player_share", "player_team_share"):
+        raise HTTPException(status_code=404, detail="Report not found")
+    if kind == "shared":
+        sh = db.get(models.StaffSharedReport, ref_id)
+        if sh and coach.id in (sh.recipient_id, sh.sender_id):
+            return kind, ref_id
+        raise HTTPException(status_code=404, detail="Report not found")
     _, owner = sv.source_text(db, kind, ref_id)
     if owner == coach.id:
         return kind, ref_id

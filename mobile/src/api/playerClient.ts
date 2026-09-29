@@ -57,6 +57,9 @@ export const playerReportsAPI = {
   list: () => playerApi.get('/player/shared-reports').then(r => r.data),
   listTeam: () => playerApi.get('/player/team-shared-reports').then(r => r.data),
   get: (id: number) => playerApi.get(`/player/shared-reports/${id}`).then(r => r.data),
+  /** One-page versions, made from exactly what was shared with the player. */
+  short: (id: number) => playerApi.get(`/player/shared-reports/${id}/short`).then(r => r.data),
+  teamShort: (id: number) => playerApi.get(`/player/team-shared-reports/${id}/short`).then(r => r.data),
   addComment: (id: number, text: string, parentId?: number) =>
     playerApi.post(`/player/shared-reports/${id}/comments`, { text, parent_id: parentId }).then(r => r.data),
   /** Rewrite a comment you left. */

@@ -4034,6 +4034,7 @@ def opponent_profile(
     offense_tendencies: dict[str, int] = defaultdict(int)
     defense_tendencies: dict[str, int] = defaultdict(int)
     latest_report = None
+    latest_report_game = None
 
     # One pass for the stats and one for the minutes, rather than two per game.
     # See the season dashboard: columns rather than entities, because this reads
@@ -4065,6 +4066,9 @@ def opponent_profile(
                      or (game.ai_scouting_report if game.coach_id == coach.id else None))
         if own_scout:
             latest_report = own_scout
+            # Which game's report it is, for its short version (only when it is
+            # a report of the coach's own, which is what a short is made from).
+            latest_report_game = game.id if row and row.report_text else None
         # Which bench this team was on in THIS game — read off the two names
         # on the scoreboard, not worked out from the team_id.
         #
@@ -4184,6 +4188,7 @@ def opponent_profile(
                         "per_game": round(all_stat_counts.get(st, 0) / n_games, 1)}
                        for st, sc in weak_spots],
         "ai_scouting_report": latest_report,
+        "ai_scouting_report_game_id": latest_report_game,
         # What they run and what works against them, from the play calling
         # recorded in these games (None when none was).
         "play_calling": scout_play_calling(db, opponent_name, games),

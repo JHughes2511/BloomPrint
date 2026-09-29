@@ -14,6 +14,7 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import PageContainer, { REPORT_MAX_WIDTH } from '../../responsive/PageContainer';
+import { WithShortVersion } from '../../components/ShortVersion';
 
 function cleanMarkdown(text: string): string {
   return text
@@ -98,9 +99,12 @@ export default function PlayerTeamReportDetailScreen() {
         {report.report_text ? (
           <View style={styles.section}>
             <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.teamReportDetail.teamReport')}</Text>
-            <View style={styles.reportBox}>
-              <Markdown style={markdownStyles}>{cleanMarkdown(report.report_text)}</Markdown>
-            </View>
+            <WithShortVersion kind="player_team_share" refId={reportId} readOnly
+                              fetcher={() => playerReportsAPI.teamShort(reportId)}>
+              <View style={styles.reportBox}>
+                <Markdown style={markdownStyles}>{cleanMarkdown(report.report_text)}</Markdown>
+              </View>
+            </WithShortVersion>
           </View>
         ) : null}
       </ScrollView>

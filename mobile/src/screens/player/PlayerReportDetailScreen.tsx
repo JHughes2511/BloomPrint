@@ -20,6 +20,7 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import PageContainer, { REPORT_MAX_WIDTH } from '../../responsive/PageContainer';
+import { WithShortVersion } from '../../components/ShortVersion';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -185,9 +186,13 @@ export default function PlayerReportDetailScreen() {
         {report.report_text && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.reportDetail.fullReport')}</Text>
-            <View style={styles.reportBox}>
-              <Markdown style={markdownStyles}>{report.report_text}</Markdown>
-            </View>
+            {/* Standard | Short: the short one is made from exactly what was shared with me. */}
+            <WithShortVersion kind="player_share" refId={reportId} readOnly
+                              fetcher={() => playerReportsAPI.short(reportId)}>
+              <View style={styles.reportBox}>
+                <Markdown style={markdownStyles}>{report.report_text}</Markdown>
+              </View>
+            </WithShortVersion>
           </View>
         )}
 

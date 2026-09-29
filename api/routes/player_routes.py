@@ -766,6 +766,31 @@ def get_coach_training(
     return _coach_training_out(session)
 
 
+@router.get("/shared-reports/{shared_id}/short")
+def get_shared_report_short(shared_id: int, db: Session = Depends(get_db),
+                            pu: models.PlayerUser = Depends(get_current_player_user)):
+    """The one-page version of a report shared with me, made from what I can see."""
+    report = db.get(models.SharedReport, shared_id)
+    if not report or report.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Report not found")
+    from .. import short_versions as sv
+    got = sv.out(sv.ensure(db, "player_share", shared_id), db)
+    got.pop("stale", None); got.pop("edited", None)
+    return got
+
+
+@router.get("/team-shared-reports/{shared_id}/short")
+def get_team_shared_report_short(shared_id: int, db: Session = Depends(get_db),
+                                 pu: models.PlayerUser = Depends(get_current_player_user)):
+    r = db.get(models.TeamSharedReport, shared_id)
+    if not r or r.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Report not found")
+    from .. import short_versions as sv
+    got = sv.out(sv.ensure(db, "player_team_share", shared_id), db)
+    got.pop("stale", None); got.pop("edited", None)
+    return got
+
+
 @router.get("/coach-training/{training_id}/short")
 def get_coach_training_short(
     training_id: int,

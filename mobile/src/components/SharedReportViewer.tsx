@@ -21,6 +21,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { CONTENT_MAX_WIDTH, sheetCap, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
+import { WithShortVersion } from './ShortVersion';
 
 type BottomTab = 'correct' | 'comments' | 'notes';
 
@@ -268,7 +269,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                     canToggle={rt.canToggle} isTranslated={rt.isTranslated}
                     showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
                   />
-                  {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+                  <WithShortVersion kind="shared" refId={item?.id}>
+                    {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+                  </WithShortVersion>
                 </>
               ) : (
                 <Text style={{ color: t.muted2 }}>

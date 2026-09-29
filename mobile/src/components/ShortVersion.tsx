@@ -23,7 +23,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 
 export type ShortKind = 'training' | 'team_report' | 'packet_training' | 'eval' | 'scouting' | 'game_full'
-  | 'play_calling' | 'film' | 'packet' | 'packet_version';
+  | 'play_calling' | 'film' | 'packet' | 'packet_version' | 'shared' | 'player_share' | 'player_team_share';
 
 /** A report type's page, as the server describes it (api/short_versions.py SCHEMAS). */
 type Field = { key: string; type: 'text' | 'lines' | 'rows'; max: number; cols?: string[]; hint?: string };
@@ -55,15 +55,16 @@ export function VersionSwitch({ value, onChange, style }: { value: 'standard' | 
  * A report with its Standard | Short switch. `children` is the standard
  * report as the screen already draws it.
  */
-export function WithShortVersion({ kind, refId, children, switchStyle }: {
+export function WithShortVersion({ kind, refId, children, switchStyle, fetcher, readOnly }: {
   kind: ShortKind; refId: number | null | undefined; children: React.ReactNode; switchStyle?: any;
+  fetcher?: () => Promise<any>; readOnly?: boolean;
 }) {
   const [mode, setMode] = useState<'standard' | 'short'>('standard');
   if (!refId) return <>{children}</>;
   return (
     <View>
       <VersionSwitch value={mode} onChange={setMode} style={switchStyle} />
-      {mode === 'standard' ? children : <ShortVersionView kind={kind} refId={refId} />}
+      {mode === 'standard' ? children : <ShortVersionView kind={kind} refId={refId} fetcher={fetcher} readOnly={readOnly} />}
     </View>
   );
 }

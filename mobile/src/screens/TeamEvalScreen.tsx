@@ -4343,7 +4343,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         </View>
                         <View style={{ marginTop: 8 }}>
                           <ReportSearchBar ctl={findScout} />
-                          {renderReport(scoutData.ai_scouting_report, { heading: t.ink, body: t.inkSoft }, findScout.search)}
+                          <WithShortVersion kind="scouting" refId={scoutData.ai_scouting_report_game_id}>
+                            {renderReport(scoutData.ai_scouting_report, { heading: t.ink, body: t.inkSoft }, findScout.search)}
+                          </WithShortVersion>
                         </View>
                       </View>
 

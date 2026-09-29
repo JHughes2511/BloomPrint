@@ -124,7 +124,24 @@ SCHEMAS: dict[str, dict] = {
 
 # The kinds a short version can be asked for, by where the report lives.
 KINDS = {"training", "team_report", "packet_training", "eval", "scouting", "game_full", "play_calling",
-         "film", "packet_version"}
+         "film", "packet_version", "shared", "player_share", "player_team_share"}
+
+
+def _layout_for_types(types: set[str]) -> str:
+    if "matchup" in types:
+        return "matchup"
+    if "team_training" in types:
+        return "team_training"
+    if types & {"training_program", "training"}:
+        return "training"
+    if types & {"player_eval", "recruitment_profile", "position_analysis", "coaching_report", "film_breakdown"} \
+            and not types & {"game_report", "game_analysis", "game_situational"}:
+        return "player_eval"
+    if "scouting_report" in types:
+        return "scouting"
+    if types & {"game_report", "game_analysis"}:
+        return "game_report"
+    return "team"
 
 
 def _types(output_type: str | None) -> set[str]:
@@ -150,6 +167,36 @@ def layout_for(db: Session, kind: str, ref_id: int) -> str:
         r = db.get(models.TeamReport, ref_id)
         types = _types(r.output_type if r else "")
         return "matchup" if "matchup" in types else "team_training" if "team_training" in types else "team"
+    if kind == "shared":
+        sh = db.get(models.StaffSharedReport, ref_id)
+        if sh is None:
+            return "team"
+        rt = sh.report_type
+        if rt == "eval":
+            e = db.get(models.Evaluation, sh.report_id)
+            return "matchup" if e and "matchup" in _types(e.output_type) else "player_eval"
+        if rt == "team_report":
+            r = db.get(models.TeamReport, sh.report_id)
+            return _layout_for_types(_types(r.output_type if r else "")) if r else "team"
+        if rt in ("training", "team_training"):
+            return rt
+        if rt in ("game_session", "scouting"):
+            return "scouting"
+        if rt == "game_report":
+            return "game_report"
+        if rt == "film":
+            return "film"
+        if rt == "game":
+            gr = db.get(models.GameReport, sh.report_id)
+            return _layout_for_types(_types(gr.output_type if gr else "")) if gr else "team"
+        return "team"
+    if kind == "player_share":
+        sh = db.get(models.SharedReport, ref_id)
+        e = sh.evaluation if sh else None
+        return "matchup" if e and "matchup" in _types(e.output_type) else "player_eval"
+    if kind == "player_team_share":
+        r = db.get(models.TeamSharedReport, ref_id)
+        return _layout_for_types(_types(r.output_type if r else ""))
     if kind == "packet_version":
         v = db.get(models.GameReportVersion, ref_id)
         types = _types(v.output_type if v else "")
@@ -239,6 +286,22 @@ def source_text(db: Session, kind: str, ref_id: int) -> tuple[str | None, int | 
         v = db.get(models.GameReportVersion, ref_id)
         gr = db.get(models.GameReport, v.game_report_id) if v else None
         return (v.report_text if v else None), (gr.coach_id if gr else None)
+    if kind == "shared":
+        # What the recipient reads: their own updated copy if they made one.
+        sh = db.get(models.StaffSharedReport, ref_id)
+        return ((sh.regenerated_text or sh.frozen_text) if sh else None), (sh.recipient_id if sh else None)
+    if kind == "player_share":
+        # Only what the player is allowed to see: the share's own filtered text
+        # (grades, flags and hidden sections already taken out), never the
+        # coach's full report.
+        sh = db.get(models.SharedReport, ref_id)
+        if sh is None:
+            return None, None
+        from .routes.player_routes import _build_shared_report_out
+        return (_build_shared_report_out(sh).report_text or None), None
+    if kind == "player_team_share":
+        r = db.get(models.TeamSharedReport, ref_id)
+        return (r.report_text if r else None), None
     return None, None
 
 
