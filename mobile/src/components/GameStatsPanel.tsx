@@ -289,9 +289,10 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
   // read but only one of which needs the five possession stats — so a file that
   // has team totals and none of those can be called out where it matters
   // instead of leaving a card silently empty.
-  const Header = ({ title, section, wantAdvanced }: { title: string; section?: string; wantAdvanced?: boolean }) => (
+  // `color` is for a header that names a team: it takes that team's colour.
+  const Header = ({ title, section, wantAdvanced, color }: { title: string; section?: string; wantAdvanced?: boolean; color?: string }) => (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-      <Text style={s.cardLabel}>{title}</Text>
+      <Text style={[s.cardLabel, color ? { color } : null]}>{title}</Text>
       {section && (
         <TouchableOpacity onPress={() => { setFixing({ section, title, wantAdvanced }); setFixNote(''); }}>
           <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 10,
@@ -575,7 +576,8 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
       {/* ── Box score ── */}
       {data.sides.filter((side: any) => side.players.length > 0).map((side: any) => (
         <View key={String(side.is_opponent)} style={s.card}>
-          <Header title={side.team_name} section="players" />
+          <Header title={side.team_name} section="players"
+                  color={side.is_opponent ? theirColor : ourColor} />
           <BoxScoreRows
             side={side} t={t} s={s} tr={tr}
             onEditRow={(p: any) => {
@@ -598,16 +600,19 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
  */
 function BoxScoreRows({ side, t, s, tr, onEditRow }: any) {
   const anyJersey = side.players.some((p: any) => p.jersey);
+  // Column heads and totals in the team's own colour: blue for us, clay for
+  // the opponent, so the opponent's table no longer reads as ours.
+  const teamInk = { color: side.is_opponent ? t.negative : t.accent };
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <View>
         <View style={[s.tRow, s.tHead]}>
-          {anyJersey && <Text style={[s.tJersey, s.tHeadText]}>#</Text>}
-          <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>
+          {anyJersey && <Text style={[s.tJersey, s.tHeadText, teamInk]}>#</Text>}
+          <Text style={[s.tCell, s.tName, s.tHeadText, teamInk]} numberOfLines={1}>
             {tr('gameStats.player')}
           </Text>
           {BOX_COLS.map(c => (
-            <Text key={c} style={[s.tCell, s.tHeadText]}>{COL_LABEL[c] ?? c}</Text>
+            <Text key={c} style={[s.tCell, s.tHeadText, teamInk]}>{COL_LABEL[c] ?? c}</Text>
           ))}
         </View>
         {side.players.map((p: any) => (
@@ -622,11 +627,11 @@ function BoxScoreRows({ side, t, s, tr, onEditRow }: any) {
         ))}
         <View style={[s.tRow, s.tTotals]}>
           {anyJersey && <Text style={s.tJersey} />}
-          <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>
+          <Text style={[s.tCell, s.tName, s.tTotalText, teamInk]} numberOfLines={1}>
             {tr('gameStats.total')}
           </Text>
           {BOX_COLS.map(c => (
-            <Text key={c} style={[s.tCell, s.tHeadText]}>{boxCell(c, side.totals[c])}</Text>
+            <Text key={c} style={[s.tCell, s.tTotalText, teamInk]}>{boxCell(c, side.totals[c])}</Text>
           ))}
         </View>
       </View>
@@ -660,7 +665,7 @@ export function TeamBoxScore({ gameId, isOpponent, refreshKey = 0 }:
   if (!side?.players?.length) return null;
   return (
     <View style={s.card}>
-      <Text style={s.cardLabel}>{side.team_name}</Text>
+      <Text style={[s.cardLabel, { color: side.is_opponent ? t.negative : t.accent }]}>{side.team_name}</Text>
       <BoxScoreRows side={side} t={t} s={s} tr={tr} />
     </View>
   );
@@ -723,5 +728,6 @@ const makeStyles = (t: ThemeTokens) => ({
   tName: { width: 150, textAlign: 'left', color: t.ink, paddingRight: 8 } as const,
   tJersey: { width: 34, paddingVertical: 7, color: t.muted, fontSize: 12,
              textAlign: 'center' } as const,
-  tHeadText: { color: t.label, fontFamily: fonts[800], fontSize: 11 } as const,
+  tHeadText: { fontFamily: fonts[800], fontSize: 11 } as const,
+  tTotalText: { fontFamily: fonts[800], fontSize: 11 } as const,
 });

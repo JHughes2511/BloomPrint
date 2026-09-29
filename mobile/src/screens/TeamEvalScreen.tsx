@@ -3181,7 +3181,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
             return (
               <View style={s.card}>
-                <Text style={s.cardLabel}>{tr('teamGrade.quarterComparison')}</Text>
+                <Text style={[s.cardLabel, s.gameCardLabel]}>{tr('teamGrade.quarterComparison')}</Text>
                 <Text style={{ color: t.muted, fontSize: 11, marginTop: 2, marginBottom: 12 }}>
                   {wholeGame ? tr('teamGrade.noPeriodBreakdown') : tr('teamGrade.quarterComparisonHint')}
                 </Text>
@@ -3194,7 +3194,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 </View>
 
                 {/* Team totals */}
-                <View style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8 }]}>
+                <View style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8, marginTop: 4, marginBottom: 8 }]}>
                   <Text style={[s.qPlayerName, { color: t.accent, fontFamily: fonts[800] }]}>{tr('teamGrade.teamRow')}</Text>
                   {qNums.map(q => (
                     <Text key={q} style={[s.qCell, { color: cellColor(teamQ[q]), fontFamily: fonts[800] }]}>{fmt(teamQ[q])}</Text>
@@ -3209,7 +3209,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   return (
                     <View key={name}>
                       <TouchableOpacity
-                        style={[s.qRow, isOpen && { backgroundColor: t.chip, borderRadius: 8 }]}
+                        style={[s.qRow, isOpen && { backgroundColor: t.chip, borderRadius: 8, marginTop: 4 }]}
                         onPress={() => setExpandedQuarterPlayer(isOpen ? null : name)}
                       >
                         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 4 }}>
@@ -3243,7 +3243,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                             return (
                               <View key={q} style={{ marginBottom: 10 }}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[800], letterSpacing: 0.5 }}>{periodLabel(q)}</Text>
+                                  <Text style={{ color: t.inkSoft, fontSize: 11, fontFamily: fonts[800], letterSpacing: 0.5 }}>{periodLabel(q)}</Text>
                                   <Text style={{ color: cellColor(Q.weighted), fontSize: 11, fontFamily: fonts[700] }}>{fmt(Q.weighted)} {tr('teamGrade.ptsAbbr')}</Text>
                                 </View>
                                 <View style={{ flexDirection: 'row', gap: 12, marginBottom: 6 }}>
@@ -3280,7 +3280,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           ) : detailTab !== 'byquarter' && summary ? (
             <View style={s.card}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={s.cardLabel}>{tr('teamGrade.playerGrades')}</Text>
+                <Text style={[s.cardLabel, s.gameCardLabel]}>{tr('teamGrade.playerGrades')}</Text>
                 <TouchableOpacity
                   onPress={() => {
                     setShowGradeSearch(prev => {
@@ -3327,8 +3327,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.offLabel')} {g.offensive_grade.toFixed(1)}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.defLabel')} {g.defensive_grade.toFixed(1)}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{minsLabel(g.minutes_played)}{tr('teamGrade.mAbbr')}</Text>
-                    <View style={s.gradeBadge}>
-                      <Text style={s.gradeBadgeText}>{g.game_grade.toFixed(2)}</Text>
+                    {/* In the side's own colour: clay on the opponent's tab, not our blue. */}
+                    <View style={[s.gradeBadge, detailTab === 'opponent' && { backgroundColor: t.negativeSoft, borderColor: t.negative }]}>
+                      <Text style={[s.gradeBadgeText, detailTab === 'opponent' && { color: t.negative }]}>{g.game_grade.toFixed(2)}</Text>
                     </View>
                     <Ionicons
                       name={expandedPlayer === g.player_name ? 'chevron-up' : 'chevron-down'}
@@ -5037,6 +5038,9 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
     color: t.label, fontSize: 11, fontFamily: fonts[700],
     letterSpacing: 2, textTransform: 'uppercase',
   },
+  // Section headers on a game's page. Not the accent: there the accent is our
+  // team's colour (and clay the opponent's), so a blue header read as "ours".
+  gameCardLabel: { color: t.inkSoft },
   bigStat: { color: t.ink, fontSize: 42, fontFamily: fonts[900], letterSpacing: -0.9 },
   leaderRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -5058,7 +5062,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
   qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontFamily: fonts[700] },
-  qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 2, marginBottom: 6 },
+  qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 10 },
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
     paddingHorizontal: 16, paddingVertical: 8, marginRight: 8,
