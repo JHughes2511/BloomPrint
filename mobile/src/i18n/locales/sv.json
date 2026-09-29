@@ -3016,14 +3016,15 @@
       "scoredWord": "gav poäng",
       "noScoreWord": "ingen poäng",
       "noData": "Inga spelval registrerade för matchen. Registrera live eller importera ett blad.",
-      "notNoted": "Ej noterat"
+      "notNoted": "Ej noterat",
+      "notRecorded": "Ej registrerat"
     },
     "endings": {
-      "miss2": "missad tvåa",
-      "miss3": "missad trea",
-      "turnover": "bolltapp",
-      "ft_miss": "missade straffar",
-      "other": "annat"
+      "miss2": "Missad tvåa",
+      "miss3": "Missad trea",
+      "turnover": "Bolltapp",
+      "ft_miss": "Missade straffar",
+      "other": "Annat"
     }
   }
 }

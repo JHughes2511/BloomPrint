@@ -3016,14 +3016,15 @@
       "scoredWord": "marqué",
       "noScoreWord": "pas marqué",
       "noData": "Aucun système saisi pour ce match. Suivez-le en direct ou importez une feuille.",
-      "notNoted": "Non noté"
+      "notNoted": "Non noté",
+      "notRecorded": "Non renseigné"
     },
     "endings": {
-      "miss2": "2 manqué",
-      "miss3": "3 manqué",
-      "turnover": "perte de balle",
-      "ft_miss": "lancers francs manqués",
-      "other": "autre"
+      "miss2": "Tir à 2 manqué",
+      "miss3": "Tir à 3 manqué",
+      "turnover": "Perte de balle",
+      "ft_miss": "Lancers francs manqués",
+      "other": "Autre"
     }
   }
 }

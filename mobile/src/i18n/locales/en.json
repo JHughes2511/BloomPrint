@@ -3016,14 +3016,15 @@
       "scoredWord": "scored",
       "noScoreWord": "no score",
       "noData": "No play calling recorded for this game yet. Track it live or import a sheet.",
-      "notNoted": "Not noted"
+      "notNoted": "Not noted",
+      "notRecorded": "Not recorded"
     },
     "endings": {
-      "miss2": "missed 2",
-      "miss3": "missed 3",
-      "turnover": "turnover",
-      "ft_miss": "missed free throws",
-      "other": "other"
+      "miss2": "Missed 2-pointer",
+      "miss3": "Missed 3-pointer",
+      "turnover": "Turnover",
+      "ft_miss": "Missed free throws",
+      "other": "Other"
     }
   }
 }

@@ -3016,14 +3016,15 @@
       "scoredWord": "gescoord",
       "noScoreWord": "geen score",
       "noData": "Nog geen spelkeuze voor deze wedstrijd. Houd het live bij of importeer een blad.",
-      "notNoted": "Niet genoteerd"
+      "notNoted": "Niet genoteerd",
+      "notRecorded": "Niet vastgelegd"
     },
     "endings": {
-      "miss2": "2 gemist",
-      "miss3": "3 gemist",
-      "turnover": "balverlies",
-      "ft_miss": "vrije worpen gemist",
-      "other": "anders"
+      "miss2": "Tweepunter gemist",
+      "miss3": "Driepunter gemist",
+      "turnover": "Balverlies",
+      "ft_miss": "Vrije worpen gemist",
+      "other": "Anders"
     }
   }
 }

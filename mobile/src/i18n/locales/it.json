@@ -3016,14 +3016,15 @@
       "scoredWord": "a segno",
       "noScoreWord": "non a segno",
       "noData": "Nessuna chiamata registrata per questa partita. Seguila live o importa un foglio.",
-      "notNoted": "Non annotata"
+      "notNoted": "Non annotata",
+      "notRecorded": "Non registrato"
     },
     "endings": {
-      "miss2": "2 sbagliato",
-      "miss3": "3 sbagliato",
-      "turnover": "palla persa",
-      "ft_miss": "tiri liberi sbagliati",
-      "other": "altro"
+      "miss2": "Tiro da 2 sbagliato",
+      "miss3": "Tiro da 3 sbagliato",
+      "turnover": "Palla persa",
+      "ft_miss": "Tiri liberi sbagliati",
+      "other": "Altro"
     }
   }
 }

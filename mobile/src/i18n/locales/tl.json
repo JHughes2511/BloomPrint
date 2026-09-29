@@ -3016,14 +3016,15 @@
       "scoredWord": "naka-score",
       "noScoreWord": "walang score",
       "noData": "Wala pang play calling sa larong ito. I-track nang live o mag-import ng sheet.",
-      "notNoted": "Hindi naitala"
+      "notNoted": "Hindi naitala",
+      "notRecorded": "Hindi naitala"
     },
     "endings": {
-      "miss2": "mintis na 2",
-      "miss3": "mintis na 3",
-      "turnover": "turnover",
-      "ft_miss": "mintis na free throw",
-      "other": "iba"
+      "miss2": "Mintis na 2-pointer",
+      "miss3": "Mintis na 3-pointer",
+      "turnover": "Turnover",
+      "ft_miss": "Mintis na free throw",
+      "other": "Iba"
     }
   }
 }

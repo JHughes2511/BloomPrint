@@ -3016,7 +3016,8 @@
       "scoredWord": "קלעו",
       "noScoreWord": "לא קלעו",
       "noData": "עדיין אין מהלכים למשחק הזה. עקבו בזמן אמת או ייבאו דף.",
-      "notNoted": "לא צוין"
+      "notNoted": "לא צוין",
+      "notRecorded": "לא נרשם"
     },
     "endings": {
       "miss2": "החטאת 2",

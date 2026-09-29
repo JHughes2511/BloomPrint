@@ -3016,14 +3016,15 @@
       "scoredWord": "pelnė",
       "noScoreWord": "be taškų",
       "noData": "Šioms rungtynėms derinių dar nėra. Fiksuokite tiesiogiai arba importuokite lapą.",
-      "notNoted": "Nepažymėta"
+      "notNoted": "Nepažymėta",
+      "notRecorded": "Neužfiksuota"
     },
     "endings": {
-      "miss2": "nepataikytas dvitaškis",
-      "miss3": "nepataikytas tritaškis",
-      "turnover": "klaida",
-      "ft_miss": "nepataikytos baudos",
-      "other": "kita"
+      "miss2": "Nepataikytas dvitaškis",
+      "miss3": "Nepataikytas tritaškis",
+      "turnover": "Klaida",
+      "ft_miss": "Nepataikytos baudos",
+      "other": "Kita"
     }
   }
 }

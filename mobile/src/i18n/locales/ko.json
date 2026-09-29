@@ -3016,11 +3016,12 @@
       "scoredWord": "득점",
       "noScoreWord": "무득점",
       "noData": "이 경기의 플레이 콜이 아직 없습니다. 실시간으로 기록하거나 시트를 가져오세요.",
-      "notNoted": "기록 없음"
+      "notNoted": "기록 없음",
+      "notRecorded": "기록 없음"
     },
     "endings": {
-      "miss2": "2점 실패",
-      "miss3": "3점 실패",
+      "miss2": "2점슛 실패",
+      "miss3": "3점슛 실패",
       "turnover": "턴오버",
       "ft_miss": "자유투 실패",
       "other": "기타"

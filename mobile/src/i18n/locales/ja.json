@@ -3016,11 +3016,12 @@
       "scoredWord": "得点",
       "noScoreWord": "得点なし",
       "noData": "この試合のプレーコールはまだありません。ライブで記録するかシートを取り込んでください。",
-      "notNoted": "記録なし"
+      "notNoted": "記録なし",
+      "notRecorded": "記録なし"
     },
     "endings": {
-      "miss2": "2点ミス",
-      "miss3": "3点ミス",
+      "miss2": "2点シュートミス",
+      "miss3": "3点シュートミス",
       "turnover": "ターンオーバー",
       "ft_miss": "フリースローミス",
       "other": "その他"

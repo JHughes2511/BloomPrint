@@ -3016,14 +3016,15 @@
       "scoredWord": "koš",
       "noScoreWord": "bez koša",
       "noData": "Za ovu utakmicu još nema akcija. Prati uživo ili uvezi list.",
-      "notNoted": "Nije zabilježeno"
+      "notNoted": "Nije zabilježeno",
+      "notRecorded": "Nije zabilježeno"
     },
     "endings": {
-      "miss2": "promašaj za 2",
-      "miss3": "promašaj za 3",
-      "turnover": "izgubljena lopta",
-      "ft_miss": "promašena slobodna bacanja",
-      "other": "drugo"
+      "miss2": "Promašaj za 2",
+      "miss3": "Promašaj za 3",
+      "turnover": "Izgubljena lopta",
+      "ft_miss": "Promašena slobodna bacanja",
+      "other": "Drugo"
     }
   }
 }

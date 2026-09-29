@@ -3016,14 +3016,15 @@
       "scoredWord": "anotó",
       "noScoreWord": "no anotó",
       "noData": "Aún no hay llamado de jugadas en este partido. Regístralo en vivo o importa una hoja.",
-      "notNoted": "No anotada"
+      "notNoted": "No anotada",
+      "notRecorded": "Sin registrar"
     },
     "endings": {
-      "miss2": "doble fallado",
-      "miss3": "triple fallado",
-      "turnover": "pérdida",
-      "ft_miss": "tiros libres fallados",
-      "other": "otro"
+      "miss2": "Doble fallado",
+      "miss3": "Triple fallado",
+      "turnover": "Pérdida",
+      "ft_miss": "Tiros libres fallados",
+      "other": "Otro"
     }
   }
 }

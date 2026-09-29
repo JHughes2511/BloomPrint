@@ -3016,14 +3016,15 @@
       "scoredWord": "gepunktet",
       "noScoreWord": "keine Punkte",
       "noData": "Für dieses Spiel sind noch keine Spielzüge erfasst. Live erfassen oder einen Bogen importieren.",
-      "notNoted": "Nicht notiert"
+      "notNoted": "Nicht notiert",
+      "notRecorded": "Nicht erfasst"
     },
     "endings": {
       "miss2": "Zweier daneben",
       "miss3": "Dreier daneben",
       "turnover": "Ballverlust",
       "ft_miss": "Freiwürfe daneben",
-      "other": "anders"
+      "other": "Anderes"
     }
   }
 }

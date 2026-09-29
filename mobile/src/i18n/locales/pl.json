@@ -3016,14 +3016,15 @@
       "scoredWord": "celne",
       "noScoreWord": "bez punktów",
       "noData": "Brak zapisanych zagrywek w tym meczu. Śledź na żywo lub zaimportuj arkusz.",
-      "notNoted": "Nie zapisano"
+      "notNoted": "Nie zapisano",
+      "notRecorded": "Nie zapisano"
     },
     "endings": {
-      "miss2": "pudło za 2",
-      "miss3": "pudło za 3",
-      "turnover": "strata",
-      "ft_miss": "niecelne rzuty wolne",
-      "other": "inne"
+      "miss2": "Pudło za 2",
+      "miss3": "Pudło za 3",
+      "turnover": "Strata",
+      "ft_miss": "Niecelne rzuty wolne",
+      "other": "Inne"
     }
   }
 }

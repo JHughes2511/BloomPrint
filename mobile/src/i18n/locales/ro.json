@@ -3016,14 +3016,15 @@
       "scoredWord": "a marcat",
       "noScoreWord": "fără puncte",
       "noData": "Încă nu există sisteme pentru acest meci. Urmărește live sau importă o foaie.",
-      "notNoted": "Nenotat"
+      "notNoted": "Nenotat",
+      "notRecorded": "Neînregistrat"
     },
     "endings": {
-      "miss2": "ratat de 2",
-      "miss3": "ratat de 3",
-      "turnover": "pierdere",
-      "ft_miss": "aruncări libere ratate",
-      "other": "altceva"
+      "miss2": "Aruncare de 2 ratată",
+      "miss3": "Aruncare de 3 ratată",
+      "turnover": "Pierdere",
+      "ft_miss": "Aruncări libere ratate",
+      "other": "Altceva"
     }
   }
 }

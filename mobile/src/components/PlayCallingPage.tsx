@@ -73,10 +73,11 @@ export default function PlayCallingPage({ game, sideNames, qLabel, statLabel, on
     if (!rows?.length) return null;
     const pts = rows.some(r => r.points != null);
     return (
-      <View style={{ marginTop: 12 }}>
-        <Text style={s.tableTitle}>{title}</Text>
+      <View style={{ marginTop: 22 }}>
+        {/* The title and its column headings on one line: they belong to the
+            rows under them, not the table above. */}
         <View style={[s.tr, s.th]}>
-          <Text style={[s.thText, { flex: 1 }]} />
+          <Text style={[s.tableTitle, { flex: 1, marginBottom: 0 }]}>{title}</Text>
           <Text style={[s.thText, s.num]}>{tr('playCalling.page.colTrips')}</Text>
           <Text style={[s.thText, s.num]}>{tr('playCalling.page.colScored')}</Text>
           <Text style={[s.thText, s.num]}>%</Text>
@@ -167,7 +168,7 @@ export default function PlayCallingPage({ game, sideNames, qLabel, statLabel, on
               const o = orb?.[sd] ?? {};
               const orbTotal = Object.values(o).reduce((a: number, v: any) => a + Number(v || 0), 0);
               return (
-                <View key={sd} style={{ marginTop: 12 }}>
+                <View key={sd} style={[{ marginTop: 16 }, sides.indexOf(sd) > 0 && s.sideBreak]}>
                   <Text style={s.sideTitle}>{tr('playCalling.page.overall', { team: sideNames[sd] })}</Text>
                   <Text style={s.overall}>
                     {x.overall.points != null
@@ -182,12 +183,31 @@ export default function PlayCallingPage({ game, sideNames, qLabel, statLabel, on
                          label={k => (k === 'Not noted' ? tr('playCalling.page.notNoted') : String(k))} />
                   <Table title={tr('playCalling.page.byPlayDefense')} rows={x.by_play_defense} label={k => String(k)} />
                   <Table title={tr('playCalling.page.byQuarter')} rows={x.by_quarter} label={qName} />
-                  {Object.keys(x.no_score_endings ?? {}).length > 0 && (
-                    <Text style={[s.overall, { marginTop: 10 }]}>
-                      {tr('playCalling.page.endings')}: {Object.entries(x.no_score_endings).map(([k, v]: any) =>
-                        `${tr(`playCalling.endings.${k}`, { defaultValue: k })} ${v}`).join(', ')}
-                    </Text>
-                  )}
+                  {/* Every non-scoring trip, by how it ended — the ones nobody
+                      recorded an ending for are counted too, not left out. */}
+                  {(() => {
+                    const ends = Object.entries(x.no_score_endings ?? {}) as [string, number][];
+                    const missing = (x.overall.n - x.overall.scored) - ends.reduce((a, [, v]) => a + v, 0);
+                    const rows = [...ends.sort((a, b) => b[1] - a[1]),
+                                  ...(missing > 0 ? [['notRecorded', missing] as [string, number]] : [])];
+                    if (!rows.length) return null;
+                    return (
+                      <View style={{ marginTop: 22 }}>
+                        <View style={[s.tr, s.th]}>
+                          <Text style={[s.tableTitle, { flex: 1, marginBottom: 0 }]}>{tr('playCalling.page.endings')}</Text>
+                          <Text style={[s.thText, s.num]}>{tr('playCalling.page.colTrips')}</Text>
+                        </View>
+                        {rows.map(([k, v]) => (
+                          <View key={k} style={s.tr}>
+                            <Text style={[s.td, { flex: 1 }]}>
+                              {k === 'notRecorded' ? tr('playCalling.page.notRecorded') : tr(`playCalling.endings.${k}`, { defaultValue: k })}
+                            </Text>
+                            <Text style={[s.td, s.num]}>{v}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    );
+                  })()}
                 </View>
               );
             })}
@@ -241,6 +261,7 @@ const makeStyles = (t: ThemeTokens) => ({
   cta: { marginTop: 10, flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'center' as const, gap: 8,
          backgroundColor: t.ctaBg, borderRadius: 12, paddingVertical: 12 },
   ctaText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 14 },
+  sideBreak: { marginTop: 32, paddingTop: 20, borderTopWidth: 1, borderTopColor: t.line },
   sideTitle: { color: t.ink, fontSize: 15, fontFamily: fonts[800] },
   overall: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600], marginTop: 2 },
   tableTitle: { color: t.muted, fontSize: 11, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase' as const, marginBottom: 4 },

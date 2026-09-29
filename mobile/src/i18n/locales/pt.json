@@ -3016,14 +3016,15 @@
       "scoredWord": "pontuou",
       "noScoreWord": "não pontuou",
       "noData": "Ainda não há chamada de jogadas neste jogo. Registre ao vivo ou importe uma folha.",
-      "notNoted": "Não anotada"
+      "notNoted": "Não anotada",
+      "notRecorded": "Não registrado"
     },
     "endings": {
-      "miss2": "errou de 2",
-      "miss3": "errou de 3",
-      "turnover": "erro de posse",
-      "ft_miss": "lances livres errados",
-      "other": "outro"
+      "miss2": "Arremesso de 2 errado",
+      "miss3": "Arremesso de 3 errado",
+      "turnover": "Erro de posse",
+      "ft_miss": "Lances livres errados",
+      "other": "Outro"
     }
   }
 }

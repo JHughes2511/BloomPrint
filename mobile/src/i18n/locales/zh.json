@@ -3016,7 +3016,8 @@
       "scoredWord": "得分",
       "noScoreWord": "未得分",
       "noData": "本场尚无战术调用记录。可实时记录或导入表格。",
-      "notNoted": "未记录"
+      "notNoted": "未记录",
+      "notRecorded": "未记录"
     },
     "endings": {
       "miss2": "两分不中",

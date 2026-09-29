@@ -3016,14 +3016,15 @@
       "scoredWord": "sayı",
       "noScoreWord": "sayı yok",
       "noData": "Bu maç için henüz set seçimi yok. Canlı izle veya bir kâğıt içe aktar.",
-      "notNoted": "Not alınmadı"
+      "notNoted": "Not alınmadı",
+      "notRecorded": "Kaydedilmedi"
     },
     "endings": {
-      "miss2": "kaçan ikilik",
-      "miss3": "kaçan üçlük",
-      "turnover": "top kaybı",
-      "ft_miss": "kaçan serbest atışlar",
-      "other": "diğer"
+      "miss2": "Kaçan ikilik",
+      "miss3": "Kaçan üçlük",
+      "turnover": "Top kaybı",
+      "ft_miss": "Kaçan serbest atışlar",
+      "other": "Diğer"
     }
   }
 }
