@@ -2032,13 +2032,16 @@
     "tiedTo": "경기 스탯 연결됨",
     "untie": "연결 해제",
     "uniformsTitle": "누가 무슨 색을 입었나요?",
-    "uniformsHint": "유니폼 색으로 영상이 두 팀 선수를 구분합니다. 비워 두면 영상 분석 후에 여쭤봅니다.",
+    "uniformsHint": "각 팀의 유니폼 색을 고르세요. 선택지는 영상에서 가져왔습니다. 틀린 경우에만 '기타'를 누르세요. 건너뛰고 나중에 알려 주셔도 됩니다.",
     "uniformPlaceholder": "색, 예: 흰색",
     "otherTeam": "다른 팀",
     "skipColours": "건너뛰기",
     "uploadFilmBtn": "영상 업로드",
     "whoWore": "{{colour}}을(를) 입은 팀은?",
-    "whoWoreHint": "영상에서 이 색들이 보였습니다. 어느 팀이 어떤 색이었는지 고르면 선수들이 각 팀으로 정리됩니다."
+    "whoWoreHint": "영상에서 이 색들이 보였습니다. 어느 팀이 어떤 색이었는지 고르면 선수들이 각 팀으로 정리됩니다.",
+    "detectingColours": "영상에서 유니폼 색을 읽는 중…",
+    "otherColour": "기타",
+    "saveColours": "저장"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "볼 스크린 (핸들러): {{parts}} ({{of}}번 중)",
       "pnrScreener": "볼 스크린 (스크리너): {{parts}} ({{of}}번 중)",
       "post": "포스트업: {{count}}번 ({{parts}})",
-      "runHard": "전환에서 열심히 달림 ({{of}}번 중 {{count}}번)",
-      "runJog": "달리지 않음: {{of}}번 중 {{count}}번 조깅",
-      "runSometimes": "가끔 달림 ({{of}}번 중 {{count}}번 전력질주)",
+      "runHard": "열심히 달림",
+      "runJog": "달리지 않음",
+      "runSometimes": "가끔 달림",
       "cuts": "컷: {{count}}번 (득점 {{scored}}, 오픈 {{open}})",
       "stagnantOff": "공격에서 정체: {{count}}번 서서 지켜봄",
       "movesWell": "공 없이 잘 움직임 (컷·위치 이동·스크린 {{count}}번)",
       "defense": "수비: {{parts}}",
-      "stagnantDef": "수비에서 정체: 공을 보다가 {{count}}번 자기 선수를 놓침"
+      "stagnantDef": "수비에서 정체: 공을 보다가 {{count}}번 자기 선수를 놓침",
+      "runAfterOffSprint": "{{after}} 후 열심히 달림",
+      "runAfterOffJog": "{{after}} 후 달리지 않음",
+      "runAfterDefSprint": "{{after}} 후 열심히 수비로 복귀",
+      "runAfterDefJog": "{{after}} 후 수비로 복귀하지 않음",
+      "transMatchNo": "전환 수비에서 매치업을 잡지 않음",
+      "transMatchYes": "전환 수비에서 매치업을 잡음"
     },
     "tendWord": {
       "right": "오른쪽",
@@ -2381,6 +2390,13 @@
       "block": "블록",
       "rightShoulder": "오른쪽 어깨",
       "leftShoulder": "왼쪽 어깨"
+    },
+    "tendAfter": {
+      "turnover": "턴오버",
+      "steal": "스틸",
+      "rebound": "수비 리바운드",
+      "miss": "슛 실패",
+      "made": "득점"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "리포트 종합 중",
     "uploading": "영상 업로드 중 — {{pct}}%({{total}} 중 {{sent}})",
     "uploadingOf": "{{n}}개 중 {{i}}번째 영상 업로드 중 — {{pct}}%({{total}} 중 {{sent}})",
-    "working": "처리 중…"
+    "working": "처리 중…",
+    "colours": "유니폼 색 확인 중",
+    "waitColours": "유니폼 색 답변 대기 중"
   },
   "notifs": {
     "seasonNew": {

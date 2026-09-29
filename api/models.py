@@ -793,6 +793,10 @@ class GameReportClip(Base):
     # afterwards from the colours the film was logged with. Until it is set, a
     # film's player events belong to nobody and count toward no one.
     uniforms       = Column(JSON, nullable=True)
+    # The two jersey colours seen in a few frames as the film went up, offered
+    # to the coach as choices; and whether they answered (or skipped).
+    colours_detected = Column(JSON, nullable=True)
+    uniforms_answered = Column(Boolean, nullable=True)
     # The film was watched with a player-by-player log (films from before that
     # have none, and are not asked about uniforms).
     player_events  = Column(Boolean, nullable=True)

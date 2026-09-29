@@ -139,16 +139,31 @@ def _facts(evs: list[dict]) -> list[dict]:
                       "shoulders": _parts(Counter(e.get("dir") for e in post if e.get("dir"))),
                       "parts": _parts(Counter(e.get("end") for e in post if e.get("end")))})
 
-    efforts = Counter(e.get("effort") for e in by.get("transition", []) if e.get("effort"))
-    n = sum(efforts.values())
-    if n >= 2:
-        sprint, jog = efforts.get("sprint", 0), efforts.get("jog", 0)
-        if sprint / n >= 0.7:
-            facts.append({"k": "runHard", "count": sprint, "of": n})
-        elif jog / n >= LEAN:
-            facts.append({"k": "runJog", "count": jog, "of": n})
-        else:
-            facts.append({"k": "runSometimes", "count": sprint, "of": n})
+    # Running the floor, said the way a coach says it: when the player runs
+    # and when not ("runs hard after turnovers, jogs back after makes"), not
+    # as a count. The counts still decide it; they are just not the sentence.
+    trans = [e for e in by.get("transition", []) if e.get("effort")]
+    said_when = False
+    for way in ("offense", "defense"):
+        for after in ("turnover", "steal", "rebound", "miss", "made"):
+            sub = [e for e in trans if e.get("way") == way and e.get("after") == after]
+            if len(sub) < 2:
+                continue
+            sprint = sum(e["effort"] == "sprint" for e in sub) / len(sub)
+            if sprint >= 0.7 or sprint <= 1 - LEAN:
+                facts.append({"k": "runAfter", "way": way, "after": after,
+                              "effort": "sprint" if sprint >= 0.7 else "jog"})
+                said_when = True
+    if not said_when and len(trans) >= 2:
+        sprint = sum(e["effort"] == "sprint" for e in trans) / len(trans)
+        facts.append({"k": "runHard" if sprint >= 0.7 else "runJog" if sprint <= 1 - LEAN else "runSometimes"})
+    back = [e for e in trans if e.get("way") == "defense" and e.get("match") in ("yes", "no")]
+    if len(back) >= 2:
+        miss = sum(e["match"] == "no" for e in back) / len(back)
+        if miss >= LEAN:
+            facts.append({"k": "transMatch", "match": "no"})
+        elif miss <= 1 - 0.7:
+            facts.append({"k": "transMatch", "match": "yes"})
 
     off = by.get("off_ball", [])
     acts = Counter(e.get("act") for e in off if e.get("act"))
@@ -188,6 +203,8 @@ WORDS = {
     "foul": "fouls", "steal": "steals", "block": "blocks",
 }
 ZONE_WORDS = {**WORDS, "rim": "at the rim"}
+AFTER_WORDS = {"turnover": "a turnover", "steal": "a steal", "rebound": "a defensive rebound",
+               "miss": "a missed shot", "made": "a made basket"}
 
 
 def _join(parts, words=WORDS) -> str:
@@ -224,11 +241,21 @@ def english(f: dict) -> str:
         return f"Post-ups ({f['count']}): " + "; ".join(x for x in (
             f"turns over the {sh}" if sh else "", _join(f["parts"])) if x)
     if k == "runHard":
-        return f"Runs the floor hard ({f['count']} of {f['of']})"
+        return "Runs the floor hard"
     if k == "runJog":
-        return f"Does not run the floor: jogs {f['count']} of {f['of']}"
+        return "Does not run the floor"
     if k == "runSometimes":
-        return f"Runs the floor sometimes (sprints {f['count']} of {f['of']})"
+        return "Runs the floor some of the time"
+    if k == "runAfter":
+        after = AFTER_WORDS[f["after"]]
+        if f["way"] == "offense":
+            return (f"Runs the floor hard after {after}" if f["effort"] == "sprint"
+                    else f"Does not run the floor after {after}")
+        return (f"Gets back hard on defense after {after}" if f["effort"] == "sprint"
+                else f"Does not get back on defense after {after}")
+    if k == "transMatch":
+        return ("Does not match up in transition defense" if f["match"] == "no"
+                else "Matches up in transition defense")
     if k == "cuts":
         return (f"Cuts: {f['count']}" + (f", scored {f['scored']}" if f["scored"] else "")
                 + (f", got open {f['open']}" if f["open"] else "") + ex)
@@ -358,6 +385,11 @@ def for_opponent(db: Session, coach_id: int, opponent: str) -> list[dict]:
     if not events:
         return []
     players = tendencies(events, {opponent: _opponent_roster(db, coach_id, opponent)})
+    # Across several games a film timestamp points nowhere: which game's 12:34?
+    for p in players:
+        for f in p["facts"]:
+            f.pop("ex", None)
+        p["lines"] = [english(f) for f in p["facts"]]
     games = defaultdict(set)
     for e in events:
         games[e["no"]].add(e["clip"])

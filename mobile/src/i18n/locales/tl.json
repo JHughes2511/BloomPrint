@@ -2032,13 +2032,16 @@
     "tiedTo": "Nakaugnay ang Estadistika",
     "untie": "Alisin",
     "uniformsTitle": "Sino ang nakasuot ng ano?",
-    "uniformsHint": "Sa kulay ng jersey, natutukoy ng video ang mga player ng dalawang team. Iwanang blangko at tatanungin ka pagkatapos basahin ang video.",
+    "uniformsHint": "Piliin ang kulay ng jersey ng bawat team. Galing sa video ang mga pagpipilian; pindutin ang Iba lang kung mali. Puwedeng laktawan at sabihin mamaya.",
     "uniformPlaceholder": "Kulay, hal. puti",
     "otherTeam": "Ibang team",
     "skipColours": "Laktawan",
     "uploadFilmBtn": "I-upload ang video",
     "whoWore": "Sino ang nakasuot ng {{colour}}?",
-    "whoWoreHint": "Nakita ng video ang mga kulay na ito. Sabihin kung aling team ang nakasuot ng bawat isa, at mapupunta ang bawat player sa kanyang team."
+    "whoWoreHint": "Nakita ng video ang mga kulay na ito. Sabihin kung aling team ang nakasuot ng bawat isa, at mapupunta ang bawat player sa kanyang team.",
+    "detectingColours": "Binabasa ang kulay ng jersey mula sa video…",
+    "otherColour": "Iba",
+    "saveColours": "I-save"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Ball screen bilang handler: {{parts}} (sa {{of}})",
       "pnrScreener": "Ball screen bilang screener: {{parts}} (sa {{of}})",
       "post": "Post-up: {{count}} ({{parts}})",
-      "runHard": "Tumatakbo nang todo sa transition ({{count}} sa {{of}})",
-      "runJog": "Hindi tumatakbo: nagja-jog {{count}} sa {{of}}",
-      "runSometimes": "Minsan tumatakbo (sumisprint {{count}} sa {{of}})",
+      "runHard": "Tumatakbo nang todo",
+      "runJog": "Hindi tumatakbo",
+      "runSometimes": "Minsan tumatakbo",
       "cuts": "Mga cut: {{count}} (naka-score {{scored}}, naging open {{open}})",
       "stagnantOff": "Walang galaw sa opensa: nakatayo at nanonood {{count}} beses",
       "movesWell": "Magaling gumalaw nang walang bola ({{count}} cut, paglipat at screen)",
       "defense": "Depensa: {{parts}}",
-      "stagnantDef": "Walang galaw sa depensa: nawawala ang binabantayan habang nanonood ng bola {{count}} beses"
+      "stagnantDef": "Walang galaw sa depensa: nawawala ang binabantayan habang nanonood ng bola {{count}} beses",
+      "runAfterOffSprint": "Tumatakbo nang todo pagkatapos ng {{after}}",
+      "runAfterOffJog": "Hindi tumatakbo pagkatapos ng {{after}}",
+      "runAfterDefSprint": "Bumabalik nang todo sa depensa pagkatapos ng {{after}}",
+      "runAfterDefJog": "Hindi bumabalik sa depensa pagkatapos ng {{after}}",
+      "transMatchNo": "Hindi kumukuha ng babantayan sa transition defense",
+      "transMatchYes": "Kumukuha ng babantayan sa transition defense"
     },
     "tendWord": {
       "right": "kanan",
@@ -2381,6 +2390,13 @@
       "block": "block",
       "rightShoulder": "kanang balikat",
       "leftShoulder": "kaliwang balikat"
+    },
+    "tendAfter": {
+      "turnover": "turnover",
+      "steal": "steal",
+      "rebound": "defensive rebound",
+      "miss": "mintis na tira",
+      "made": "pumasok na basket"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Binubuo ang ulat",
     "uploading": "Ina-upload ang film — {{pct}}% ({{sent}} sa {{total}})",
     "uploadingOf": "Ina-upload ang film {{i}} sa {{n}} — {{pct}}% ({{sent}} sa {{total}})",
-    "working": "Ginagawa…"
+    "working": "Ginagawa…",
+    "colours": "Sinusuri ang kulay ng jersey",
+    "waitColours": "Hinihintay ang kulay ng jersey"
   },
   "notifs": {
     "seasonNew": {

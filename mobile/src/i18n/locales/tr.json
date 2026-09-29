@@ -2032,13 +2032,16 @@
     "tiedTo": "İstatistikler bağlandı",
     "untie": "Bağlantıyı kaldır",
     "uniformsTitle": "Kim hangi formayı giydi?",
-    "uniformsHint": "Forma renkleri, videonun iki takımın oyuncularını ayırt etmesini sağlar. Boş bırakırsan video okunduktan sonra sorulur.",
+    "uniformsHint": "Her takımın forma rengini seç. Seçenekler videodan gelir; yalnızca yanlışsa Diğer'e dokun. Atlayıp sonra da söyleyebilirsin.",
     "uniformPlaceholder": "Renk, örn. beyaz",
     "otherTeam": "Diğer takım",
     "skipColours": "Atla",
     "uploadFilmBtn": "Video yükle",
     "whoWore": "{{colour}} formayı kim giydi?",
-    "whoWoreHint": "Video bu renkleri gördü. Hangi takımın hangisini giydiğini söyle, her oyuncu kendi takımına yazılsın."
+    "whoWoreHint": "Video bu renkleri gördü. Hangi takımın hangisini giydiğini söyle, her oyuncu kendi takımına yazılsın.",
+    "detectingColours": "Forma renkleri videodan okunuyor…",
+    "otherColour": "Diğer",
+    "saveColours": "Kaydet"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick and roll top taşıyıcı olarak: {{parts}} ({{of}} içinde)",
       "pnrScreener": "Pick and roll perdeci olarak: {{parts}} ({{of}} içinde)",
       "post": "Post oyunu: {{count}} ({{parts}})",
-      "runHard": "Hücum-savunma geçişinde sert koşuyor ({{count}}/{{of}})",
-      "runJog": "Koşmuyor: {{count}}/{{of}} tempolu yürüyor",
-      "runSometimes": "Bazen koşuyor ({{count}}/{{of}} depar)",
+      "runHard": "Sahayı hızlı koşuyor",
+      "runJog": "Sahayı koşmuyor",
+      "runSometimes": "Bazen koşuyor",
       "cuts": "Kesmeler: {{count}} (sayı {{scored}}, boşa çıktı {{open}})",
       "stagnantOff": "Hücumda durağan: {{count}} kez durup izliyor",
       "movesWell": "Topsuz iyi hareket ediyor ({{count}} kesme, yer değiştirme ve perde)",
       "defense": "Savunma: {{parts}}",
-      "stagnantDef": "Savunmada durağan: topa bakarken adamını {{count}} kez kaybediyor"
+      "stagnantDef": "Savunmada durağan: topa bakarken adamını {{count}} kez kaybediyor",
+      "runAfterOffSprint": "{{after}} sonra hızlı koşuyor",
+      "runAfterOffJog": "{{after}} sonra koşmuyor",
+      "runAfterDefSprint": "{{after}} sonra savunmaya hızlı dönüyor",
+      "runAfterDefJog": "{{after}} sonra savunmaya dönmüyor",
+      "transMatchNo": "Geçiş savunmasında adam almıyor",
+      "transMatchYes": "Geçiş savunmasında adam alıyor"
     },
     "tendWord": {
       "right": "sağa",
@@ -2381,6 +2390,13 @@
       "block": "bloklar",
       "rightShoulder": "sağ omuz",
       "leftShoulder": "sol omuz"
+    },
+    "tendAfter": {
+      "turnover": "top kaybından",
+      "steal": "top çalmadan",
+      "rebound": "savunma ribaundundan",
+      "miss": "kaçan şuttan",
+      "made": "atılan basketten"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Rapor derleniyor",
     "uploading": "Video yükleniyor — %{{pct}} ({{total}} içinden {{sent}})",
     "uploadingOf": "{{n}} videodan {{i}}. yükleniyor — %{{pct}} ({{total}} içinden {{sent}})",
-    "working": "İşleniyor…"
+    "working": "İşleniyor…",
+    "colours": "Forma renkleri kontrol ediliyor",
+    "waitColours": "Forma renkleri bekleniyor"
   },
   "notifs": {
     "seasonNew": {

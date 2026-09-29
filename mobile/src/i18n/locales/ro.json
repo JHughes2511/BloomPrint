@@ -2032,13 +2032,16 @@
     "tiedTo": "Statistici legate",
     "untie": "Dezleagă",
     "uniformsTitle": "Cine ce purta?",
-    "uniformsHint": "Culorile echipamentului permit filmului să deosebească jucătorii celor două echipe. Lasă gol și vei fi întrebat după ce filmul e citit.",
+    "uniformsHint": "Alege culoarea echipamentului fiecărei echipe. Opțiunile vin din film; atinge Alta doar dacă sunt greșite. Poți sări și spune după.",
     "uniformPlaceholder": "Culoare, ex. alb",
     "otherTeam": "Cealaltă echipă",
     "skipColours": "Sari peste",
     "uploadFilmBtn": "Încarcă filmul",
     "whoWore": "Cine purta {{colour}}?",
-    "whoWoreHint": "Filmul a văzut aceste culori. Spune ce echipă purta fiecare și fiecare jucător ajunge la echipa lui."
+    "whoWoreHint": "Filmul a văzut aceste culori. Spune ce echipă purta fiecare și fiecare jucător ajunge la echipa lui.",
+    "detectingColours": "Se citesc culorile echipamentelor din film…",
+    "otherColour": "Alta",
+    "saveColours": "Salvează"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick and roll ca purtător: {{parts}} (din {{of}})",
       "pnrScreener": "Pick and roll ca blocant: {{parts}} (din {{of}})",
       "post": "Joc la post: {{count}} ({{parts}})",
-      "runHard": "Aleargă tare pe tranziție ({{count}} din {{of}})",
-      "runJog": "Nu aleargă: merge la trap {{count}} din {{of}}",
-      "runSometimes": "Aleargă uneori (sprintează {{count}} din {{of}})",
+      "runHard": "Aleargă tare",
+      "runJog": "Nu aleargă",
+      "runSometimes": "Aleargă uneori",
       "cuts": "Tăieturi: {{count}} (a marcat {{scored}}, liber {{open}})",
       "stagnantOff": "Static în atac: stă și privește de {{count}} ori",
       "movesWell": "Se mișcă bine fără minge ({{count}} tăieturi, repoziționări și blocuri)",
       "defense": "Apărare: {{parts}}",
-      "stagnantDef": "Static în apărare: își pierde omul privind mingea de {{count}} ori"
+      "stagnantDef": "Static în apărare: își pierde omul privind mingea de {{count}} ori",
+      "runAfterOffSprint": "Aleargă tare după {{after}}",
+      "runAfterOffJog": "Nu aleargă după {{after}}",
+      "runAfterDefSprint": "Revine tare în apărare după {{after}}",
+      "runAfterDefJog": "Nu revine în apărare după {{after}}",
+      "transMatchNo": "Nu preia pe nimeni în apărarea de tranziție",
+      "transMatchYes": "Preia un jucător în apărarea de tranziție"
     },
     "tendWord": {
       "right": "dreapta",
@@ -2381,6 +2390,13 @@
       "block": "capace",
       "rightShoulder": "umărul drept",
       "leftShoulder": "umărul stâng"
+    },
+    "tendAfter": {
+      "turnover": "o pierdere",
+      "steal": "o intercepție",
+      "rebound": "o recuperare în apărare",
+      "miss": "o aruncare ratată",
+      "made": "un coș marcat"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Se sintetizează raportul",
     "uploading": "Se încarcă filmarea — {{pct}}% ({{sent}} din {{total}})",
     "uploadingOf": "Se încarcă filmarea {{i}} din {{n}} — {{pct}}% ({{sent}} din {{total}})",
-    "working": "Se lucrează…"
+    "working": "Se lucrează…",
+    "colours": "Se verifică culorile echipamentelor",
+    "waitColours": "Se așteaptă culorile echipamentelor"
   },
   "notifs": {
     "seasonNew": {

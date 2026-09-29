@@ -259,9 +259,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       case 'post': return tr('teamGrade.tend.post', { count: f.count, parts: [
         ...(f.shoulders || []).map(([d, n]: any) => `${tendWord(d === 'R' ? 'rightShoulder' : 'leftShoulder')} ${n}`),
         ...(f.parts || []).map(([w, n]: any) => `${tendWord(w)} ${n}`)].join(', ') });
-      case 'runHard': return tr('teamGrade.tend.runHard', { count: f.count, of: f.of });
-      case 'runJog': return tr('teamGrade.tend.runJog', { count: f.count, of: f.of });
-      case 'runSometimes': return tr('teamGrade.tend.runSometimes', { count: f.count, of: f.of });
+      case 'runHard': return tr('teamGrade.tend.runHard');
+      case 'runJog': return tr('teamGrade.tend.runJog');
+      case 'runSometimes': return tr('teamGrade.tend.runSometimes');
+      case 'runAfter': return tr(`teamGrade.tend.runAfter${f.way === 'offense' ? 'Off' : 'Def'}${f.effort === 'sprint' ? 'Sprint' : 'Jog'}`,
+                                 { after: tr(`teamGrade.tendAfter.${f.after}`) });
+      case 'transMatch': return tr(f.match === 'no' ? 'teamGrade.tend.transMatchNo' : 'teamGrade.tend.transMatchYes');
       case 'cuts': return tr('teamGrade.tend.cuts', { count: f.count, scored: f.scored, open: f.open }) + ex;
       case 'stagnantOff': return tr('teamGrade.tend.stagnantOff', { count: f.count }) + ex;
       case 'movesWell': return tr('teamGrade.tend.movesWell', { count: f.count });

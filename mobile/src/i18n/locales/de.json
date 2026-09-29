@@ -2032,13 +2032,16 @@
     "tiedTo": "Statistiken verknüpft",
     "untie": "Trennen",
     "uniformsTitle": "Wer trug was?",
-    "uniformsHint": "Mit den Trikotfarben kann das Video die Spieler beider Teams unterscheiden. Leer lassen, dann wirst du nach dem Auswerten gefragt.",
+    "uniformsHint": "Wähle die Trikotfarbe jedes Teams. Die Auswahl stammt aus dem Video; tippe nur auf Andere, wenn sie falsch ist. Du kannst überspringen und es später angeben.",
     "uniformPlaceholder": "Farbe, z. B. weiß",
     "otherTeam": "Anderes Team",
     "skipColours": "Überspringen",
     "uploadFilmBtn": "Video hochladen",
     "whoWore": "Wer trug {{colour}}?",
-    "whoWoreHint": "Das Video hat diese Farben gesehen. Sag, welches Team welche trug, dann wird jeder Spieler seinem Team zugeordnet."
+    "whoWoreHint": "Das Video hat diese Farben gesehen. Sag, welches Team welche trug, dann wird jeder Spieler seinem Team zugeordnet.",
+    "detectingColours": "Trikotfarben werden aus dem Video gelesen…",
+    "otherColour": "Andere",
+    "saveColours": "Speichern"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick-and-Roll als Ballführer: {{parts}} (von {{of}})",
       "pnrScreener": "Pick-and-Roll als Blocksteller: {{parts}} (von {{of}})",
       "post": "Postspiel: {{count}} ({{parts}})",
-      "runHard": "Läuft hart in der Transition ({{count}} von {{of}})",
-      "runJog": "Läuft nicht: trabt {{count}} von {{of}}",
-      "runSometimes": "Läuft manchmal (sprintet {{count}} von {{of}})",
+      "runHard": "Läuft hart",
+      "runJog": "Läuft nicht",
+      "runSometimes": "Läuft manchmal",
       "cuts": "Cuts: {{count}} (gepunktet {{scored}}, frei {{open}})",
       "stagnantOff": "Statisch im Angriff: steht und schaut {{count}}-mal zu",
       "movesWell": "Bewegt sich gut ohne Ball ({{count}} Cuts, Positionswechsel und Blöcke)",
       "defense": "Verteidigung: {{parts}}",
-      "stagnantDef": "Statisch in der Verteidigung: verliert den Gegenspieler beim Ballschauen {{count}}-mal"
+      "stagnantDef": "Statisch in der Verteidigung: verliert den Gegenspieler beim Ballschauen {{count}}-mal",
+      "runAfterOffSprint": "Läuft hart nach {{after}}",
+      "runAfterOffJog": "Läuft nicht nach {{after}}",
+      "runAfterDefSprint": "Sprintet nach {{after}} hart zurück in die Verteidigung",
+      "runAfterDefJog": "Kommt nach {{after}} nicht zurück in die Verteidigung",
+      "transMatchNo": "Übernimmt in der Transition-Verteidigung keinen Gegenspieler",
+      "transMatchYes": "Übernimmt in der Transition-Verteidigung einen Gegenspieler"
     },
     "tendWord": {
       "right": "rechts",
@@ -2381,6 +2390,13 @@
       "block": "Blocks",
       "rightShoulder": "rechte Schulter",
       "leftShoulder": "linke Schulter"
+    },
+    "tendAfter": {
+      "turnover": "einem Ballverlust",
+      "steal": "einem Steal",
+      "rebound": "einem Defensivrebound",
+      "miss": "einem Fehlwurf",
+      "made": "einem Treffer"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Bericht wird zusammengestellt",
     "uploading": "Video wird hochgeladen – {{pct}} % ({{sent}} von {{total}})",
     "uploadingOf": "Video {{i}} von {{n}} wird hochgeladen – {{pct}} % ({{sent}} von {{total}})",
-    "working": "Wird verarbeitet…"
+    "working": "Wird verarbeitet…",
+    "colours": "Trikotfarben werden geprüft",
+    "waitColours": "Warte auf die Trikotfarben"
   },
   "notifs": {
     "seasonNew": {

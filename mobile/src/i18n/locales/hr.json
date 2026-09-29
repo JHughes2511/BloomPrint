@@ -2032,13 +2032,16 @@
     "tiedTo": "Statistika povezana",
     "untie": "Odspoji",
     "uniformsTitle": "Tko je nosio što?",
-    "uniformsHint": "Boje dresova omogućuju snimci da razlikuje igrače dviju momčadi. Ostavi prazno i pitat ćemo te kada se snimka pročita.",
+    "uniformsHint": "Odaberi boju dresa svake momčadi. Izbor dolazi sa snimke; dodirni Druga samo ako je pogrešan. Možeš preskočiti i reći poslije.",
     "uniformPlaceholder": "Boja, npr. bijela",
     "otherTeam": "Druga momčad",
     "skipColours": "Preskoči",
     "uploadFilmBtn": "Pošalji snimku",
     "whoWore": "Tko je nosio {{colour}}?",
-    "whoWoreHint": "Snimka je vidjela ove boje. Reci koja je momčad nosila koju i svaki igrač ide u svoju momčad."
+    "whoWoreHint": "Snimka je vidjela ove boje. Reci koja je momčad nosila koju i svaki igrač ide u svoju momčad.",
+    "detectingColours": "Čitanje boja dresova sa snimke…",
+    "otherColour": "Druga",
+    "saveColours": "Spremi"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick and roll kao nositelj lopte: {{parts}} (od {{of}})",
       "pnrScreener": "Pick and roll kao postavljač bloka: {{parts}} (od {{of}})",
       "post": "Igra u postu: {{count}} ({{parts}})",
-      "runHard": "Snažno trči kontru ({{count}} od {{of}})",
-      "runJog": "Ne trči: kaska {{count}} od {{of}}",
-      "runSometimes": "Ponekad trči (sprinta {{count}} od {{of}})",
+      "runHard": "Snažno trči",
+      "runJog": "Ne trči",
+      "runSometimes": "Ponekad trči",
       "cuts": "Utrčavanja: {{count}} (zabio {{scored}}, bio slobodan {{open}})",
       "stagnantOff": "Stoji u napadu: stoji i gleda {{count}} puta",
       "movesWell": "Dobro se kreće bez lopte ({{count}} utrčavanja, premještanja i blokova)",
       "defense": "Obrana: {{parts}}",
-      "stagnantDef": "Stoji u obrani: gubi svog igrača gledajući loptu {{count}} puta"
+      "stagnantDef": "Stoji u obrani: gubi svog igrača gledajući loptu {{count}} puta",
+      "runAfterOffSprint": "Snažno trči nakon {{after}}",
+      "runAfterOffJog": "Ne trči nakon {{after}}",
+      "runAfterDefSprint": "Snažno se vraća u obranu nakon {{after}}",
+      "runAfterDefJog": "Ne vraća se u obranu nakon {{after}}",
+      "transMatchNo": "Ne preuzima igrača u tranzicijskoj obrani",
+      "transMatchYes": "Preuzima igrača u tranzicijskoj obrani"
     },
     "tendWord": {
       "right": "desno",
@@ -2381,6 +2390,13 @@
       "block": "blokade",
       "rightShoulder": "desno rame",
       "leftShoulder": "lijevo rame"
+    },
+    "tendAfter": {
+      "turnover": "izgubljene lopte",
+      "steal": "ukradene lopte",
+      "rebound": "skoka u obrani",
+      "miss": "promašenog šuta",
+      "made": "postignutog koša"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Sastavljam izvještaj",
     "uploading": "Prijenos snimke — {{pct}}% ({{sent}} od {{total}})",
     "uploadingOf": "Prijenos snimke {{i}} od {{n}} — {{pct}}% ({{sent}} od {{total}})",
-    "working": "U tijeku…"
+    "working": "U tijeku…",
+    "colours": "Provjera boja dresova",
+    "waitColours": "Čeka se boja dresova"
   },
   "notifs": {
     "seasonNew": {

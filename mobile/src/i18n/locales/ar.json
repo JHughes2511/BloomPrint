@@ -2032,13 +2032,16 @@
     "tiedTo": "تم ربط الإحصائيات",
     "untie": "إلغاء الربط",
     "uniformsTitle": "من ارتدى ماذا؟",
-    "uniformsHint": "ألوان القمصان تتيح للفيديو التمييز بين لاعبي الفريقين. اتركها فارغة وسنسألك بعد قراءة الفيديو.",
+    "uniformsHint": "اختر لون قميص كل فريق. الخيارات مأخوذة من الفيديو؛ اضغط «آخر» فقط إذا كانت خاطئة. يمكنك التخطي والإجابة لاحقًا.",
     "uniformPlaceholder": "اللون، مثل أبيض",
     "otherTeam": "الفريق الآخر",
     "skipColours": "تخطٍّ",
     "uploadFilmBtn": "رفع الفيديو",
     "whoWore": "من ارتدى {{colour}}؟",
-    "whoWoreHint": "رأى الفيديو هذه الألوان. حدّد أي فريق ارتدى كل لون، وسيُسجَّل كل لاعب مع فريقه."
+    "whoWoreHint": "رأى الفيديو هذه الألوان. حدّد أي فريق ارتدى كل لون، وسيُسجَّل كل لاعب مع فريقه.",
+    "detectingColours": "جارٍ قراءة ألوان القمصان من الفيديو…",
+    "otherColour": "آخر",
+    "saveColours": "حفظ"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "الحجز والدوران كحامل للكرة: {{parts}} (من {{of}})",
       "pnrScreener": "الحجز والدوران كحاجز: {{parts}} (من {{of}})",
       "post": "اللعب تحت السلة: {{count}} ({{parts}})",
-      "runHard": "يركض بقوة في الهجمات المرتدة ({{count}} من {{of}})",
-      "runJog": "لا يركض: يهرول {{count}} من {{of}}",
-      "runSometimes": "يركض أحيانًا (ينطلق {{count}} من {{of}})",
+      "runHard": "يركض بقوة",
+      "runJog": "لا يركض",
+      "runSometimes": "يركض أحيانًا",
       "cuts": "القطع: {{count}} (سجّل {{scored}}، تحرّر {{open}})",
       "stagnantOff": "جامد في الهجوم: يقف ويشاهد {{count}} مرات",
       "movesWell": "يتحرك جيدًا دون كرة ({{count}} قطع وتمركز وحجز)",
       "defense": "الدفاع: {{parts}}",
-      "stagnantDef": "جامد في الدفاع: يفقد لاعبه وهو يراقب الكرة {{count}} مرات"
+      "stagnantDef": "جامد في الدفاع: يفقد لاعبه وهو يراقب الكرة {{count}} مرات",
+      "runAfterOffSprint": "يركض بقوة بعد {{after}}",
+      "runAfterOffJog": "لا يركض بعد {{after}}",
+      "runAfterDefSprint": "يعود بقوة للدفاع بعد {{after}}",
+      "runAfterDefJog": "لا يعود للدفاع بعد {{after}}",
+      "transMatchNo": "لا يلتقط لاعبًا في دفاع التحول",
+      "transMatchYes": "يلتقط لاعبًا في دفاع التحول"
     },
     "tendWord": {
       "right": "اليمين",
@@ -2381,6 +2390,13 @@
       "block": "صدّات",
       "rightShoulder": "الكتف الأيمن",
       "leftShoulder": "الكتف الأيسر"
+    },
+    "tendAfter": {
+      "turnover": "فقدان الكرة",
+      "steal": "قطع الكرة",
+      "rebound": "متابعة دفاعية",
+      "miss": "تسديدة ضائعة",
+      "made": "سلة ناجحة"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "تجميع التقرير",
     "uploading": "جارٍ رفع الفيديو — {{pct}}٪ ({{sent}} من {{total}})",
     "uploadingOf": "جارٍ رفع الفيديو {{i}} من {{n}} — {{pct}}٪ ({{sent}} من {{total}})",
-    "working": "جارٍ العمل…"
+    "working": "جارٍ العمل…",
+    "colours": "جارٍ التحقق من ألوان القمصان",
+    "waitColours": "في انتظار ألوان القمصان"
   },
   "notifs": {
     "seasonNew": {

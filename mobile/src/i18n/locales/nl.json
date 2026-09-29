@@ -2032,13 +2032,16 @@
     "tiedTo": "Statistieken gekoppeld",
     "untie": "Ontkoppelen",
     "uniformsTitle": "Wie droeg wat?",
-    "uniformsHint": "Met de shirtkleuren kan de video de spelers van beide teams uit elkaar houden. Laat leeg en je krijgt de vraag nadat de video is gelezen.",
+    "uniformsHint": "Kies de shirtkleur van elk team. De keuzes komen uit de video; tik alleen op Anders als ze niet kloppen. Je kunt overslaan en het later aangeven.",
     "uniformPlaceholder": "Kleur, bijv. wit",
     "otherTeam": "Ander team",
     "skipColours": "Overslaan",
     "uploadFilmBtn": "Video uploaden",
     "whoWore": "Wie droeg {{colour}}?",
-    "whoWoreHint": "De video zag deze kleuren. Geef aan welk team welke droeg, dan komt elke speler bij zijn team."
+    "whoWoreHint": "De video zag deze kleuren. Geef aan welk team welke droeg, dan komt elke speler bij zijn team.",
+    "detectingColours": "Shirtkleuren uit de video lezen…",
+    "otherColour": "Anders",
+    "saveColours": "Opslaan"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick-and-roll als balhandler: {{parts}} (van {{of}})",
       "pnrScreener": "Pick-and-roll als screener: {{parts}} (van {{of}})",
       "post": "Postspel: {{count}} ({{parts}})",
-      "runHard": "Rent hard terug en mee ({{count}} van {{of}})",
-      "runJog": "Rent niet: jogt {{count}} van {{of}}",
-      "runSometimes": "Rent soms (sprint {{count}} van {{of}})",
+      "runHard": "Rent hard mee",
+      "runJog": "Rent niet mee",
+      "runSometimes": "Rent soms mee",
       "cuts": "Cuts: {{count}} (gescoord {{scored}}, vrijgelopen {{open}})",
       "stagnantOff": "Stilstaand in aanval: staat te kijken {{count}} keer",
       "movesWell": "Beweegt goed zonder bal ({{count}} cuts, verplaatsingen en screens)",
       "defense": "Verdediging: {{parts}}",
-      "stagnantDef": "Stilstaand in verdediging: verliest zijn man door naar de bal te kijken {{count}} keer"
+      "stagnantDef": "Stilstaand in verdediging: verliest zijn man door naar de bal te kijken {{count}} keer",
+      "runAfterOffSprint": "Rent hard mee na {{after}}",
+      "runAfterOffJog": "Rent niet mee na {{after}}",
+      "runAfterDefSprint": "Komt hard terug in verdediging na {{after}}",
+      "runAfterDefJog": "Komt niet terug in verdediging na {{after}}",
+      "transMatchNo": "Pakt niemand op in de transitieverdediging",
+      "transMatchYes": "Pakt een man op in de transitieverdediging"
     },
     "tendWord": {
       "right": "rechts",
@@ -2381,6 +2390,13 @@
       "block": "blocks",
       "rightShoulder": "rechterschouder",
       "leftShoulder": "linkerschouder"
+    },
+    "tendAfter": {
+      "turnover": "een balverlies",
+      "steal": "een steal",
+      "rebound": "een verdedigende rebound",
+      "miss": "een gemist schot",
+      "made": "een gescoorde bal"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Rapport samenstellen",
     "uploading": "Video uploaden — {{pct}}% ({{sent}} van {{total}})",
     "uploadingOf": "Video {{i}} van {{n}} uploaden — {{pct}}% ({{sent}} van {{total}})",
-    "working": "Bezig…"
+    "working": "Bezig…",
+    "colours": "Shirtkleuren controleren",
+    "waitColours": "Wachten op shirtkleuren"
   },
   "notifs": {
     "seasonNew": {

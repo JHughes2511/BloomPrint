@@ -2032,13 +2032,16 @@
     "tiedTo": "הסטטיסטיקות מקושרות",
     "untie": "בטל קישור",
     "uniformsTitle": "מי לבש מה?",
-    "uniformsHint": "צבעי החולצות מאפשרים לסרטון להבדיל בין שחקני שתי הקבוצות. השאירו ריק ותישאלו אחרי שהסרטון ייקרא.",
+    "uniformsHint": "בחרו את צבע החולצה של כל קבוצה. האפשרויות מגיעות מהסרטון; הקישו על 'אחר' רק אם הן שגויות. אפשר לדלג ולציין אחר כך.",
     "uniformPlaceholder": "צבע, למשל לבן",
     "otherTeam": "קבוצה אחרת",
     "skipColours": "דילוג",
     "uploadFilmBtn": "העלאת סרטון",
     "whoWore": "מי לבש {{colour}}?",
-    "whoWoreHint": "הסרטון ראה את הצבעים האלה. ציינו איזו קבוצה לבשה כל צבע, וכל שחקן יתויק בקבוצה שלו."
+    "whoWoreHint": "הסרטון ראה את הצבעים האלה. ציינו איזו קבוצה לבשה כל צבע, וכל שחקן יתויק בקבוצה שלו.",
+    "detectingColours": "קוראים את צבעי החולצות מהסרטון…",
+    "otherColour": "אחר",
+    "saveColours": "שמירה"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "פיק אנד רול כמוביל כדור: {{parts}} (מתוך {{of}})",
       "pnrScreener": "פיק אנד רול כחוסם: {{parts}} (מתוך {{of}})",
       "post": "משחק בפוסט: {{count}} ({{parts}})",
-      "runHard": "רץ חזק במעבר ({{count}} מתוך {{of}})",
-      "runJog": "לא רץ: מדדה {{count}} מתוך {{of}}",
-      "runSometimes": "רץ לפעמים (ספרינט {{count}} מתוך {{of}})",
+      "runHard": "רץ חזק",
+      "runJog": "לא רץ",
+      "runSometimes": "רץ לפעמים",
       "cuts": "חיתוכים: {{count}} (קלע {{scored}}, השתחרר {{open}})",
       "stagnantOff": "סטטי בהתקפה: עומד ומסתכל {{count}} פעמים",
       "movesWell": "זז טוב בלי כדור ({{count}} חיתוכים, תזוזות וחסימות)",
       "defense": "הגנה: {{parts}}",
-      "stagnantDef": "סטטי בהגנה: מאבד את השחקן שלו כשהוא מסתכל על הכדור {{count}} פעמים"
+      "stagnantDef": "סטטי בהגנה: מאבד את השחקן שלו כשהוא מסתכל על הכדור {{count}} פעמים",
+      "runAfterOffSprint": "רץ חזק אחרי {{after}}",
+      "runAfterOffJog": "לא רץ אחרי {{after}}",
+      "runAfterDefSprint": "חוזר חזק להגנה אחרי {{after}}",
+      "runAfterDefJog": "לא חוזר להגנה אחרי {{after}}",
+      "transMatchNo": "לא לוקח שחקן בהגנת מעבר",
+      "transMatchYes": "לוקח שחקן בהגנת מעבר"
     },
     "tendWord": {
       "right": "ימין",
@@ -2381,6 +2390,13 @@
       "block": "חסימות",
       "rightShoulder": "הכתף הימנית",
       "leftShoulder": "הכתף השמאלית"
+    },
+    "tendAfter": {
+      "turnover": "איבוד כדור",
+      "steal": "חטיפה",
+      "rebound": "ריבאונד הגנה",
+      "miss": "זריקה מוחטאת",
+      "made": "סל שנקלע"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "מרכיב את הדוח",
     "uploading": "מעלה את הווידאו — {{pct}}% ({{sent}} מתוך {{total}})",
     "uploadingOf": "מעלה וידאו {{i}} מתוך {{n}} — {{pct}}% ({{sent}} מתוך {{total}})",
-    "working": "מעבד…"
+    "working": "מעבד…",
+    "colours": "בודקים את צבעי החולצות",
+    "waitColours": "ממתינים לצבעי החולצות"
   },
   "notifs": {
     "seasonNew": {

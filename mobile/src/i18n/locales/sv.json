@@ -2032,13 +2032,16 @@
     "tiedTo": "Statistik kopplad",
     "untie": "Koppla bort",
     "uniformsTitle": "Vem hade vad?",
-    "uniformsHint": "Tröjfärgerna låter videon skilja på lagens spelare. Lämna tomt så får du frågan när videon är läst.",
+    "uniformsHint": "Välj varje lags tröjfärg. Valen kommer från videon; tryck på Annan bara om de är fel. Du kan hoppa över och säga det efteråt.",
     "uniformPlaceholder": "Färg, t.ex. vit",
     "otherTeam": "Andra laget",
     "skipColours": "Hoppa över",
     "uploadFilmBtn": "Ladda upp video",
     "whoWore": "Vem hade {{colour}}?",
-    "whoWoreHint": "Videon såg de här färgerna. Säg vilket lag som hade vilken, så hamnar varje spelare i sitt lag."
+    "whoWoreHint": "Videon såg de här färgerna. Säg vilket lag som hade vilken, så hamnar varje spelare i sitt lag.",
+    "detectingColours": "Läser tröjfärgerna från videon…",
+    "otherColour": "Annan",
+    "saveColours": "Spara"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick and roll som bollförare: {{parts}} (av {{of}})",
       "pnrScreener": "Pick and roll som screenare: {{parts}} (av {{of}})",
       "post": "Postspel: {{count}} ({{parts}})",
-      "runHard": "Springer hårt i omställningen ({{count}} av {{of}})",
-      "runJog": "Springer inte: joggar {{count}} av {{of}}",
-      "runSometimes": "Springer ibland (spurtar {{count}} av {{of}})",
+      "runHard": "Springer hårt",
+      "runJog": "Springer inte",
+      "runSometimes": "Springer ibland",
       "cuts": "Cuts: {{count}} (gjorde poäng {{scored}}, blev fri {{open}})",
       "stagnantOff": "Stillastående i anfall: står och tittar {{count}} gånger",
       "movesWell": "Rör sig bra utan boll ({{count}} cuts, förflyttningar och screens)",
       "defense": "Försvar: {{parts}}",
-      "stagnantDef": "Stillastående i försvar: tappar sin spelare när bollen tittas på {{count}} gånger"
+      "stagnantDef": "Stillastående i försvar: tappar sin spelare när bollen tittas på {{count}} gånger",
+      "runAfterOffSprint": "Springer hårt efter {{after}}",
+      "runAfterOffJog": "Springer inte efter {{after}}",
+      "runAfterDefSprint": "Tar sig hårt tillbaka i försvar efter {{after}}",
+      "runAfterDefJog": "Tar sig inte tillbaka i försvar efter {{after}}",
+      "transMatchNo": "Plockar inte upp någon i omställningsförsvaret",
+      "transMatchYes": "Plockar upp en spelare i omställningsförsvaret"
     },
     "tendWord": {
       "right": "höger",
@@ -2381,6 +2390,13 @@
       "block": "blockar",
       "rightShoulder": "höger axel",
       "leftShoulder": "vänster axel"
+    },
+    "tendAfter": {
+      "turnover": "en bolltapp",
+      "steal": "en steal",
+      "rebound": "en defensiv retur",
+      "miss": "ett missat skott",
+      "made": "en gjord korg"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Sammanställer rapport",
     "uploading": "Laddar upp filmen — {{pct}} % ({{sent}} av {{total}})",
     "uploadingOf": "Laddar upp film {{i}} av {{n}} — {{pct}} % ({{sent}} av {{total}})",
-    "working": "Arbetar…"
+    "working": "Arbetar…",
+    "colours": "Kontrollerar tröjfärgerna",
+    "waitColours": "Väntar på tröjfärgerna"
   },
   "notifs": {
     "seasonNew": {

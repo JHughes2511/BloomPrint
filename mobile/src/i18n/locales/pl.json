@@ -2032,13 +2032,16 @@
     "tiedTo": "Statystyki powiązane",
     "untie": "Odłącz",
     "uniformsTitle": "Kto był w czym?",
-    "uniformsHint": "Kolory strojów pozwalają nagraniu odróżnić zawodników obu drużyn. Zostaw puste, a zapytamy po przeczytaniu nagrania.",
+    "uniformsHint": "Wybierz kolor stroju każdej drużyny. Opcje pochodzą z nagrania; wybierz Inny tylko, jeśli są błędne. Możesz pominąć i podać później.",
     "uniformPlaceholder": "Kolor, np. biały",
     "otherTeam": "Inna drużyna",
     "skipColours": "Pomiń",
     "uploadFilmBtn": "Wyślij nagranie",
     "whoWore": "Kto grał w kolorze {{colour}}?",
-    "whoWoreHint": "Nagranie pokazało te kolory. Wskaż, która drużyna nosiła który, a każdy zawodnik trafi do swojej drużyny."
+    "whoWoreHint": "Nagranie pokazało te kolory. Wskaż, która drużyna nosiła który, a każdy zawodnik trafi do swojej drużyny.",
+    "detectingColours": "Odczytywanie kolorów strojów z nagrania…",
+    "otherColour": "Inny",
+    "saveColours": "Zapisz"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick and roll jako kozłujący: {{parts}} (z {{of}})",
       "pnrScreener": "Pick and roll jako zasłaniający: {{parts}} (z {{of}})",
       "post": "Gra tyłem do kosza: {{count}} ({{parts}})",
-      "runHard": "Mocno biega w kontrze ({{count}} z {{of}})",
-      "runJog": "Nie biega: truchta {{count}} z {{of}}",
-      "runSometimes": "Czasem biega (sprintuje {{count}} z {{of}})",
+      "runHard": "Mocno biega",
+      "runJog": "Nie biega",
+      "runSometimes": "Czasem biega",
       "cuts": "Ścięcia: {{count}} (zdobył {{scored}}, był wolny {{open}})",
       "stagnantOff": "Stoi w ataku: stoi i patrzy {{count}} razy",
       "movesWell": "Dobrze porusza się bez piłki ({{count}} ścięć, przesunięć i zasłon)",
       "defense": "Obrona: {{parts}}",
-      "stagnantDef": "Stoi w obronie: gubi swojego zawodnika patrząc na piłkę {{count}} razy"
+      "stagnantDef": "Stoi w obronie: gubi swojego zawodnika patrząc na piłkę {{count}} razy",
+      "runAfterOffSprint": "Mocno biega po {{after}}",
+      "runAfterOffJog": "Nie biega po {{after}}",
+      "runAfterDefSprint": "Mocno wraca do obrony po {{after}}",
+      "runAfterDefJog": "Nie wraca do obrony po {{after}}",
+      "transMatchNo": "Nie kryje nikogo w obronie przejściowej",
+      "transMatchYes": "Kryje zawodnika w obronie przejściowej"
     },
     "tendWord": {
       "right": "prawo",
@@ -2381,6 +2390,13 @@
       "block": "bloki",
       "rightShoulder": "prawy bark",
       "leftShoulder": "lewy bark"
+    },
+    "tendAfter": {
+      "turnover": "stracie",
+      "steal": "przechwycie",
+      "rebound": "zbiórce w obronie",
+      "miss": "niecelnym rzucie",
+      "made": "celnym rzucie"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Tworzenie raportu",
     "uploading": "Przesyłanie nagrania — {{pct}}% ({{sent}} z {{total}})",
     "uploadingOf": "Przesyłanie nagrania {{i}} z {{n}} — {{pct}}% ({{sent}} z {{total}})",
-    "working": "Przetwarzanie…"
+    "working": "Przetwarzanie…",
+    "colours": "Sprawdzanie kolorów strojów",
+    "waitColours": "Oczekiwanie na kolory strojów"
   },
   "notifs": {
     "seasonNew": {

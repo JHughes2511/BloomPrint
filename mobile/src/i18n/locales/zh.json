@@ -2032,13 +2032,16 @@
     "tiedTo": "已关联比赛数据",
     "untie": "取消关联",
     "uniformsTitle": "哪队穿什么颜色？",
-    "uniformsHint": "球衣颜色能让视频区分两队的球员。留空的话，视频读完后会再问你。",
+    "uniformsHint": "选择每队的球衣颜色。选项来自视频；只有不对时才点“其他”。也可以跳过，之后再说。",
     "uniformPlaceholder": "颜色，如白色",
     "otherTeam": "另一队",
     "skipColours": "跳过",
     "uploadFilmBtn": "上传视频",
     "whoWore": "谁穿{{colour}}？",
-    "whoWoreHint": "视频识别到这些颜色。选出每种颜色是哪队的，每名球员就会归入各自的队。"
+    "whoWoreHint": "视频识别到这些颜色。选出每种颜色是哪队的，每名球员就会归入各自的队。",
+    "detectingColours": "正在从视频识别球衣颜色…",
+    "otherColour": "其他",
+    "saveColours": "保存"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "挡拆持球：{{parts}}（共{{of}}次）",
       "pnrScreener": "挡拆掩护者：{{parts}}（共{{of}}次）",
       "post": "背身单打：{{count}}次（{{parts}}）",
-      "runHard": "转换中积极奔跑（{{of}}次中{{count}}次）",
-      "runJog": "不跑位：{{of}}次中{{count}}次慢跑",
-      "runSometimes": "有时奔跑（{{of}}次中{{count}}次冲刺）",
+      "runHard": "全力奔跑",
+      "runJog": "不跑位",
+      "runSometimes": "有时奔跑",
       "cuts": "空切：{{count}}次（得分{{scored}}，空位{{open}}）",
       "stagnantOff": "进攻停滞：{{count}}次站着看",
       "movesWell": "无球跑动好（空切、换位和掩护{{count}}次）",
       "defense": "防守：{{parts}}",
-      "stagnantDef": "防守停滞：看球丢人{{count}}次"
+      "stagnantDef": "防守停滞：看球丢人{{count}}次",
+      "runAfterOffSprint": "{{after}}后全力推进",
+      "runAfterOffJog": "{{after}}后不跑",
+      "runAfterDefSprint": "{{after}}后全力回防",
+      "runAfterDefJog": "{{after}}后不回防",
+      "transMatchNo": "转换防守中不找人",
+      "transMatchYes": "转换防守中能找到人"
     },
     "tendWord": {
       "right": "右",
@@ -2381,6 +2390,13 @@
       "block": "盖帽",
       "rightShoulder": "右肩",
       "leftShoulder": "左肩"
+    },
+    "tendAfter": {
+      "turnover": "失误",
+      "steal": "抢断",
+      "rebound": "防守篮板",
+      "miss": "投篮不中",
+      "made": "进球"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "正在汇总报告",
     "uploading": "正在上传影片 — {{pct}}%（{{total}} 中已上传 {{sent}}）",
     "uploadingOf": "正在上传第 {{i}} 段影片，共 {{n}} 段 — {{pct}}%（{{total}} 中已上传 {{sent}}）",
-    "working": "处理中…"
+    "working": "处理中…",
+    "colours": "正在检查球衣颜色",
+    "waitColours": "等待球衣颜色"
   },
   "notifs": {
     "seasonNew": {

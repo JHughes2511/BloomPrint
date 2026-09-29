@@ -1050,6 +1050,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     # only). `uniforms` is {colour: team name} when the coach said who wore what.
     want_events = bool(args.get("player_events"))
     uniforms = args.get("uniforms") or None
+    colour_words = args.get("colour_words") or None
     from .player_events import directive as _events_directive, split as _split_events, \
         events_only_prompt as _events_only_prompt
     player_events: list[dict] = []
@@ -1189,7 +1190,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 r = _client().messages.create(
                     model=OPUS, max_tokens=4000,
                     messages=[{"role": "user", "content":
-                               [{"type": "text", "text": _events_only_prompt(uniforms)}] + _frames_content(frames)}])
+                               [{"type": "text", "text": _events_only_prompt(uniforms, colour_words)}] + _frames_content(frames)}])
                 player_events = _split_events(text_of(r))[1]
             except Exception:
                 player_events = []
@@ -1222,7 +1223,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 + (f"{segment_note} " if segment_note else "") +
                 "Cite specific moments by their film timestamp [MM:SS] (e.g. (12:34)), never frame numbers or raw seconds. "
                 "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
-                + (_events_directive(uniforms) if want_events else "")
+                + (_events_directive(uniforms, colour_words) if want_events else "")
             )
             seg_content = [{"type": "text", "text": seg_prompt}] + _frames_content(ch)
             note = None

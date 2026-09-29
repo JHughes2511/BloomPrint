@@ -2032,13 +2032,16 @@
     "tiedTo": "Estatísticas ligadas",
     "untie": "Desligar",
     "uniformsTitle": "Quem vestia o quê?",
-    "uniformsHint": "As cores das camisas permitem ao vídeo distinguir os jogadores de cada time. Deixe em branco e perguntaremos depois que o vídeo for lido.",
+    "uniformsHint": "Escolha a cor da camisa de cada time. As opções vêm do vídeo; toque em Outra só se estiverem erradas. Você pode pular e dizer depois.",
     "uniformPlaceholder": "Cor, ex. branco",
     "otherTeam": "Outro time",
     "skipColours": "Pular",
     "uploadFilmBtn": "Enviar vídeo",
     "whoWore": "Quem vestia {{colour}}?",
-    "whoWoreHint": "O vídeo viu estas cores. Diga qual time vestia cada uma e cada jogador fica no seu time."
+    "whoWoreHint": "O vídeo viu estas cores. Diga qual time vestia cada uma e cada jogador fica no seu time.",
+    "detectingColours": "Lendo as cores das camisas no vídeo…",
+    "otherColour": "Outra",
+    "saveColours": "Salvar"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Corta-luz como armador: {{parts}} (de {{of}})",
       "pnrScreener": "Corta-luz como bloqueador: {{parts}} (de {{of}})",
       "post": "Jogo de costas: {{count}} ({{parts}})",
-      "runHard": "Corre a quadra com força ({{count}} de {{of}})",
-      "runJog": "Não corre a quadra: trota {{count}} de {{of}}",
-      "runSometimes": "Corre a quadra às vezes (dispara {{count}} de {{of}})",
+      "runHard": "Corre a quadra com força",
+      "runJog": "Não corre a quadra",
+      "runSometimes": "Corre a quadra às vezes",
       "cuts": "Cortes: {{count}} (pontuou {{scored}}, ficou livre {{open}})",
       "stagnantOff": "Parado no ataque: em pé assistindo {{count}} vezes",
       "movesWell": "Movimenta-se bem sem a bola ({{count}} cortes, reposicionamentos e bloqueios)",
       "defense": "Defesa: {{parts}}",
-      "stagnantDef": "Parado na defesa: perde seu jogador olhando a bola {{count}} vezes"
+      "stagnantDef": "Parado na defesa: perde seu jogador olhando a bola {{count}} vezes",
+      "runAfterOffSprint": "Corre a quadra com força após {{after}}",
+      "runAfterOffJog": "Não corre a quadra após {{after}}",
+      "runAfterDefSprint": "Volta forte para a defesa após {{after}}",
+      "runAfterDefJog": "Não volta para a defesa após {{after}}",
+      "transMatchNo": "Não marca ninguém na defesa de transição",
+      "transMatchYes": "Marca alguém na defesa de transição"
     },
     "tendWord": {
       "right": "direita",
@@ -2381,6 +2390,13 @@
       "block": "tocos",
       "rightShoulder": "ombro direito",
       "leftShoulder": "ombro esquerdo"
+    },
+    "tendAfter": {
+      "turnover": "um erro de posse",
+      "steal": "um roubo",
+      "rebound": "um rebote defensivo",
+      "miss": "um arremesso errado",
+      "made": "uma cesta convertida"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "A sintetizar o relatório",
     "uploading": "A carregar o vídeo — {{pct}}% ({{sent}} de {{total}})",
     "uploadingOf": "A carregar o vídeo {{i}} de {{n}} — {{pct}}% ({{sent}} de {{total}})",
-    "working": "Processando…"
+    "working": "Processando…",
+    "colours": "Verificando as cores das camisas",
+    "waitColours": "Aguardando as cores das camisas"
   },
   "notifs": {
     "seasonNew": {

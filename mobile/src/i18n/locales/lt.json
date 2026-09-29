@@ -2032,13 +2032,16 @@
     "tiedTo": "Statistika susieta",
     "untie": "Atsieti",
     "uniformsTitle": "Kas vilkėjo ką?",
-    "uniformsHint": "Aprangos spalvos leidžia vaizdo įrašui atskirti abiejų komandų žaidėjus. Palikite tuščią ir paklausime perskaičius įrašą.",
+    "uniformsHint": "Pasirinkite kiekvienos komandos aprangos spalvą. Pasirinkimai paimti iš įrašo; spauskite Kita tik jei jie neteisingi. Galite praleisti ir nurodyti vėliau.",
     "uniformPlaceholder": "Spalva, pvz., balta",
     "otherTeam": "Kita komanda",
     "skipColours": "Praleisti",
     "uploadFilmBtn": "Įkelti įrašą",
     "whoWore": "Kas vilkėjo {{colour}}?",
-    "whoWoreHint": "Įrašas matė šias spalvas. Nurodykite, kuri komanda vilkėjo kurią, ir kiekvienas žaidėjas pateks į savo komandą."
+    "whoWoreHint": "Įrašas matė šias spalvas. Nurodykite, kuri komanda vilkėjo kurią, ir kiekvienas žaidėjas pateks į savo komandą.",
+    "detectingColours": "Skaitomos aprangos spalvos iš įrašo…",
+    "otherColour": "Kita",
+    "saveColours": "Išsaugoti"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Užtvaros su kamuoliu: {{parts}} (iš {{of}})",
       "pnrScreener": "Užtvaros kaip statantis: {{parts}} (iš {{of}})",
       "post": "Žaidimas po krepšiu: {{count}} ({{parts}})",
-      "runHard": "Stipriai bėga greitame puolime ({{count}} iš {{of}})",
-      "runJog": "Nebėga: risnoja {{count}} iš {{of}}",
-      "runSometimes": "Kartais bėga (sprintuoja {{count}} iš {{of}})",
+      "runHard": "Stipriai bėga",
+      "runJog": "Nebėga",
+      "runSometimes": "Kartais bėga",
       "cuts": "Įsibėgėjimai: {{count}} (pelnė {{scored}}, atsilaisvino {{open}})",
       "stagnantOff": "Stovi puolime: stovi ir žiūri {{count}} kartus",
       "movesWell": "Gerai juda be kamuolio ({{count}} įsibėgėjimai, persistūmimai ir užtvaros)",
       "defense": "Gynyba: {{parts}}",
-      "stagnantDef": "Stovi gynyboje: praranda savo žaidėją žiūrėdamas į kamuolį {{count}} kartus"
+      "stagnantDef": "Stovi gynyboje: praranda savo žaidėją žiūrėdamas į kamuolį {{count}} kartus",
+      "runAfterOffSprint": "Stipriai bėga po {{after}}",
+      "runAfterOffJog": "Nebėga po {{after}}",
+      "runAfterDefSprint": "Stipriai grįžta į gynybą po {{after}}",
+      "runAfterDefJog": "Negrįžta į gynybą po {{after}}",
+      "transMatchNo": "Neperima žaidėjo pereinamojoje gynyboje",
+      "transMatchYes": "Perima žaidėją pereinamojoje gynyboje"
     },
     "tendWord": {
       "right": "dešinę",
@@ -2381,6 +2390,13 @@
       "block": "blokai",
       "rightShoulder": "dešinį petį",
       "leftShoulder": "kairį petį"
+    },
+    "tendAfter": {
+      "turnover": "klaidos",
+      "steal": "perėmimo",
+      "rebound": "atkovoto kamuolio gynyboje",
+      "miss": "nepataikyto metimo",
+      "made": "pelnyto taško"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Rengiama ataskaita",
     "uploading": "Įrašas įkeliamas — {{pct}} % ({{sent}} iš {{total}})",
     "uploadingOf": "Įkeliamas {{i}} įrašas iš {{n}} — {{pct}} % ({{sent}} iš {{total}})",
-    "working": "Vykdoma…"
+    "working": "Vykdoma…",
+    "colours": "Tikrinamos aprangos spalvos",
+    "waitColours": "Laukiama aprangos spalvų"
   },
   "notifs": {
     "seasonNew": {

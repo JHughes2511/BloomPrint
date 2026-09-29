@@ -2032,13 +2032,16 @@
     "tiedTo": "試合スタッツを紐づけ済み",
     "untie": "解除",
     "uniformsTitle": "どちらが何色？",
-    "uniformsHint": "ユニフォームの色で、映像が両チームの選手を見分けられます。空欄のままなら、映像の解析後に確認します。",
+    "uniformsHint": "各チームのユニフォームの色を選んでください。候補は映像から取っています。違う場合だけ「その他」を。スキップして後で答えることもできます。",
     "uniformPlaceholder": "色（例：白）",
     "otherTeam": "相手チーム",
     "skipColours": "スキップ",
     "uploadFilmBtn": "映像をアップロード",
     "whoWore": "{{colour}}を着ていたのは？",
-    "whoWoreHint": "映像でこれらの色が見つかりました。どのチームがどの色か選ぶと、各選手がチームに振り分けられます。"
+    "whoWoreHint": "映像でこれらの色が見つかりました。どのチームがどの色か選ぶと、各選手がチームに振り分けられます。",
+    "detectingColours": "映像からユニフォームの色を読み取り中…",
+    "otherColour": "その他",
+    "saveColours": "保存"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "ボールスクリーン（ハンドラー）：{{parts}}（{{of}}回中）",
       "pnrScreener": "ボールスクリーン（スクリーナー）：{{parts}}（{{of}}回中）",
       "post": "ポストアップ：{{count}}回（{{parts}}）",
-      "runHard": "トランジションで全力で走る（{{of}}回中{{count}}回）",
-      "runJog": "走らない：{{of}}回中{{count}}回ジョグ",
-      "runSometimes": "時々走る（{{of}}回中{{count}}回スプリント）",
+      "runHard": "全力で走る",
+      "runJog": "走らない",
+      "runSometimes": "時々走る",
       "cuts": "カット：{{count}}回（得点{{scored}}、フリー{{open}}）",
       "stagnantOff": "オフェンスで停滞：{{count}}回立ち止まって見ている",
       "movesWell": "ボールなしでよく動く（カット・移動・スクリーン{{count}}回）",
       "defense": "ディフェンス：{{parts}}",
-      "stagnantDef": "ディフェンスで停滞：ボールを見てマークを{{count}}回見失う"
+      "stagnantDef": "ディフェンスで停滞：ボールを見てマークを{{count}}回見失う",
+      "runAfterOffSprint": "{{after}}の後に全力で走る",
+      "runAfterOffJog": "{{after}}の後に走らない",
+      "runAfterDefSprint": "{{after}}の後に全力でディフェンスに戻る",
+      "runAfterDefJog": "{{after}}の後にディフェンスに戻らない",
+      "transMatchNo": "トランジションディフェンスでマークにつかない",
+      "transMatchYes": "トランジションディフェンスでマークにつく"
     },
     "tendWord": {
       "right": "右",
@@ -2381,6 +2390,13 @@
       "block": "ブロック",
       "rightShoulder": "右肩",
       "leftShoulder": "左肩"
+    },
+    "tendAfter": {
+      "turnover": "ターンオーバー",
+      "steal": "スティール",
+      "rebound": "ディフェンスリバウンド",
+      "miss": "シュートミス",
+      "made": "得点"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "レポートを統合中",
     "uploading": "映像をアップロード中 — {{pct}}%（{{total}} 中 {{sent}}）",
     "uploadingOf": "映像 {{i}} / {{n}} をアップロード中 — {{pct}}%（{{total}} 中 {{sent}}）",
-    "working": "処理中…"
+    "working": "処理中…",
+    "colours": "ユニフォームの色を確認中",
+    "waitColours": "ユニフォームの色の回答待ち"
   },
   "notifs": {
     "seasonNew": {

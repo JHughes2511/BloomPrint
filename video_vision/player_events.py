@@ -38,8 +38,12 @@ VOCAB: dict[str, dict[str, set[str]]] = {
                    "act": {"roll", "pop", "slip"}},
     # Back to the basket. dir is the shoulder turned over.
     "post":       {"dir": {"L", "R"}, "end": {"shot", "pass", "turnover"}},
-    # Getting up and down the floor.
-    "transition": {"effort": {"sprint", "jog"}, "way": {"offense", "defense"}},
+    # Getting up and down the floor, and what set it off: running out after a
+    # turnover is not the same habit as getting back after a make. "match" is
+    # whether, getting back, the player picked someone up.
+    "transition": {"effort": {"sprint", "jog"}, "way": {"offense", "defense"},
+                   "after": {"turnover", "made", "miss", "rebound", "steal"},
+                   "match": {"yes", "no"}},
     # Offense without the ball. "stand" is the stagnant one: standing and watching.
     "off_ball":   {"act": {"cut", "relocate", "screen", "stand"},
                    "res": {"scored", "open", "none"}},
@@ -51,18 +55,22 @@ VOCAB: dict[str, dict[str, set[str]]] = {
 MARKER = "PLAYER EVENTS:"
 
 
-def directive(uniforms: dict[str, str] | None) -> str:
+def directive(uniforms: dict[str, str] | None, colour_words: list[str] | None = None) -> str:
     """What each segment is asked to log, after its notes.
 
     `uniforms` is {colour: team name} from the coach. With it, the model is
-    told the exact colour words to use, so matching back is exact. Without it,
-    the model names the colours it sees and the coach confirms afterwards which
-    team was which.
+    told the exact colour words to use, so matching back is exact. Without it
+    but with the colours seen at upload (`colour_words`), those words are used,
+    so a team put to a colour later still matches exactly. With neither, the
+    model names the colours it sees and the coach confirms afterwards.
     """
     if uniforms:
         teams = "; ".join(f'"{c}" = {t}' for c, t in uniforms.items())
         uni_rule = (f'"uni" is the uniform colour, using EXACTLY one of these words: '
                     f'{", ".join(json.dumps(c) for c in uniforms)} ({teams}).')
+    elif colour_words:
+        uni_rule = (f'"uni" is the uniform colour, using EXACTLY one of these words: '
+                    f'{", ".join(json.dumps(c) for c in colour_words)}.')
     else:
         uni_rule = ('"uni" is the uniform colour as one or two plain words (e.g. "white", '
                     '"dark blue"), the SAME words every time for the same team.')
@@ -81,7 +89,9 @@ def directive(uniforms: dict[str, str] | None) -> str:
         '- "pnr": "role" handler|screener; a handler has "read" use|reject|split|pass|shoot; '
         'a screener has "act" roll|pop|slip\n'
         '- "post": "dir" L|R (shoulder the player turns over), "end" shot|pass|turnover\n'
-        '- "transition": "effort" sprint|jog, "way" offense|defense — only when you see the player '
+        '- "transition": "effort" sprint|jog, "way" offense|defense (running out on offense, or '
+        'getting back on defense), "after" turnover|made|miss|rebound|steal (what started it), and on '
+        'defense "match" yes|no (did the player pick someone up) — only when you see the player '
         "running (or not running) the floor\n"
         '- "off_ball": "act" cut|relocate|screen|stand ("stand" = standing and watching, '
         'stagnant), "res" scored|open|none\n'
@@ -92,10 +102,63 @@ def directive(uniforms: dict[str, str] | None) -> str:
     )
 
 
-def events_only_prompt(uniforms: dict[str, str] | None) -> str:
+def events_only_prompt(uniforms: dict[str, str] | None, colour_words: list[str] | None = None) -> str:
     """For a short film read in one pass: no segment notes to hang the log on."""
     return ("Watch these frames of game film and log individual players' actions. Write no "
-            "notes: only the line and the array described below." + directive(uniforms))
+            "notes: only the line and the array described below." + directive(uniforms, colour_words))
+
+
+COLOURS_PROMPT = (
+    "These frames are from one basketball game. What colour is each team's uniform? Reply with "
+    'only JSON: {"colours": ["<one team>", "<the other team>"]}, each one or two plain lowercase '
+    'words (e.g. "white", "dark blue"). Referees are not a team.'
+)
+
+
+def detect_colours(video_path: str, ask) -> list[str]:
+    """The two uniform colours in a film, from a handful of frames across it.
+
+    Asked as the film goes up, so the coach picks "Duke wore white" from what
+    the film shows instead of typing it. `ask(content) -> str` is the model
+    call. An empty list when the film cannot be read or the answer is unclear.
+    """
+    import base64
+    import cv2
+    cap = cv2.VideoCapture(video_path)
+    try:
+        total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+        if total <= 0:
+            return []
+        content: list[dict] = [{"type": "text", "text": COLOURS_PROMPT}]
+        for k in range(1, 9):
+            cap.set(cv2.CAP_PROP_POS_FRAMES, int(total * k / 9))
+            ok, frame = cap.read()
+            if not ok:
+                continue
+            h, w = frame.shape[:2]
+            scale = min(1.0, 768 / max(w, 1))
+            if scale < 1.0:
+                frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
+            ok, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            if ok:
+                content.append({"type": "image", "source": {
+                    "type": "base64", "media_type": "image/jpeg",
+                    "data": base64.b64encode(buf.tobytes()).decode()}})
+    finally:
+        cap.release()
+    if len(content) < 3:
+        return []
+    m = re.search(r"\{.*\}", ask(content) or "", re.S)
+    try:
+        colours = json.loads(m.group(0)).get("colours") if m else None
+    except ValueError:
+        return []
+    out = []
+    for c in colours or []:
+        c = " ".join(str(c or "").lower().split())[:40]
+        if c and c not in out:
+            out.append(c)
+    return out[:2] if len(out) == 2 else []
 
 
 def _ts_seconds(t) -> int | None:

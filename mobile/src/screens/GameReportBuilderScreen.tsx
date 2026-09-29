@@ -192,8 +192,11 @@ export default function GameReportBuilderScreen() {
   const [linkAsk, setLinkAsk] = useState<any | null>(null);
   // Film picked and waiting on "who wore what": the colours let the film file
   // each player under their team.
-  const [pendingFilm, setPendingFilm] = useState<{ asset: any; label: string; teamName: string } | null>(null);
-  const [uniformRows, setUniformRows] = useState<{ team: string; colour: string }[]>([]);
+  // "Who wore what", asked as the film goes up: the film's own two colours
+  // are offered as choices once a few frames have been read.
+  type ColourRow = { team: string; colour: string; other: boolean };
+  const [colourAsk, setColourAsk] = useState<{ clipId: number; rows: ColourRow[]; detected: string[] | null } | null>(null);
+  const colourAskRef = useRef<number | null>(null);
   // Colours a film saw, being put to teams: {clipId: {colour: team}}.
   const [wore, setWore] = useState<Record<number, Record<string, string>>>({});
   const [linking, setLinking] = useState(false);
@@ -501,41 +504,70 @@ export default function GameReportBuilderScreen() {
     const asset = result.assets[0];
     const choices = filmChoices();
     // One possible team means there is nothing to ask.
-    if (choices.length === 1) { askUniforms(asset, choices[0].label, choices[0].name); return; }
+    if (choices.length === 1) { uploadClip(asset, choices[0].label, choices[0].name); return; }
     Alert.alert(tr('gameBuilder.whoseFilm'), '', [
       ...choices.map(c => ({
         text: c.name,
-        onPress: () => askUniforms(asset, c.label, (c as any).teamName ?? c.name),
+        onPress: () => uploadClip(asset, c.label, (c as any).teamName ?? c.name),
       })),
       { text: tr('common.cancel'), style: 'cancel' as const },
     ]);
   };
 
   /**
-   * Who wore what, before the film goes up. Game film shows two teams, and a
-   * jersey number alone cannot say whose #5 it is; the colours can. Two rows,
-   * filled with the teams the packet already names, both editable — and
-   * skippable: the film then says which colours it saw and asks afterwards.
+   * Who wore what, as the film goes up. Game film shows two teams, and a
+   * jersey number alone cannot say whose #5 it is; the colours can. The film's
+   * own two colours are read off a few frames and offered as choices, so the
+   * coach taps rather than types — "Other" is there for when the film got it
+   * wrong. The read waits briefly for the answer; skipped, the film is read
+   * anyway and the question comes back under the film afterwards.
    */
-  const askUniforms = (asset: any, label: string, teamName: string) => {
-    const sides = filmSides().map(s => s.name);
+  const openColourAsk = (clipId: number, label: string, teamName: string) => {
+    const sides = filmSides().map(sd => sd.name);
     const first = label === 'both' ? sides[0] : teamName;
     const second = label === 'both' ? sides[1] : sides.find(n => n !== teamName) ?? '';
-    setUniformRows([{ team: first ?? '', colour: '' }, { team: second ?? '', colour: '' }]);
-    setPendingFilm({ asset, label, teamName });
+    colourAskRef.current = clipId;
+    setColourAsk({ clipId, detected: null, rows: [
+      { team: first ?? '', colour: '', other: false }, { team: second ?? '', colour: '', other: false }] });
+    (async () => {
+      for (let i = 0; i < 45 && colourAskRef.current === clipId && reportId; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        try {
+          const rep = await gameReportsAPI.get(reportId);
+          const c = (rep?.clips ?? []).find((x: any) => x.id === clipId);
+          if (!c || c.uniforms || c.uniforms_answered) { setColourAsk(null); return; }
+          if (Array.isArray(c.colours_detected)) {
+            setColourAsk(prev => (prev && prev.clipId === clipId ? { ...prev, detected: c.colours_detected } : prev));
+            return;
+          }
+        } catch { /* try again */ }
+      }
+      setColourAsk(prev => (prev && prev.clipId === clipId && prev.detected === null ? { ...prev, detected: [] } : prev));
+    })();
   };
 
-  const sendPendingFilm = (withColours: boolean) => {
-    if (!pendingFilm) return;
+  /** Pick a colour for one team; the other team takes the film's other colour. */
+  const pickColour = (i: number, colour: string) => setColourAsk(prev => {
+    if (!prev) return prev;
+    const rows = prev.rows.map((r, j) => (j === i ? { ...r, colour, other: false } : r));
+    const rest = (prev.detected ?? []).filter(c => c !== colour);
+    const k = i === 0 ? 1 : 0;
+    if (rows[k] && !rows[k].colour && !rows[k].other && rest.length === 1) rows[k] = { ...rows[k], colour: rest[0] };
+    return { ...prev, rows };
+  });
+
+  const answerColours = async (save: boolean) => {
+    const ask = colourAsk;
+    if (!ask || !reportId) return;
+    colourAskRef.current = null;
+    setColourAsk(null);
     const map: Record<string, string> = {};
-    if (withColours) {
-      for (const r of uniformRows) {
+    if (save) {
+      for (const r of ask.rows) {
         if (r.team.trim() && r.colour.trim()) map[r.colour.trim().toLowerCase()] = r.team.trim();
       }
     }
-    const { asset, label, teamName } = pendingFilm;
-    setPendingFilm(null);
-    uploadClip(asset, label, teamName, Object.keys(map).length ? JSON.stringify(map) : '');
+    try { await gameReportsAPI.setClipUniforms(reportId, ask.clipId, map); } catch { /* asked again after */ }
   };
 
   /** Put a team to a colour the film saw; saved once every colour has one. */
@@ -544,14 +576,16 @@ export default function GameReportBuilderScreen() {
     setWore(prev => ({ ...prev, [clip.id]: next }));
     if (!reportId || !(clip.uniforms_seen ?? []).every((c: string) => next[c])) return;
     try {
-      await gameReportsAPI.setClipUniforms(reportId, clip.id, next);
+      // Added to what the film already has: a colour put right afterwards
+      // must not wipe the one confirmed as it went up.
+      await gameReportsAPI.setClipUniforms(reportId, clip.id, { ...(clip.uniforms ?? {}), ...next });
       setReport(await gameReportsAPI.get(reportId));
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('common.somethingWentWrong'));
     }
   };
 
-  const uploadClip = async (asset: any, label: string, teamName = '', uniforms = '') => {
+  const uploadClip = async (asset: any, label: string, teamName = '') => {
     if (!reportId) return;
     setUploadingClip(true);
     setClipProgress(tr('gameBuilder.uploadingFilm'));
@@ -575,17 +609,18 @@ export default function GameReportBuilderScreen() {
           purpose: `gr${reportId}clip`, onProgress: onProg,
         });
         created = await gameReportsAPI.addClipRef(reportId, {
-          label, team_name: teamName, video_ref: ref, uniforms,
+          label, team_name: teamName, video_ref: ref,
         });
       } else {
         created = await uploadFileStreamed(
           // On web the picker hands back the File itself; upload that rather than
           // asking the browser to rebuild it from the blob: URL.
           `/game-reports/${reportId}/clips`, asset.file ?? asset.uri,
-          { label, team_name: teamName, ...(uniforms ? { uniforms } : {}) }, 'video', 'video/mp4',
+          { label, team_name: teamName }, 'video', 'video/mp4',
           onProg,
         );
       }
+      if (created?.clip_id) openColourAsk(created.clip_id, label, teamName);
       if (created?.job_id) {
         setClipProgress(tr('gameBuilder.analyzingFilm'));
         await evalsAPI.awaitJob(created.job_id, setClipProgress);
@@ -1481,42 +1516,71 @@ export default function GameReportBuilderScreen() {
           asks who is IN the film, and asked right after it: a suggestion the
           coach confirms, a way to say none of them, and a way to go and import
           the game if it is not in the app yet. */}
-      {/* Who wore what: asked as the film goes up. */}
-      <Sheet visible={!!pendingFilm} animationType="slide" transparent onRequestClose={() => setPendingFilm(null)}>
+      {/* Who wore what: asked as the film goes up, from the film's own colours. */}
+      <Sheet visible={!!colourAsk} animationType="slide" transparent onRequestClose={() => answerColours(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{tr('gameBuilder.uniformsTitle')}</Text>
-              <TouchableOpacity onPress={() => setPendingFilm(null)} style={{ marginLeft: 'auto' }}>
+              <TouchableOpacity onPress={() => answerColours(false)} style={{ marginLeft: 'auto' }}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalSub}>{tr('gameBuilder.uniformsHint')}</Text>
-            {uniformRows.map((row, i) => (
-              <View key={i} style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+            {colourAsk?.detected === null ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 14 }}>
+                <ActivityIndicator color={t.accent} size="small" />
+                <Text style={{ color: t.muted, fontSize: 13 }}>{tr('gameBuilder.detectingColours')}</Text>
+              </View>
+            ) : (colourAsk?.rows ?? []).map((row, i) => (
+              <View key={i} style={styles.colourRow}>
                 <TextInput
-                  style={[styles.oppNameInput, { flex: 1.3, marginBottom: 0 }]}
+                  style={styles.colourTeam}
                   placeholder={tr('gameBuilder.otherTeam')}
                   placeholderTextColor={t.muted2}
                   value={row.team}
-                  onChangeText={v => setUniformRows(prev => prev.map((r, j) => (j === i ? { ...r, team: v } : r)))}
+                  onChangeText={v => setColourAsk(prev => prev && ({ ...prev, rows: prev.rows.map((r, j) => (j === i ? { ...r, team: v } : r)) }))}
                 />
-                <TextInput
-                  style={[styles.oppNameInput, { flex: 1, marginBottom: 0 }]}
-                  placeholder={tr('gameBuilder.uniformPlaceholder')}
-                  placeholderTextColor={t.muted2}
-                  value={row.colour}
-                  accessibilityLabel={tr('gameBuilder.uniformPlaceholder')}
-                  onChangeText={v => setUniformRows(prev => prev.map((r, j) => (j === i ? { ...r, colour: v } : r)))}
-                />
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, flex: 1 }}>
+                  {(colourAsk?.detected ?? []).map(c => {
+                    const on = row.colour === c && !row.other;
+                    return (
+                      <TouchableOpacity key={c} onPress={() => pickColour(i, c)}
+                                        style={[styles.woreChip, on && styles.woreChipOn]}>
+                        <Text style={[styles.woreChipText, on && styles.woreChipTextOn]}>{c}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  {(colourAsk?.detected ?? []).length > 0 && (
+                    <TouchableOpacity
+                      onPress={() => setColourAsk(prev => prev && ({ ...prev, rows: prev.rows.map((r, j) => (j === i ? { ...r, colour: '', other: true } : r)) }))}
+                      style={[styles.woreChip, row.other && styles.woreChipOn]}>
+                      <Text style={[styles.woreChipText, row.other && styles.woreChipTextOn]}>{tr('gameBuilder.otherColour')}</Text>
+                    </TouchableOpacity>
+                  )}
+                  {(row.other || (colourAsk?.detected ?? []).length === 0) && (
+                    <TextInput
+                      style={[styles.oppNameInput, { flexBasis: 140, flexGrow: 1, marginBottom: 0 }]}
+                      placeholder={tr('gameBuilder.uniformPlaceholder')}
+                      placeholderTextColor={t.muted2}
+                      value={row.colour}
+                      accessibilityLabel={tr('gameBuilder.uniformPlaceholder')}
+                      onChangeText={v => setColourAsk(prev => prev && ({ ...prev, rows: prev.rows.map((r, j) => (j === i ? { ...r, colour: v } : r)) }))}
+                    />
+                  )}
+                </View>
               </View>
             ))}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
-              <TouchableOpacity style={[styles.woreBtn, { borderWidth: 1, borderColor: t.line }]} onPress={() => sendPendingFilm(false)}>
+              <TouchableOpacity style={[styles.woreBtn, { borderWidth: 1, borderColor: t.line }]} onPress={() => answerColours(false)}>
                 <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('gameBuilder.skipColours')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.woreBtn, { backgroundColor: t.ctaBg }]} onPress={() => sendPendingFilm(true)}>
-                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('gameBuilder.uploadFilmBtn')}</Text>
+              <TouchableOpacity
+                style={[styles.woreBtn, { backgroundColor: t.ctaBg },
+                        !(colourAsk?.rows ?? []).every(r => r.colour.trim() && r.team.trim()) && { opacity: 0.5 }]}
+                disabled={!(colourAsk?.rows ?? []).every(r => r.colour.trim() && r.team.trim())}
+                onPress={() => answerColours(true)}>
+                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('gameBuilder.saveColours')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1902,6 +1966,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   woreChipOn: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   woreChipText: { color: t.inkSoft, fontSize: 12, fontFamily: fonts[700] },
   woreChipTextOn: { color: t.ctaText },
+  colourRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 },
+  colourTeam: { width: 150, color: t.ink, fontSize: 13, fontFamily: fonts[700], paddingVertical: 7,
+                borderBottomWidth: 1, borderBottomColor: t.line },
   woreBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(REPORT_MODAL_WIDTH)},
   modalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },

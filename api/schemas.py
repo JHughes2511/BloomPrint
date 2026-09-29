@@ -540,6 +540,7 @@ class GameReportClipOut(BaseModel):
     player_events: bool | None = None
     uniforms: dict | None = None
     uniforms_seen: list[str] = []
+    colours_detected: list[str] | None = None
     created_at: datetime
     model_config = {"from_attributes": True}
 

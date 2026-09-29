@@ -1,5 +1,6 @@
 """Game Report Packet routes — persistent multi-source report builder."""
 
+import os
 import re
 import json
 import shutil
@@ -154,8 +155,13 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             rdb.close()
 
         from ..storage import ensure_local
+        local_path = ensure_local(video_path)
+        colour_words = None
+        if player_events:
+            uniforms, colour_words = _colours_for_film(clip_id, local_path, _prog,
+                                                       uniforms, resumed=bool(done_segments))
         result = asyncio.run(_handle_analyze_basketball_video({
-            "video_path": ensure_local(video_path),
+            "video_path": local_path,
             "output_type": output_type,
             "program_name": program_name,
             "competition_level": level,
@@ -177,6 +183,7 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "_on_profile": _save_profile,
             "player_events": player_events,
             "uniforms": uniforms,
+            "colour_words": colour_words,
         }))
         text = result[0].text
         from video_vision.server import EVENTS_PREFIX
@@ -552,8 +559,13 @@ def _build_out(gr: models.GameReport, db: Session | None = None) -> schemas.Game
             if c.game_id:
                 game = db.get(models.GameSession, c.game_id)
                 c.game_label = _game_label(db, game) if game else None
-            if c.player_events and not c.uniforms and c.analysis_text:
-                c.uniforms_seen = _uniforms_seen(db, c.id)
+            if c.player_events and c.analysis_text:
+                # Colours the film logged that no team has been put to yet —
+                # all of them if the coach skipped, or one they typed
+                # differently from what the film saw.
+                from ..tendencies import _team_for
+                c.uniforms_seen = [u for u in _uniforms_seen(db, c.id)
+                                   if not _team_for(c.uniforms, u)]
     return out
 
 
@@ -586,7 +598,10 @@ def set_clip_uniforms(
     clip = db.get(models.GameReportClip, clip_id)
     if not gr or gr.coach_id != coach.id or not clip or clip.game_report_id != gr.id:
         raise HTTPException(status_code=404, detail="Film not found")
+    # An empty answer is "skip": the film is read with the colours it saw, and
+    # the teams can still be put to them afterwards.
     clip.uniforms = _parse_uniforms(json.dumps(body.uniforms))
+    clip.uniforms_answered = True
     db.commit()
     return {"uniforms": clip.uniforms}
 
@@ -1109,6 +1124,74 @@ async def add_clip(
         call["level"], subject, directive, seg_note, clip.uniforms, True,
     )
     return {"job_id": job.id, "clip_id": clip.id}
+
+
+# How long a film waits for "who wore what" before being read anyway.
+COLOUR_WAIT_SECONDS = int(os.environ.get("BLOOMPRINT_COLOUR_WAIT", "150"))
+
+
+def _colours_for_film(clip_id: int, path: str, progress, uniforms: dict | None,
+                      resumed: bool = False) -> tuple[dict | None, list[str] | None]:
+    """Who wore what, settled before the film is read.
+
+    The two colours are read off a handful of frames and offered to the coach
+    as choices; the read waits a little for the answer, so every player the
+    film logs is tagged with a colour the coach confirmed. If no answer comes,
+    the film is read with the detected words, and "who wore white?" is asked
+    afterwards instead. A film resumed after a restart does not wait again.
+    """
+    import time as _time
+    db = SessionLocal()
+    try:
+        clip = db.get(models.GameReportClip, clip_id)
+        detected = (clip.colours_detected if clip else None) or None
+    finally:
+        db.close()
+    if uniforms:
+        return uniforms, None
+    if detected is None and not resumed:
+        progress(0, 1, "job:colours")
+        try:
+            from video_vision.server import _client
+            from video_vision.player_events import detect_colours
+            from ..ai_models import SONNET, text_of
+
+            def ask(content):
+                r = _client().messages.create(model=SONNET, max_tokens=200,
+                                              messages=[{"role": "user", "content": content}])
+                return text_of(r)
+            detected = detect_colours(path, ask)
+        except Exception:
+            detected = []
+        db = SessionLocal()
+        try:
+            clip = db.get(models.GameReportClip, clip_id)
+            if clip:
+                clip.colours_detected = detected
+                db.commit()
+        finally:
+            db.close()
+    if not resumed and detected:
+        progress(0, 1, "job:waitColours")
+        waited = 0
+        while waited < COLOUR_WAIT_SECONDS:
+            db = SessionLocal()
+            try:
+                clip = db.get(models.GameReportClip, clip_id)
+                if clip is None:
+                    break
+                if clip.uniforms or clip.uniforms_answered:
+                    return clip.uniforms or None, detected
+            finally:
+                db.close()
+            _time.sleep(2)
+            waited += 2
+    db = SessionLocal()
+    try:
+        clip = db.get(models.GameReportClip, clip_id)
+        return (clip.uniforms if clip else None) or None, detected or None
+    finally:
+        db.close()
 
 
 def _parse_uniforms(raw: str) -> dict | None:

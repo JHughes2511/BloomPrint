@@ -77,6 +77,8 @@ export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: 
   const scanPct = label.match(/^job:scanning:(\d+)$/);
   if (scanPct) return `${tr('jobProgress.scanning')} ${scanPct[1]}%`;
   if (label === 'job:scanning') return tr('jobProgress.scanning');
+  if (label === 'job:colours') return tr('jobProgress.colours');
+  if (label === 'job:waitColours') return tr('jobProgress.waitColours');
   if (label === 'job:synthesizing') return tr('jobProgress.synthesizing');
   // Same phase, same words as before it started reporting itself — with the
   // percentage appended, exactly as the scan does. The heartbeat after it is

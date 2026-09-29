@@ -2032,13 +2032,16 @@
     "tiedTo": "Game Stats tied",
     "untie": "Untie",
     "uniformsTitle": "Who wore what?",
-    "uniformsHint": "Jersey colours let the film tell the two teams' players apart. Leave them blank and you'll be asked after the film is read.",
+    "uniformsHint": "Pick each team's jersey colour. The choices come from the film; tap Other only if they're wrong. You can skip and say afterwards.",
     "uniformPlaceholder": "Colour, e.g. white",
     "otherTeam": "Other team",
     "skipColours": "Skip",
     "uploadFilmBtn": "Upload film",
     "whoWore": "Who wore {{colour}}?",
-    "whoWoreHint": "The film saw these colours. Say which team wore each, and every player is filed under their team."
+    "whoWoreHint": "The film saw these colours. Say which team wore each, and every player is filed under their team.",
+    "detectingColours": "Reading the jersey colours from the film…",
+    "otherColour": "Other",
+    "saveColours": "Save"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Ball screens as the handler: {{parts}} (of {{of}})",
       "pnrScreener": "Ball screens as the screener: {{parts}} (of {{of}})",
       "post": "Post-ups: {{count}} ({{parts}})",
-      "runHard": "Runs the floor hard ({{count}} of {{of}})",
-      "runJog": "Does not run the floor: jogs {{count}} of {{of}}",
-      "runSometimes": "Runs the floor sometimes (sprints {{count}} of {{of}})",
+      "runHard": "Runs the floor hard",
+      "runJog": "Does not run the floor",
+      "runSometimes": "Runs the floor some of the time",
       "cuts": "Cuts: {{count}} (scored {{scored}}, got open {{open}})",
       "stagnantOff": "Stagnant on offense: standing and watching {{count}} times",
       "movesWell": "Moves well without the ball ({{count}} cuts, relocations and screens)",
       "defense": "Defense: {{parts}}",
-      "stagnantDef": "Stagnant on defense: loses their player watching the ball {{count}} times"
+      "stagnantDef": "Stagnant on defense: loses their player watching the ball {{count}} times",
+      "runAfterOffSprint": "Runs the floor hard after {{after}}",
+      "runAfterOffJog": "Does not run the floor after {{after}}",
+      "runAfterDefSprint": "Gets back hard on defense after {{after}}",
+      "runAfterDefJog": "Does not get back on defense after {{after}}",
+      "transMatchNo": "Does not match up in transition defense",
+      "transMatchYes": "Matches up in transition defense"
     },
     "tendWord": {
       "right": "right",
@@ -2381,6 +2390,13 @@
       "block": "blocks",
       "rightShoulder": "right shoulder",
       "leftShoulder": "left shoulder"
+    },
+    "tendAfter": {
+      "turnover": "a turnover",
+      "steal": "a steal",
+      "rebound": "a defensive rebound",
+      "miss": "a missed shot",
+      "made": "a made basket"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Synthesizing report",
     "uploading": "Uploading film — {{pct}}% ({{sent}} of {{total}})",
     "uploadingOf": "Uploading film {{i}} of {{n}} — {{pct}}% ({{sent}} of {{total}})",
-    "working": "Working…"
+    "working": "Working…",
+    "colours": "Checking jersey colours",
+    "waitColours": "Waiting for jersey colours"
   },
   "notifs": {
     "seasonNew": {

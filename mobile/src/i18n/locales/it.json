@@ -2032,13 +2032,16 @@
     "tiedTo": "Statistiche collegate",
     "untie": "Scollega",
     "uniformsTitle": "Chi indossava cosa?",
-    "uniformsHint": "I colori delle maglie permettono al video di distinguere i giocatori delle due squadre. Lasciali vuoti e te lo chiederemo dopo la lettura del video.",
+    "uniformsHint": "Scegli il colore della maglia di ogni squadra. Le scelte vengono dal video; tocca Altro solo se sono sbagliate. Puoi saltare e dirlo dopo.",
     "uniformPlaceholder": "Colore, es. bianco",
     "otherTeam": "Altra squadra",
     "skipColours": "Salta",
     "uploadFilmBtn": "Carica video",
     "whoWore": "Chi indossava {{colour}}?",
-    "whoWoreHint": "Il video ha visto questi colori. Indica quale squadra indossava ciascuno e ogni giocatore finisce nella sua squadra."
+    "whoWoreHint": "Il video ha visto questi colori. Indica quale squadra indossava ciascuno e ogni giocatore finisce nella sua squadra.",
+    "detectingColours": "Lettura dei colori delle maglie dal video…",
+    "otherColour": "Altro",
+    "saveColours": "Salva"
   },
   "teamGrade": {
     "views": {
@@ -2335,14 +2338,20 @@
       "pnrHandler": "Pick and roll da palleggiatore: {{parts}} (su {{of}})",
       "pnrScreener": "Pick and roll da bloccante: {{parts}} (su {{of}})",
       "post": "Gioco in post: {{count}} ({{parts}})",
-      "runHard": "Corre forte in transizione ({{count}} su {{of}})",
-      "runJog": "Non corre il campo: trotterella {{count}} su {{of}}",
-      "runSometimes": "Corre il campo a volte (sprinta {{count}} su {{of}})",
+      "runHard": "Corre forte il campo",
+      "runJog": "Non corre il campo",
+      "runSometimes": "Corre il campo a volte",
       "cuts": "Tagli: {{count}} (segnato {{scored}}, libero {{open}})",
       "stagnantOff": "Statico in attacco: fermo a guardare {{count}} volte",
       "movesWell": "Si muove bene senza palla ({{count}} tagli, spostamenti e blocchi)",
       "defense": "Difesa: {{parts}}",
-      "stagnantDef": "Statico in difesa: perde il suo uomo guardando la palla {{count}} volte"
+      "stagnantDef": "Statico in difesa: perde il suo uomo guardando la palla {{count}} volte",
+      "runAfterOffSprint": "Corre forte dopo {{after}}",
+      "runAfterOffJog": "Non corre dopo {{after}}",
+      "runAfterDefSprint": "Rientra forte in difesa dopo {{after}}",
+      "runAfterDefJog": "Non rientra in difesa dopo {{after}}",
+      "transMatchNo": "Non si accoppia nella difesa in transizione",
+      "transMatchYes": "Si accoppia nella difesa in transizione"
     },
     "tendWord": {
       "right": "destra",
@@ -2381,6 +2390,13 @@
       "block": "stoppate",
       "rightShoulder": "spalla destra",
       "leftShoulder": "spalla sinistra"
+    },
+    "tendAfter": {
+      "turnover": "una palla persa",
+      "steal": "una rubata",
+      "rebound": "un rimbalzo difensivo",
+      "miss": "un tiro sbagliato",
+      "made": "un canestro segnato"
     }
   },
   "whiteboard": {
@@ -2502,7 +2518,9 @@
     "synthesizing": "Sintesi del report",
     "uploading": "Caricamento del video — {{pct}}% ({{sent}} di {{total}})",
     "uploadingOf": "Caricamento del video {{i}} di {{n}} — {{pct}}% ({{sent}} di {{total}})",
-    "working": "Elaborazione…"
+    "working": "Elaborazione…",
+    "colours": "Controllo dei colori delle maglie",
+    "waitColours": "In attesa dei colori delle maglie"
   },
   "notifs": {
     "seasonNew": {
