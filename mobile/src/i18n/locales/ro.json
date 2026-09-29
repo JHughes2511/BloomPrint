@@ -2987,6 +2987,43 @@
       "savedTitle": "Sisteme importate",
       "savedMsg": "{{n}} posesii salvate la acest meci."
     },
-    "quickScored": "{{scored}} din {{n}} reușite"
+    "quickScored": "{{scored}} din {{n}} reușite",
+    "page": {
+      "tab": "Sisteme",
+      "pickHint": "Alege un meci pentru a vedea sistemele și a scrie un raport de eficiență.",
+      "cardLine": "{{n}} posesii · {{pct}}% reușite",
+      "cardNone": "Încă niciun sistem",
+      "context": "Context pentru raport",
+      "contextPlaceholder": "ex. Am jucat mic în sfertul 3; zona lor 2-3 după time-out-uri",
+      "generate": "Generează raportul de eficiență a sistemelor",
+      "regenerate": "Regenerează raportul",
+      "writing": "Se scrie raportul…",
+      "reportTitle": "Raport de eficiență a sistemelor",
+      "numbers": "Cifrele",
+      "overall": "Atacul {{team}}",
+      "byPlay": "După sistem",
+      "byType": "După tip",
+      "byDefense": "După apărare",
+      "byPlayDefense": "Sistem vs apărare",
+      "byQuarter": "După sfert",
+      "colTrips": "Posesii",
+      "colScored": "Reușite",
+      "colPts": "Pct",
+      "colPpp": "Pe posesie",
+      "endings": "Cum s-au încheiat posesiile fără puncte",
+      "possessions": "Posesii",
+      "both": "Ambele",
+      "scoredWord": "a marcat",
+      "noScoreWord": "fără puncte",
+      "noData": "Încă nu există sisteme pentru acest meci. Urmărește live sau importă o foaie.",
+      "notNoted": "Nenotat"
+    },
+    "endings": {
+      "miss2": "ratat de 2",
+      "miss3": "ratat de 3",
+      "turnover": "pierdere",
+      "ft_miss": "aruncări libere ratate",
+      "other": "altceva"
+    }
   }
 }

@@ -31,6 +31,7 @@ import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
 import PlayCallingPanel from '../components/PlayCallingPanel';
 import PlayCallingImport from '../components/PlayCallingImport';
+import PlayCallingPage from '../components/PlayCallingPage';
 import TeamLabelPrompt from '../components/TeamLabelPrompt';
 import GameReportPanel from '../components/GameReportPanel';
 import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
@@ -147,7 +148,7 @@ function quarterMultiplier(q: number): number {
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
-type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout' | 'gamereport';
+type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout' | 'gamereport' | 'playcalling';
 
 /**
  * Minutes as a coach reads them, or a dash.
@@ -412,12 +413,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [pcKey, setPcKey] = useState(0);
   // A play-calling sheet picked for import, being read and checked.
   const [pcImportFile, setPcImportFile] = useState<{ uri: string; name: string; type: string } | null>(null);
-  const pickPlayCallingSheet = async () => {
+  const [pcImportGame, setPcImportGame] = useState<any>(null);
+  const pickPlayCallingSheet = async (game: any) => {
     const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
     if (res.canceled || !res.assets?.[0]) return;
     const f = res.assets[0];
+    setPcImportGame(game);
     setPcImportFile({ uri: f.uri, name: f.name ?? 'sheet', type: f.mimeType ?? 'application/octet-stream' });
   };
+  const sideNamesFor = (g: any) => ({
+    our: g?.team_name ?? (teams as any[]).find(tm => tm.id === g?.team_id)?.name ?? coach?.program_name ?? tr('teamGrade.ourTeam'),
+    opponent: g?.opponent_name || tr('teamGrade.opponent'),
+  });
+
   // The circle whose name is showing: hovered on a computer, tapped on a phone.
   const [peekTracker, setPeekTracker] = useState<number | null>(null);
   const peekTimer = useRef<any>(null);
@@ -494,6 +502,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showScoutingReport, setShowScoutingReport] = useState(false);
   const [gameReportGame, setGameReportGame] = useState<any>(null);
+  // The Play Calling tab: the game open on it, and what each game card says.
+  const [pcGame, setPcGame] = useState<any>(null);
+  const [pcOverview, setPcOverview] = useState<Record<string, any>>({});
+  const [pcImportKey, setPcImportKey] = useState(0);
+  useEffect(() => {
+    if (activeView !== 'playcalling') return;
+    playCallingAPI.overview().then(setPcOverview).catch(() => {});
+  }, [activeView, pcImportKey, pcGame?.id]);
   const [gameReportSearch, setGameReportSearch] = useState('');
   // One date range for Games, Scout and Game Report. Owned here rather than by
   // each list, because a coach who narrows to this season in one of them
@@ -1419,7 +1435,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     const v = route?.params?.view ? String(route.params.view) : null;
     if (!v || restoredView.current) return;
     restoredView.current = true;
-    if (['dashboard', 'games', 'scout', 'gamereport'].includes(v)) setActiveView(v as ViewKey);
+    if (['dashboard', 'games', 'scout', 'gamereport', 'playcalling'].includes(v)) setActiveView(v as ViewKey);
   }, [route?.params?.view]);
 
   const restoredGame = useRef(false);
@@ -1449,7 +1465,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   useFocusEffect(useCallback(() => {
     const p = route?.params ?? {};
     if (!p.openView && !p.openNewGame && !p.openPlaybook && !p.openScoutTeam) return;
-    if (p.openView && ['dashboard', 'games', 'scout', 'gamereport'].includes(p.openView)) {
+    if (p.openView && ['dashboard', 'games', 'scout', 'gamereport', 'playcalling'].includes(p.openView)) {
       setActiveView(p.openView as ViewKey);
     }
     if (p.openNewGame) {
@@ -2440,14 +2456,16 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           <View style={desktopOnly({ flex: 1, minWidth: 0 })}>
             <Text style={s.screenTitle}>{tr('common.tabs.teamGrade')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 8)}>
-              {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
+              {(['dashboard', 'games', 'scout', 'gamereport', 'playcalling'] as const).map(v => (
                 <TouchableOpacity
                   key={v}
                   style={[s.navBtn, navView === v && s.navBtnActive]}
-                  onPress={() => { if (v === 'gamereport') setGameReportGame(null); setActiveView(v); }}
+                  onPress={() => { if (v === 'gamereport') setGameReportGame(null); if (v === 'playcalling') setPcGame(null); setActiveView(v); }}
                 >
                   <Text style={[s.navBtnText, navView === v && s.navBtnTextActive]}>
-                    {v === 'dashboard' ? tr('teamGrade.views.dashboard') : v === 'games' ? tr('teamGrade.views.games') : v === 'scout' ? tr('teamGrade.views.scout') : tr('reportTypes.game_report')}
+                    {v === 'dashboard' ? tr('teamGrade.views.dashboard') : v === 'games' ? tr('teamGrade.views.games')
+                      : v === 'scout' ? tr('teamGrade.views.scout') : v === 'playcalling' ? tr('playCalling.page.tab')
+                      : tr('reportTypes.game_report')}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -3889,7 +3907,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             {canTrack(detailGame) && (
               <TouchableOpacity
                 style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
-                onPress={pickPlayCallingSheet}
+                onPress={() => pickPlayCallingSheet(detailGame)}
               >
                 <Ionicons name="clipboard-outline" size={14} color={t.muted} />
                 <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>{tr('playCalling.import.button')}</Text>
@@ -3903,24 +3921,6 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>{tr('teamGrade.generateGameReport')}</Text>
             </TouchableOpacity>
           </View>
-
-          <PlayCallingImport
-            game={detailGame}
-            file={pcImportFile}
-            sideNames={{
-              our: detailGame.team_name ?? (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
-                ?? coach?.program_name ?? tr('teamGrade.ourTeam'),
-              opponent: detailGame.opponent_name || tr('teamGrade.opponent'),
-            }}
-            qLabel={qLabel}
-            onClose={() => setPcImportFile(null)}
-            onSaved={(n) => {
-              setPcImportFile(null);
-              Alert.alert(tr('playCalling.import.savedTitle'), tr('playCalling.import.savedMsg', { n }));
-            }}
-            t={t}
-            tr={tr}
-          />
 
           {/* Live entry shortcut if in_progress — anyone who can track it */}
           {detailGame.status === 'in_progress' && canTrack(detailGame) && (
@@ -4243,6 +4243,87 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       )}
 
       {/* Full Game Report — our team + opponent, with add-context (like Scout) */}
+      {/* Play Calling: a card per game, then that game's play calling and its report. */}
+      {activeView === 'playcalling' && (
+        <KeyboardAwareScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
+          {!pcGame ? (
+            <>
+              <ListSearchHeader
+                title={tr('playCalling.page.tab')}
+                titleStyle={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}
+                value={gameReportSearch}
+                onChange={setGameReportSearch}
+                placeholder={tr('staffHub.searchGamesPlaceholder')}
+                trailing={<DateRangeFilter value={dateRange} onChange={setDateRange} />}
+                subtitle={(
+                  <Text style={{ color: t.muted2, fontSize: 13, marginTop: 4 }}>{tr('playCalling.page.pickHint')}</Text>
+                )}
+              />
+              <View style={{ height: 12 }} />
+              {sessions.length === 0 && (
+                <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noGamesYet')}</Text>
+              )}
+              <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
+                    ref={reportGrid.ref} onLayout={reportGrid.onLayout}>
+                {gameReportGames.map((g: any) => {
+                  const o = pcOverview[String(g.id)];
+                  const n = (o?.our?.n ?? 0) + (o?.opponent?.n ?? 0);
+                  const sc = (o?.our?.scored ?? 0) + (o?.opponent?.scored ?? 0);
+                  return (
+                    <TouchableOpacity key={g.id} style={[s.gameCard, reportGrid.cardWidth ? { width: reportGrid.cardWidth } : null]}
+                                      onPress={() => setPcGame(g)}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{matchupLabel(g)}</Text>
+                        <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
+                          {g.date ? new Date(g.date).toLocaleDateString() : ''}
+                          {g.our_score != null ? `  ·  ${g.our_score}-${g.opponent_score}` : ''}
+                        </Text>
+                        <Text style={{ color: n ? t.inkSoft : t.muted2, fontSize: 12, marginTop: 2 }}>
+                          {n ? tr('playCalling.page.cardLine', { n, pct: Math.round((100 * sc) / n) }) : tr('playCalling.page.cardNone')}
+                          {o?.report ? `  ·  ${tr('teamGrade.reportReady')}` : ''}
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color={t.muted} />
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          ) : (
+            <PlayCallingPage
+              game={pcGame}
+              sideNames={sideNamesFor(pcGame)}
+              qLabel={qLabel}
+              statLabel={statLabel}
+              onBack={() => setPcGame(null)}
+              onGameData={() => void openDetail(pcGame, true)}
+              onImport={() => pickPlayCallingSheet(pcGame)}
+              refreshKey={pcImportKey}
+              t={t}
+              tr={tr}
+            />
+          )}
+        </KeyboardAwareScrollView>
+      )}
+
+      {pcImportGame && (
+        <PlayCallingImport
+          game={pcImportGame}
+          file={pcImportFile}
+          sideNames={sideNamesFor(pcImportGame)}
+          qLabel={qLabel}
+          onClose={() => { setPcImportFile(null); setPcImportGame(null); }}
+          onSaved={(n) => {
+            setPcImportFile(null);
+            setPcImportGame(null);
+            setPcImportKey(k => k + 1);
+            Alert.alert(tr('playCalling.import.savedTitle'), tr('playCalling.import.savedMsg', { n }));
+          }}
+          t={t}
+          tr={tr}
+        />
+      )}
+
       {activeView === 'gamereport' && (
         <KeyboardAwareScrollView ref={findGameReport.scrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {!gameReportGame ? (

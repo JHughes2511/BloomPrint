@@ -2987,6 +2987,43 @@
       "savedTitle": "Systèmes importés",
       "savedMsg": "{{n}} possessions enregistrées pour ce match."
     },
-    "quickScored": "{{scored}} sur {{n}} marqués"
+    "quickScored": "{{scored}} sur {{n}} marqués",
+    "page": {
+      "tab": "Systèmes",
+      "pickHint": "Choisissez un match pour voir ses systèmes et rédiger un rapport d'efficacité.",
+      "cardLine": "{{n}} possessions · {{pct}} % marquées",
+      "cardNone": "Aucun système saisi",
+      "context": "Contexte du rapport",
+      "contextPlaceholder": "ex. Petit format au 3e ; leur 2-3 est sorti après les temps morts",
+      "generate": "Générer le rapport d'efficacité des systèmes",
+      "regenerate": "Régénérer le rapport",
+      "writing": "Rédaction du rapport…",
+      "reportTitle": "Rapport d'efficacité des systèmes",
+      "numbers": "Les chiffres",
+      "overall": "Attaque de {{team}}",
+      "byPlay": "Par système",
+      "byType": "Par type",
+      "byDefense": "Par défense rencontrée",
+      "byPlayDefense": "Système vs défense",
+      "byQuarter": "Par quart-temps",
+      "colTrips": "Possessions",
+      "colScored": "Marquées",
+      "colPts": "Pts",
+      "colPpp": "Par possession",
+      "endings": "Comment ont fini les possessions sans panier",
+      "possessions": "Possessions",
+      "both": "Les deux",
+      "scoredWord": "marqué",
+      "noScoreWord": "pas marqué",
+      "noData": "Aucun système saisi pour ce match. Suivez-le en direct ou importez une feuille.",
+      "notNoted": "Non noté"
+    },
+    "endings": {
+      "miss2": "2 manqué",
+      "miss3": "3 manqué",
+      "turnover": "perte de balle",
+      "ft_miss": "lancers francs manqués",
+      "other": "autre"
+    }
   }
 }

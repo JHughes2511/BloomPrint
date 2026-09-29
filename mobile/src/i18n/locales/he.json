@@ -2987,6 +2987,43 @@
       "savedTitle": "המהלכים יובאו",
       "savedMsg": "נשמרו {{n}} התקפות למשחק."
     },
-    "quickScored": "{{scored}} מתוך {{n}} קלעו"
+    "quickScored": "{{scored}} מתוך {{n}} קלעו",
+    "page": {
+      "tab": "בחירת מהלכים",
+      "pickHint": "בחרו משחק כדי לראות את המהלכים ולכתוב דוח יעילות.",
+      "cardLine": "{{n}} התקפות · {{pct}}% קלעו",
+      "cardNone": "אין עדיין מהלכים",
+      "context": "הקשר לדוח",
+      "contextPlaceholder": "למשל: שיחקנו נמוך ברבע השלישי; ה-2-3 שלהם אחרי פסקי זמן",
+      "generate": "יצירת דוח יעילות מהלכים",
+      "regenerate": "יצירה מחדש",
+      "writing": "כותבים את הדוח…",
+      "reportTitle": "דוח יעילות מהלכים",
+      "numbers": "המספרים",
+      "overall": "ההתקפה של {{team}}",
+      "byPlay": "לפי מהלך",
+      "byType": "לפי סוג",
+      "byDefense": "לפי הגנה",
+      "byPlayDefense": "מהלך מול הגנה",
+      "byQuarter": "לפי רבע",
+      "colTrips": "התקפות",
+      "colScored": "קלעו",
+      "colPts": "נק'",
+      "colPpp": "להתקפה",
+      "endings": "איך נגמרו התקפות בלי סל",
+      "possessions": "התקפות",
+      "both": "שתיהן",
+      "scoredWord": "קלעו",
+      "noScoreWord": "לא קלעו",
+      "noData": "עדיין אין מהלכים למשחק הזה. עקבו בזמן אמת או ייבאו דף.",
+      "notNoted": "לא צוין"
+    },
+    "endings": {
+      "miss2": "החטאת 2",
+      "miss3": "החטאת 3",
+      "turnover": "איבוד",
+      "ft_miss": "החטאות עונשין",
+      "other": "אחר"
+    }
   }
 }

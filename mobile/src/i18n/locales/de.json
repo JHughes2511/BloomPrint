@@ -2987,6 +2987,43 @@
       "savedTitle": "Spielzüge importiert",
       "savedMsg": "{{n}} Angriffe für dieses Spiel gespeichert."
     },
-    "quickScored": "{{scored}} von {{n}} erfolgreich"
+    "quickScored": "{{scored}} von {{n}} erfolgreich",
+    "page": {
+      "tab": "Spielzüge",
+      "pickHint": "Wähle ein Spiel, um die Spielzüge zu sehen und einen Effizienzbericht zu schreiben.",
+      "cardLine": "{{n}} Angriffe · {{pct}} % erfolgreich",
+      "cardNone": "Noch keine Spielzüge",
+      "context": "Kontext für den Bericht",
+      "contextPlaceholder": "z. B. Im 3. Viertel klein gespielt; ihre 2-3 kam nach Auszeiten",
+      "generate": "Effizienzbericht zu Spielzügen erstellen",
+      "regenerate": "Bericht neu erstellen",
+      "writing": "Bericht wird geschrieben…",
+      "reportTitle": "Effizienzbericht zu Spielzügen",
+      "numbers": "Die Zahlen",
+      "overall": "Angriff {{team}}",
+      "byPlay": "Nach Spielzug",
+      "byType": "Nach Art",
+      "byDefense": "Nach Verteidigung",
+      "byPlayDefense": "Spielzug gg. Verteidigung",
+      "byQuarter": "Nach Viertel",
+      "colTrips": "Angriffe",
+      "colScored": "Erfolgreich",
+      "colPts": "Pkt.",
+      "colPpp": "Pro Angriff",
+      "endings": "Wie Angriffe ohne Punkte endeten",
+      "possessions": "Angriffe",
+      "both": "Beide",
+      "scoredWord": "gepunktet",
+      "noScoreWord": "keine Punkte",
+      "noData": "Für dieses Spiel sind noch keine Spielzüge erfasst. Live erfassen oder einen Bogen importieren.",
+      "notNoted": "Nicht notiert"
+    },
+    "endings": {
+      "miss2": "Zweier daneben",
+      "miss3": "Dreier daneben",
+      "turnover": "Ballverlust",
+      "ft_miss": "Freiwürfe daneben",
+      "other": "anders"
+    }
   }
 }

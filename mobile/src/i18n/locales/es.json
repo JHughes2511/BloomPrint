@@ -2987,6 +2987,43 @@
       "savedTitle": "Llamado de jugadas importado",
       "savedMsg": "{{n}} posesiones guardadas en este partido."
     },
-    "quickScored": "{{scored}} de {{n}} anotadas"
+    "quickScored": "{{scored}} de {{n}} anotadas",
+    "page": {
+      "tab": "Llamado de jugadas",
+      "pickHint": "Elige un partido para ver su llamado de jugadas y generar un informe de eficiencia.",
+      "cardLine": "{{n}} posesiones · {{pct}}% anotadas",
+      "cardNone": "Sin llamado de jugadas",
+      "context": "Contexto para el informe",
+      "contextPlaceholder": "p. ej. Jugamos pequeños en el 3.º; su 2-3 salió tras los tiempos muertos",
+      "generate": "Generar informe de eficiencia de jugadas",
+      "regenerate": "Regenerar informe",
+      "writing": "Escribiendo el informe…",
+      "reportTitle": "Informe de eficiencia del llamado de jugadas",
+      "numbers": "Los números",
+      "overall": "Ataque de {{team}}",
+      "byPlay": "Por jugada",
+      "byType": "Por tipo de jugada",
+      "byDefense": "Por defensa enfrentada",
+      "byPlayDefense": "Jugada vs defensa",
+      "byQuarter": "Por cuarto",
+      "colTrips": "Posesiones",
+      "colScored": "Anotadas",
+      "colPts": "Pts",
+      "colPpp": "Por posesión",
+      "endings": "Cómo terminaron las posesiones sin anotar",
+      "possessions": "Posesiones",
+      "both": "Ambos",
+      "scoredWord": "anotó",
+      "noScoreWord": "no anotó",
+      "noData": "Aún no hay llamado de jugadas en este partido. Regístralo en vivo o importa una hoja.",
+      "notNoted": "No anotada"
+    },
+    "endings": {
+      "miss2": "doble fallado",
+      "miss3": "triple fallado",
+      "turnover": "pérdida",
+      "ft_miss": "tiros libres fallados",
+      "other": "otro"
+    }
   }
 }

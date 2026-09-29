@@ -2987,6 +2987,43 @@
       "savedTitle": "Play calling imported",
       "savedMsg": "{{n}} possessions saved to this game."
     },
-    "quickScored": "{{scored}} of {{n}} scored"
+    "quickScored": "{{scored}} of {{n}} scored",
+    "page": {
+      "tab": "Play Calling",
+      "pickHint": "Pick a game to see its play calling and write a Play Calling Efficiency report.",
+      "cardLine": "{{n}} possessions · {{pct}}% scored",
+      "cardNone": "No play calling yet",
+      "context": "Context for the report",
+      "contextPlaceholder": "e.g. We went small in the 3rd; their 2-3 came out of timeouts",
+      "generate": "Generate Play Calling Efficiency Report",
+      "regenerate": "Regenerate report",
+      "writing": "Writing the report…",
+      "reportTitle": "Play Calling Efficiency Report",
+      "numbers": "The numbers",
+      "overall": "{{team}} offense",
+      "byPlay": "By play",
+      "byType": "By play type",
+      "byDefense": "By defense faced",
+      "byPlayDefense": "Play vs defense",
+      "byQuarter": "By quarter",
+      "colTrips": "Trips",
+      "colScored": "Scored",
+      "colPts": "Pts",
+      "colPpp": "Per trip",
+      "endings": "How non-scoring trips ended",
+      "possessions": "Possessions",
+      "both": "Both",
+      "scoredWord": "scored",
+      "noScoreWord": "no score",
+      "noData": "No play calling recorded for this game yet. Track it live or import a sheet.",
+      "notNoted": "Not noted"
+    },
+    "endings": {
+      "miss2": "missed 2",
+      "miss3": "missed 3",
+      "turnover": "turnover",
+      "ft_miss": "missed free throws",
+      "other": "other"
+    }
   }
 }

@@ -2987,6 +2987,43 @@
       "savedTitle": "Spelval importerade",
       "savedMsg": "{{n}} anfall sparade i matchen."
     },
-    "quickScored": "{{scored}} av {{n}} gav poäng"
+    "quickScored": "{{scored}} av {{n}} gav poäng",
+    "page": {
+      "tab": "Spelval",
+      "pickHint": "Välj en match för att se spelvalen och skriva en effektivitetsrapport.",
+      "cardLine": "{{n}} anfall · {{pct}} % gav poäng",
+      "cardNone": "Inga spelval än",
+      "context": "Kontext för rapporten",
+      "contextPlaceholder": "t.ex. Vi spelade små i tredje; deras 2-3 kom efter timeouts",
+      "generate": "Skapa effektivitetsrapport för spelval",
+      "regenerate": "Skapa rapport igen",
+      "writing": "Skriver rapporten…",
+      "reportTitle": "Effektivitetsrapport för spelval",
+      "numbers": "Siffrorna",
+      "overall": "{{team}} anfall",
+      "byPlay": "Per spel",
+      "byType": "Per typ",
+      "byDefense": "Per försvar",
+      "byPlayDefense": "Spel mot försvar",
+      "byQuarter": "Per period",
+      "colTrips": "Anfall",
+      "colScored": "Poäng",
+      "colPts": "P",
+      "colPpp": "Per anfall",
+      "endings": "Hur anfall utan poäng slutade",
+      "possessions": "Anfall",
+      "both": "Båda",
+      "scoredWord": "gav poäng",
+      "noScoreWord": "ingen poäng",
+      "noData": "Inga spelval registrerade för matchen. Registrera live eller importera ett blad.",
+      "notNoted": "Ej noterat"
+    },
+    "endings": {
+      "miss2": "missad tvåa",
+      "miss3": "missad trea",
+      "turnover": "bolltapp",
+      "ft_miss": "missade straffar",
+      "other": "annat"
+    }
   }
 }

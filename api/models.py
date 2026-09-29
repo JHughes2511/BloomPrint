@@ -992,6 +992,20 @@ class PlayCall(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class PlayCallingReport(Base):
+    """A coach's own Play Calling Efficiency report for a game, and the
+    context they gave it. One per (game, coach), like the game report."""
+    __tablename__ = "play_calling_reports"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    game_id     = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    coach_id    = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    report_text = Column(Text, nullable=True)
+    context     = Column(Text, nullable=True)
+    created_at  = Column(DateTime, default=datetime.utcnow)
+    updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class PlayCatalogEntry(Base):
     """A named play, kept for quick selection next time.
 

@@ -399,6 +399,14 @@ export const playCallingAPI = {
   orb: (gameId: number, side: 'our' | 'opponent', quarter: number, delta: number) =>
     api.post(`/play-calling/games/${gameId}/orb`, { side, quarter, delta }).then(r => r.data),
   countDuplicate: (dupId: number) => api.post(`/game-eval/duplicates/${dupId}/count`).then(r => r.data),
+  overview: () => api.get('/play-calling/overview').then(r => r.data),
+  report: (gameId: number) => api.get(`/play-calling/games/${gameId}/report`).then(r => r.data),
+  /** Write (or rewrite) the Play Calling Efficiency report, following the job. */
+  generateReport: async (gameId: number, context: string | null, onTick?: (s: string) => void) => {
+    const { job_id } = await api.post(`/play-calling/games/${gameId}/report-job`, { context }).then(r => r.data);
+    await evalsAPI.awaitJob(job_id, onTick);
+    return api.get(`/play-calling/games/${gameId}/report`).then(r => r.data);
+  },
   /** Read a play-calling sheet (photo, PDF, CSV, Excel) into a preview; nothing is saved. */
   importRead: async (gameId: number, f: { uri: string; name: string; type: string }) => {
     const form = new FormData();

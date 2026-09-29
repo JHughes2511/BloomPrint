@@ -2987,6 +2987,43 @@
       "savedTitle": "Deriniai importuoti",
       "savedMsg": "Išsaugota {{n}} atakų šioms rungtynėms."
     },
-    "quickScored": "{{scored}} iš {{n}} sėkmingų"
+    "quickScored": "{{scored}} iš {{n}} sėkmingų",
+    "page": {
+      "tab": "Deriniai",
+      "pickHint": "Pasirinkite rungtynes, kad pamatytumėte derinius ir parašytumėte efektyvumo ataskaitą.",
+      "cardLine": "{{n}} atakų · {{pct}}% sėkmingų",
+      "cardNone": "Derinių dar nėra",
+      "context": "Kontekstas ataskaitai",
+      "contextPlaceholder": "pvz. 3-ame kėlinyje žaidėme žemai; jų 2-3 po minučių pertraukų",
+      "generate": "Kurti derinių efektyvumo ataskaitą",
+      "regenerate": "Kurti iš naujo",
+      "writing": "Rašoma ataskaita…",
+      "reportTitle": "Derinių efektyvumo ataskaita",
+      "numbers": "Skaičiai",
+      "overall": "{{team}} puolimas",
+      "byPlay": "Pagal derinį",
+      "byType": "Pagal tipą",
+      "byDefense": "Pagal gynybą",
+      "byPlayDefense": "Derinys prieš gynybą",
+      "byQuarter": "Pagal kėlinį",
+      "colTrips": "Atakos",
+      "colScored": "Sėkmingos",
+      "colPts": "Tšk.",
+      "colPpp": "Per ataką",
+      "endings": "Kaip baigėsi atakos be taškų",
+      "possessions": "Atakos",
+      "both": "Abi",
+      "scoredWord": "pelnė",
+      "noScoreWord": "be taškų",
+      "noData": "Šioms rungtynėms derinių dar nėra. Fiksuokite tiesiogiai arba importuokite lapą.",
+      "notNoted": "Nepažymėta"
+    },
+    "endings": {
+      "miss2": "nepataikytas dvitaškis",
+      "miss3": "nepataikytas tritaškis",
+      "turnover": "klaida",
+      "ft_miss": "nepataikytos baudos",
+      "other": "kita"
+    }
   }
 }

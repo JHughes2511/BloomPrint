@@ -1761,6 +1761,10 @@ def _resume_job(job_id: int, kind: str, payload: str):
 
                 _run_scouting_job(call["game_id"], call["coach_id"], job_id,
                                   call.get("edits"))
+            elif kind == "play_calling_report":
+                from .routes.play_calling import _run_report_job
+
+                _run_report_job(call["game_id"], call["coach_id"], job_id)
             elif kind == "game_report_full":
                 from .routes.game_eval import _run_game_report_job
 

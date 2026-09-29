@@ -2987,6 +2987,43 @@
       "savedTitle": "Chamada de jogadas importada",
       "savedMsg": "{{n}} posses salvas neste jogo."
     },
-    "quickScored": "{{scored}} de {{n}} convertidas"
+    "quickScored": "{{scored}} de {{n}} convertidas",
+    "page": {
+      "tab": "Chamada de jogadas",
+      "pickHint": "Escolha um jogo para ver a chamada de jogadas e gerar um relatório de eficiência.",
+      "cardLine": "{{n}} posses · {{pct}}% convertidas",
+      "cardNone": "Sem chamada de jogadas",
+      "context": "Contexto para o relatório",
+      "contextPlaceholder": "ex.: Jogamos baixos no 3º; a 2-3 deles veio após tempos",
+      "generate": "Gerar relatório de eficiência de jogadas",
+      "regenerate": "Gerar relatório de novo",
+      "writing": "Escrevendo o relatório…",
+      "reportTitle": "Relatório de eficiência da chamada de jogadas",
+      "numbers": "Os números",
+      "overall": "Ataque do {{team}}",
+      "byPlay": "Por jogada",
+      "byType": "Por tipo de jogada",
+      "byDefense": "Por defesa enfrentada",
+      "byPlayDefense": "Jogada vs defesa",
+      "byQuarter": "Por quarto",
+      "colTrips": "Posses",
+      "colScored": "Convertidas",
+      "colPts": "Pts",
+      "colPpp": "Por posse",
+      "endings": "Como terminaram as posses sem pontos",
+      "possessions": "Posses",
+      "both": "Ambos",
+      "scoredWord": "pontuou",
+      "noScoreWord": "não pontuou",
+      "noData": "Ainda não há chamada de jogadas neste jogo. Registre ao vivo ou importe uma folha.",
+      "notNoted": "Não anotada"
+    },
+    "endings": {
+      "miss2": "errou de 2",
+      "miss3": "errou de 3",
+      "turnover": "erro de posse",
+      "ft_miss": "lances livres errados",
+      "other": "outro"
+    }
   }
 }

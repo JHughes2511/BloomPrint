@@ -2987,6 +2987,43 @@
       "savedTitle": "Zagrywki zaimportowane",
       "savedMsg": "Zapisano {{n}} posiadań w tym meczu."
     },
-    "quickScored": "{{scored}} z {{n}} celnych"
+    "quickScored": "{{scored}} z {{n}} celnych",
+    "page": {
+      "tab": "Zagrywki",
+      "pickHint": "Wybierz mecz, by zobaczyć zagrywki i napisać raport efektywności.",
+      "cardLine": "{{n}} posiadań · {{pct}}% celnych",
+      "cardNone": "Brak zagrywek",
+      "context": "Kontekst raportu",
+      "contextPlaceholder": "np. W 3. kwarcie graliśmy nisko; ich 2-3 po przerwach",
+      "generate": "Utwórz raport efektywności zagrywek",
+      "regenerate": "Utwórz raport ponownie",
+      "writing": "Pisanie raportu…",
+      "reportTitle": "Raport efektywności zagrywek",
+      "numbers": "Liczby",
+      "overall": "Atak {{team}}",
+      "byPlay": "Według zagrywki",
+      "byType": "Według typu",
+      "byDefense": "Według obrony",
+      "byPlayDefense": "Zagrywka vs obrona",
+      "byQuarter": "Według kwarty",
+      "colTrips": "Posiadania",
+      "colScored": "Celne",
+      "colPts": "Pkt",
+      "colPpp": "Na posiadanie",
+      "endings": "Jak kończyły się posiadania bez punktów",
+      "possessions": "Posiadania",
+      "both": "Obie",
+      "scoredWord": "celne",
+      "noScoreWord": "bez punktów",
+      "noData": "Brak zapisanych zagrywek w tym meczu. Śledź na żywo lub zaimportuj arkusz.",
+      "notNoted": "Nie zapisano"
+    },
+    "endings": {
+      "miss2": "pudło za 2",
+      "miss3": "pudło za 3",
+      "turnover": "strata",
+      "ft_miss": "niecelne rzuty wolne",
+      "other": "inne"
+    }
   }
 }

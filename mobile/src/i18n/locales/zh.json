@@ -2987,6 +2987,43 @@
       "savedTitle": "已导入战术调用",
       "savedMsg": "已为本场比赛保存{{n}}个回合。"
     },
-    "quickScored": "{{n}}次中{{scored}}次得分"
+    "quickScored": "{{n}}次中{{scored}}次得分",
+    "page": {
+      "tab": "战术调用",
+      "pickHint": "选择一场比赛，查看战术调用并生成效率报告。",
+      "cardLine": "{{n}}个回合 · 得分率{{pct}}%",
+      "cardNone": "暂无战术调用",
+      "context": "报告背景",
+      "contextPlaceholder": "例如：第三节用小阵容；对方2-3联防出现在暂停后",
+      "generate": "生成战术调用效率报告",
+      "regenerate": "重新生成报告",
+      "writing": "正在撰写报告…",
+      "reportTitle": "战术调用效率报告",
+      "numbers": "数据",
+      "overall": "{{team}}进攻",
+      "byPlay": "按战术",
+      "byType": "按类型",
+      "byDefense": "按对方防守",
+      "byPlayDefense": "战术对防守",
+      "byQuarter": "按节",
+      "colTrips": "回合",
+      "colScored": "得分",
+      "colPts": "分",
+      "colPpp": "每回合",
+      "endings": "未得分回合的结果",
+      "possessions": "回合",
+      "both": "双方",
+      "scoredWord": "得分",
+      "noScoreWord": "未得分",
+      "noData": "本场尚无战术调用记录。可实时记录或导入表格。",
+      "notNoted": "未记录"
+    },
+    "endings": {
+      "miss2": "两分不中",
+      "miss3": "三分不中",
+      "turnover": "失误",
+      "ft_miss": "罚球不中",
+      "other": "其他"
+    }
   }
 }

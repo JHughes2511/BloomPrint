@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -505,3 +505,134 @@ def import_save(game_id: int, body: ImportSave, db: Session = Depends(get_db),
             row.count = o.count
     db.commit()
     return {"saved": saved}
+
+
+# ── The Play Calling tab: which games have it, and the report ───────────────
+
+@router.get("/overview")
+def overview(db: Session = Depends(get_db), coach: models.Coach = Depends(get_current_coach)):
+    """For each game this coach can see: how much play calling it has, and
+    whether they have a report — what a game card says."""
+    from .game_eval import _accessible_team_ids
+    teams = _accessible_team_ids(db, coach)
+    q = db.query(models.PlayCall.game_id, models.PlayCall.side, models.PlayCall.result,
+                 func.count(models.PlayCall.id)) \
+        .join(models.GameSession, models.GameSession.id == models.PlayCall.game_id)
+    from sqlalchemy import or_
+    mine = [models.GameSession.coach_id == coach.id]
+    if teams:
+        mine.append(models.GameSession.team_id.in_(teams))
+    q = q.filter(or_(*mine))
+    out: dict = {}
+    for gid, side, result, n in q.group_by(models.PlayCall.game_id, models.PlayCall.side,
+                                           models.PlayCall.result).all():
+        g = out.setdefault(str(gid), {"our": {"n": 0, "scored": 0}, "opponent": {"n": 0, "scored": 0}, "report": False})
+        if result in ("score", "no_score"):
+            g[side]["n"] += n
+            if result == "score":
+                g[side]["scored"] += n
+    for r in db.query(models.PlayCallingReport.game_id).filter(
+            models.PlayCallingReport.coach_id == coach.id,
+            models.PlayCallingReport.report_text.isnot(None)).all():
+        out.setdefault(str(r.game_id), {"our": {"n": 0, "scored": 0}, "opponent": {"n": 0, "scored": 0}})["report"] = True
+    return out
+
+
+@router.get("/games/{game_id}/report")
+def get_report(game_id: int, db: Session = Depends(get_db), coach: models.Coach = Depends(get_current_coach)):
+    game = _get_game_readable(db, game_id, coach)
+    r = db.query(models.PlayCallingReport).filter_by(game_id=game.id, coach_id=coach.id).first()
+    return {"report_text": r.report_text if r else None, "context": r.context if r else None,
+            "updated_at": r.updated_at.isoformat() + "Z" if r and r.updated_at else None}
+
+
+class ReportIn(BaseModel):
+    context: str | None = None
+
+
+@router.post("/games/{game_id}/report-job")
+def start_report(game_id: int, body: ReportIn, background_tasks: BackgroundTasks,
+                 db: Session = Depends(get_db), coach: models.Coach = Depends(get_current_coach)):
+    """Write (or rewrite) the Play Calling Efficiency report; a job to follow."""
+    from .. import genjob
+    game = _get_game_readable(db, game_id, coach)
+    if not db.query(models.PlayCall).filter_by(game_id=game.id).first():
+        raise HTTPException(status_code=400, detail="This game has no play calling recorded yet.")
+    r = db.query(models.PlayCallingReport).filter_by(game_id=game.id, coach_id=coach.id).first()
+    if r is None:
+        r = models.PlayCallingReport(game_id=game.id, coach_id=coach.id)
+        db.add(r)
+    if body.context is not None:
+        r.context = body.context.strip()[:4000] or None
+    db.commit()
+    job = genjob.start(db, coach.id, "play_calling_report", {"game_id": game.id, "coach_id": coach.id})
+    background_tasks.add_task(_run_report_job, game.id, coach.id, job.id)
+    return {"job_id": job.id}
+
+
+def report_prompt(db: Session, game: models.GameSession, coach: models.Coach) -> str:
+    """The Play Calling Efficiency report's prompt: the play calling, read
+    against everything else known about the game."""
+    from ..coach_context import resolve_level, language_directive
+    from ..report_format import REPORT_FORMAT_WITH_TABLES
+    from .game_eval import box_score_text, film_notes_for_game, _team_notes_text
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    ours = (team.name if team else None) or coach.program_name or "Our team"
+    sides = {"our": ours, "opponent": game.opponent_name or "Opponent"}
+    score = ""
+    if game.our_score is not None and game.opponent_score is not None:
+        score = f"Final score: {ours} {game.our_score} – {game.opponent_score} {sides['opponent']}\n"
+    r = db.query(models.PlayCallingReport).filter_by(game_id=game.id, coach_id=coach.id).first()
+    ctx = f"\n\nCOACH CONTEXT (weave this in):\n{r.context}" if r and r.context else ""
+    level = resolve_level(coach, team=team)
+    return (
+        f"You are the BloomPrint Basketball Intelligence Model. Write a PLAY CALLING EFFICIENCY REPORT "
+        f"for {ours} vs {sides['opponent']}.\nCOMPETITION LEVEL: {level}\n{score}\n"
+        f"{pc.prompt_block(db, game, sides)}\n\n"
+        f"BOX SCORE:\n{box_score_text(db, game)}"
+        f"{film_notes_for_game(db, coach, game)}{_team_notes_text(db, coach, game)}{ctx}\n\n"
+        "Cover, in this order:\n"
+        "1) SUMMARY — how efficient the play calling was for each team that has possessions recorded, "
+        "and the one thing that decided it.\n"
+        "2) WHAT WORKED AND WHAT DID NOT — by play and by play type (half court vs transition, "
+        "ATOs), with the counts.\n"
+        "3) AGAINST EACH DEFENSE — which plays scored against which defense, and which did not.\n"
+        "4) QUARTER BY QUARTER — how it changed through the game and why, from the possessions.\n"
+        "5) WHO FINISHED — which players scored or missed out of which plays, where recorded.\n"
+        "6) RECOMMENDATIONS — plays to keep calling, plays to change or drop, what to call against "
+        "each defense next time; and, for the opponent's possessions, what to take away.\n"
+        "Rules: quote the recorded counts. Never state, estimate or imply points where the data does "
+        "not give them — use scored / not scored. Treat plays named 'Unknown' as unidentified. Do not "
+        "invent plays, players or possessions."
+        f"{REPORT_FORMAT_WITH_TABLES}{language_directive(coach)}"
+    )
+
+
+def _run_report_job(game_id: int, coach_id: int, job_id: int) -> None:
+    import asyncio
+    from .. import genjob
+    from ..ai_models import long_text
+    from ..database import SessionLocal
+
+    def work():
+        db = SessionLocal()
+        try:
+            game = db.get(models.GameSession, game_id)
+            coach = db.get(models.Coach, coach_id)
+            if not game or not coach:
+                raise RuntimeError("Game not found")
+            prompt = report_prompt(db, game, coach)
+            text = asyncio.run(long_text(prompt, max_tokens=12000, on_words=genjob.words_reporter(job_id)))
+            if not (text or "").strip():
+                raise RuntimeError("The report came back empty.")
+            r = db.query(models.PlayCallingReport).filter_by(game_id=game_id, coach_id=coach_id).first()
+            if r is None:
+                r = models.PlayCallingReport(game_id=game_id, coach_id=coach_id)
+                db.add(r)
+            r.report_text = text.strip()
+            db.commit()
+        finally:
+            db.close()
+        return game_id
+
+    genjob.run(job_id, work)

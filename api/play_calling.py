@@ -452,3 +452,72 @@ def recent_activity(db: Session, game_id: int, me: int, limit: int = 6) -> list[
                      "at": d.created_at.isoformat() + "Z"})
     rows.sort(key=lambda r: r["at"], reverse=True)
     return rows[:limit]
+
+
+# ── For a report: the numbers, and every possession, as text ─────────────────
+
+TYPE_WORDS = {"half_court": "half court", "transition": "transition", "semi_transition": "semi-transition",
+              "transition_drag": "transition drag", "ato": "ATO", "oob": "out of bounds",
+              "press_break": "press break", "unknown": "unknown"}
+ENDING_WORDS = {"miss2": "missed 2", "miss3": "missed 3", "turnover": "turnover", "ft_miss": "missed free throws",
+                "made2": "made 2", "made3": "made 3", "and1_2": "and-1 on a 2", "and1_3": "and-1 on a 3",
+                "ft": "free throws", "other": "other"}
+
+
+def _fmt(r: dict, label: str) -> str:
+    pts = f", {r['points']} pts, {r['ppp']} per trip" if r.get("points") is not None else ""
+    return f"{label}: {r['scored']} of {r['n']} scored ({r['pct']}%){pts}"
+
+
+def prompt_block(db: Session, game: models.GameSession, sides: dict[str, str]) -> str:
+    """Everything recorded about the game's play calling, for a model to read.
+
+    Points appear only where every score in the line has them (see summary);
+    the block says so, so the report cannot fill the gap with a guess.
+    """
+    calls = (db.query(models.PlayCall).filter_by(game_id=game.id)
+             .order_by(models.PlayCall.seq, models.PlayCall.id).all())
+    if not calls:
+        return ""
+    sm = summary(calls, game)
+    events = events_by_call(db, game.id)
+    orb = tallies(db, game.id)
+    out = ["PLAY CALLING (recorded possession by possession; 'scored' means the possession scored. "
+           "Points are given ONLY where every score in that line had its points recorded — where "
+           "they are missing, do not state or estimate points; use scored / not scored.)"]
+    for side, name in sides.items():
+        s = sm.get(side)
+        if not s:
+            continue
+        out.append(f"\n{name.upper()} OFFENSE — {_fmt(s['overall'], 'overall')}")
+        for title, rows, word in (("By play", s["by_play"], None), ("By play type", s["by_type"], TYPE_WORDS),
+                                  ("By defense faced", s["by_defense"], None),
+                                  ("Play against defense", s["by_play_defense"], None),
+                                  ("By quarter", s["by_quarter"], "q")):
+            out.append(f"  {title}:")
+            for r in rows:
+                label = (f"Q{r['key']}" if word == "q" and int(r["key"]) <= 4 else f"OT{int(r['key']) - 4}" if word == "q"
+                         else (word or {}).get(r["key"], r["key"]))
+                out.append(f"    {_fmt(r, str(label))}")
+        if s["no_score_endings"]:
+            out.append("  How non-scoring trips ended: " + ", ".join(
+                f"{ENDING_WORDS.get(k, k)} {v}" for k, v in sorted(s["no_score_endings"].items(), key=lambda x: -x[1])))
+        o = orb.get(side) or {}
+        if o:
+            parts = [f"{'whole game' if int(q) == 0 else f'Q{q}'}: {c}" for q, c in sorted(o.items(), key=lambda x: int(x[0]))]
+            out.append(f"  Offensive rebounds — {', '.join(parts)}")
+    out.append("\nPOSSESSION BY POSSESSION:")
+    q_now = None
+    for c in calls:
+        if c.quarter != q_now:
+            q_now = c.quarter
+            out.append(f" Q{q_now}:" if q_now <= 4 else f" OT{q_now - 4}:")
+        res = ("open" if c.result is None else
+               f"scored{f' (+{c.points})' if c.points is not None else ''}" if c.result == "score" else "no score")
+        detail = "; ".join(f"{e['player_name']} {e['stat_name']}" for e in events.get(c.id, [])
+                           if e["is_opponent"] == (c.side == "opponent"))
+        if not detail and c.ended:
+            detail = ENDING_WORDS.get(c.ended, c.ended) + (f" ({c.player_name})" if c.player_name else "")
+        out.append(f"  {sides.get(c.side, c.side)} — {c.play} [{TYPE_WORDS.get(c.play_type, c.play_type)}]"
+                   f" vs {c.defense or 'defense not noted'}: {res}{f' — {detail}' if detail else ''}")
+    return "\n".join(out)

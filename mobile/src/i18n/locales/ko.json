@@ -2987,6 +2987,43 @@
       "savedTitle": "플레이 콜을 가져왔습니다",
       "savedMsg": "이 경기에 {{n}}포제션을 저장했습니다."
     },
-    "quickScored": "{{n}}번 중 {{scored}}번 득점"
+    "quickScored": "{{n}}번 중 {{scored}}번 득점",
+    "page": {
+      "tab": "플레이 콜",
+      "pickHint": "경기를 선택해 플레이 콜을 보고 효율 리포트를 작성하세요.",
+      "cardLine": "{{n}}포제션 · 득점률 {{pct}}%",
+      "cardNone": "아직 플레이 콜 없음",
+      "context": "리포트 참고 사항",
+      "contextPlaceholder": "예: 3쿼터에 스몰 라인업, 상대 2-3은 타임아웃 후",
+      "generate": "플레이 콜 효율 리포트 생성",
+      "regenerate": "리포트 다시 생성",
+      "writing": "리포트 작성 중…",
+      "reportTitle": "플레이 콜 효율 리포트",
+      "numbers": "숫자",
+      "overall": "{{team}} 공격",
+      "byPlay": "플레이별",
+      "byType": "유형별",
+      "byDefense": "상대 수비별",
+      "byPlayDefense": "플레이 대 수비",
+      "byQuarter": "쿼터별",
+      "colTrips": "횟수",
+      "colScored": "득점",
+      "colPts": "점",
+      "colPpp": "회당",
+      "endings": "무득점 포제션의 결과",
+      "possessions": "포제션",
+      "both": "양 팀",
+      "scoredWord": "득점",
+      "noScoreWord": "무득점",
+      "noData": "이 경기의 플레이 콜이 아직 없습니다. 실시간으로 기록하거나 시트를 가져오세요.",
+      "notNoted": "기록 없음"
+    },
+    "endings": {
+      "miss2": "2점 실패",
+      "miss3": "3점 실패",
+      "turnover": "턴오버",
+      "ft_miss": "자유투 실패",
+      "other": "기타"
+    }
   }
 }

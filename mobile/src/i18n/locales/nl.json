@@ -2987,6 +2987,43 @@
       "savedTitle": "Spelkeuze geïmporteerd",
       "savedMsg": "{{n}} balbezit opgeslagen bij deze wedstrijd."
     },
-    "quickScored": "{{scored}} van {{n}} gescoord"
+    "quickScored": "{{scored}} van {{n}} gescoord",
+    "page": {
+      "tab": "Spelkeuze",
+      "pickHint": "Kies een wedstrijd om de spelkeuze te zien en een efficiëntierapport te schrijven.",
+      "cardLine": "{{n}} balbezit · {{pct}}% gescoord",
+      "cardNone": "Nog geen spelkeuze",
+      "context": "Context voor het rapport",
+      "contextPlaceholder": "bijv. Klein gespeeld in het 3e; hun 2-3 kwam na time-outs",
+      "generate": "Efficiëntierapport spelkeuze maken",
+      "regenerate": "Rapport opnieuw maken",
+      "writing": "Rapport wordt geschreven…",
+      "reportTitle": "Efficiëntierapport spelkeuze",
+      "numbers": "De cijfers",
+      "overall": "Aanval {{team}}",
+      "byPlay": "Per spel",
+      "byType": "Per soort",
+      "byDefense": "Per verdediging",
+      "byPlayDefense": "Spel vs verdediging",
+      "byQuarter": "Per kwart",
+      "colTrips": "Balbezit",
+      "colScored": "Gescoord",
+      "colPts": "Ptn",
+      "colPpp": "Per balbezit",
+      "endings": "Hoe balbezit zonder score eindigde",
+      "possessions": "Balbezit",
+      "both": "Beide",
+      "scoredWord": "gescoord",
+      "noScoreWord": "geen score",
+      "noData": "Nog geen spelkeuze voor deze wedstrijd. Houd het live bij of importeer een blad.",
+      "notNoted": "Niet genoteerd"
+    },
+    "endings": {
+      "miss2": "2 gemist",
+      "miss3": "3 gemist",
+      "turnover": "balverlies",
+      "ft_miss": "vrije worpen gemist",
+      "other": "anders"
+    }
   }
 }

@@ -2987,6 +2987,43 @@
       "savedTitle": "Akcije uvezene",
       "savedMsg": "Spremljeno {{n}} napada za ovu utakmicu."
     },
-    "quickScored": "{{scored}} od {{n}} uspješno"
+    "quickScored": "{{scored}} od {{n}} uspješno",
+    "page": {
+      "tab": "Pozivanje akcija",
+      "pickHint": "Odaberi utakmicu da vidiš akcije i napišeš izvještaj o učinkovitosti.",
+      "cardLine": "{{n}} napada · {{pct}}% uspješno",
+      "cardNone": "Još nema akcija",
+      "context": "Kontekst za izvještaj",
+      "contextPlaceholder": "npr. U 3. četvrtini igrali smo nisko; njihova 2-3 nakon minuta odmora",
+      "generate": "Izradi izvještaj o učinkovitosti akcija",
+      "regenerate": "Izradi ponovno",
+      "writing": "Pišem izvještaj…",
+      "reportTitle": "Izvještaj o učinkovitosti akcija",
+      "numbers": "Brojke",
+      "overall": "Napad {{team}}",
+      "byPlay": "Po akciji",
+      "byType": "Po vrsti",
+      "byDefense": "Po obrani",
+      "byPlayDefense": "Akcija protiv obrane",
+      "byQuarter": "Po četvrtini",
+      "colTrips": "Napadi",
+      "colScored": "Uspješni",
+      "colPts": "Koš.",
+      "colPpp": "Po napadu",
+      "endings": "Kako su završili napadi bez koša",
+      "possessions": "Napadi",
+      "both": "Obje",
+      "scoredWord": "koš",
+      "noScoreWord": "bez koša",
+      "noData": "Za ovu utakmicu još nema akcija. Prati uživo ili uvezi list.",
+      "notNoted": "Nije zabilježeno"
+    },
+    "endings": {
+      "miss2": "promašaj za 2",
+      "miss3": "promašaj za 3",
+      "turnover": "izgubljena lopta",
+      "ft_miss": "promašena slobodna bacanja",
+      "other": "drugo"
+    }
   }
 }

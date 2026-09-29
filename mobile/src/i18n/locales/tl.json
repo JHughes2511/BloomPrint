@@ -2987,6 +2987,43 @@
       "savedTitle": "Na-import ang play calling",
       "savedMsg": "{{n}} possession ang na-save sa larong ito."
     },
-    "quickScored": "{{scored}} sa {{n}} naka-score"
+    "quickScored": "{{scored}} sa {{n}} naka-score",
+    "page": {
+      "tab": "Play Calling",
+      "pickHint": "Pumili ng laro para makita ang play calling at gumawa ng efficiency report.",
+      "cardLine": "{{n}} possession · {{pct}}% naka-score",
+      "cardNone": "Wala pang play calling",
+      "context": "Konteksto para sa report",
+      "contextPlaceholder": "hal. Maliit ang lineup namin sa 3rd; ang 2-3 nila ay pagkatapos ng timeout",
+      "generate": "Gumawa ng Play Calling Efficiency Report",
+      "regenerate": "Gawin muli ang report",
+      "writing": "Isinusulat ang report…",
+      "reportTitle": "Play Calling Efficiency Report",
+      "numbers": "Ang mga numero",
+      "overall": "Opensa ng {{team}}",
+      "byPlay": "Ayon sa play",
+      "byType": "Ayon sa uri",
+      "byDefense": "Ayon sa depensang hinarap",
+      "byPlayDefense": "Play laban sa depensa",
+      "byQuarter": "Ayon sa quarter",
+      "colTrips": "Possession",
+      "colScored": "Naka-score",
+      "colPts": "Pts",
+      "colPpp": "Bawat possession",
+      "endings": "Paano natapos ang mga walang score",
+      "possessions": "Mga possession",
+      "both": "Pareho",
+      "scoredWord": "naka-score",
+      "noScoreWord": "walang score",
+      "noData": "Wala pang play calling sa larong ito. I-track nang live o mag-import ng sheet.",
+      "notNoted": "Hindi naitala"
+    },
+    "endings": {
+      "miss2": "mintis na 2",
+      "miss3": "mintis na 3",
+      "turnover": "turnover",
+      "ft_miss": "mintis na free throw",
+      "other": "iba"
+    }
   }
 }

@@ -2987,6 +2987,43 @@
       "savedTitle": "プレーコールを取り込みました",
       "savedMsg": "この試合に{{n}}ポゼッションを保存しました。"
     },
-    "quickScored": "{{n}}回中{{scored}}回得点"
+    "quickScored": "{{n}}回中{{scored}}回得点",
+    "page": {
+      "tab": "プレーコール",
+      "pickHint": "試合を選ぶと、プレーコールを確認し効率レポートを作成できます。",
+      "cardLine": "{{n}}ポゼッション · 得点率{{pct}}%",
+      "cardNone": "プレーコールはまだありません",
+      "context": "レポートの補足",
+      "contextPlaceholder": "例：第3Qはスモール布陣、相手の2-3はタイムアウト明け",
+      "generate": "プレーコール効率レポートを作成",
+      "regenerate": "レポートを作り直す",
+      "writing": "レポートを作成中…",
+      "reportTitle": "プレーコール効率レポート",
+      "numbers": "数字",
+      "overall": "{{team}}のオフェンス",
+      "byPlay": "プレー別",
+      "byType": "タイプ別",
+      "byDefense": "相手ディフェンス別",
+      "byPlayDefense": "プレー×ディフェンス",
+      "byQuarter": "クォーター別",
+      "colTrips": "回数",
+      "colScored": "得点",
+      "colPts": "点",
+      "colPpp": "1回あたり",
+      "endings": "得点なしの終わり方",
+      "possessions": "ポゼッション",
+      "both": "両方",
+      "scoredWord": "得点",
+      "noScoreWord": "得点なし",
+      "noData": "この試合のプレーコールはまだありません。ライブで記録するかシートを取り込んでください。",
+      "notNoted": "記録なし"
+    },
+    "endings": {
+      "miss2": "2点ミス",
+      "miss3": "3点ミス",
+      "turnover": "ターンオーバー",
+      "ft_miss": "フリースローミス",
+      "other": "その他"
+    }
   }
 }

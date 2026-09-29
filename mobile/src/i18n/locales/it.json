@@ -2987,6 +2987,43 @@
       "savedTitle": "Chiamate importate",
       "savedMsg": "{{n}} possessi salvati in questa partita."
     },
-    "quickScored": "{{scored}} su {{n}} a segno"
+    "quickScored": "{{scored}} su {{n}} a segno",
+    "page": {
+      "tab": "Chiamate di gioco",
+      "pickHint": "Scegli una partita per vedere le chiamate e scrivere un report di efficienza.",
+      "cardLine": "{{n}} possessi · {{pct}}% a segno",
+      "cardNone": "Nessuna chiamata",
+      "context": "Contesto per il report",
+      "contextPlaceholder": "es. Quintetto basso nel 3°; la loro 2-3 dopo i timeout",
+      "generate": "Genera report di efficienza delle chiamate",
+      "regenerate": "Rigenera report",
+      "writing": "Scrittura del report…",
+      "reportTitle": "Report di efficienza delle chiamate",
+      "numbers": "I numeri",
+      "overall": "Attacco {{team}}",
+      "byPlay": "Per gioco",
+      "byType": "Per tipo di gioco",
+      "byDefense": "Per difesa affrontata",
+      "byPlayDefense": "Gioco vs difesa",
+      "byQuarter": "Per quarto",
+      "colTrips": "Possessi",
+      "colScored": "A segno",
+      "colPts": "Pt",
+      "colPpp": "Per possesso",
+      "endings": "Come sono finiti i possessi senza punti",
+      "possessions": "Possessi",
+      "both": "Entrambe",
+      "scoredWord": "a segno",
+      "noScoreWord": "non a segno",
+      "noData": "Nessuna chiamata registrata per questa partita. Seguila live o importa un foglio.",
+      "notNoted": "Non annotata"
+    },
+    "endings": {
+      "miss2": "2 sbagliato",
+      "miss3": "3 sbagliato",
+      "turnover": "palla persa",
+      "ft_miss": "tiri liberi sbagliati",
+      "other": "altro"
+    }
   }
 }
