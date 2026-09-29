@@ -2969,6 +2969,23 @@
     },
     "done": "완료",
     "whoFor": "누구? {{stat}}",
-    "noPlayers": "위 기록 영역에서 선수를 추가하세요."
+    "noPlayers": "위 기록 영역에서 선수를 추가하세요.",
+    "import": {
+      "button": "플레이 콜 가져오기",
+      "title": "플레이 콜 가져오기",
+      "reading": "시트를 읽는 중…",
+      "readFailed": "시트를 읽을 수 없습니다. 더 선명한 사진이나 PDF, CSV, Excel로 시도하세요.",
+      "checkHint": "저장 전에 시트와 비교해 잘못 읽은 곳을 고치세요.",
+      "whose": "누구의 플레이인가요?",
+      "count": "{{n}}포제션 · {{scored}}득점",
+      "pts": "점",
+      "result": "결과",
+      "addRow": "{{q}}에 추가",
+      "wholeGame": "경기 전체",
+      "save": "{{n}}포제션 저장",
+      "pickWhose": "누구의 플레이인지 고르세요",
+      "savedTitle": "플레이 콜을 가져왔습니다",
+      "savedMsg": "이 경기에 {{n}}포제션을 저장했습니다."
+    }
   }
 }

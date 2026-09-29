@@ -2969,6 +2969,23 @@
     },
     "done": "Fertig",
     "whoFor": "Wer? {{stat}}",
-    "noPlayers": "Füge oben im Statistikbereich Spieler hinzu."
+    "noPlayers": "Füge oben im Statistikbereich Spieler hinzu.",
+    "import": {
+      "button": "Spielzüge importieren",
+      "title": "Spielzüge importieren",
+      "reading": "Bogen wird gelesen…",
+      "readFailed": "Der Bogen ließ sich nicht lesen. Versuche ein schärferes Foto oder eine PDF-, CSV- oder Excel-Datei.",
+      "checkHint": "Mit dem Bogen abgleichen und Fehler vor dem Speichern korrigieren.",
+      "whose": "Wessen Spielzüge sind das?",
+      "count": "{{n}} Angriffe · {{scored}} erfolgreich",
+      "pts": "Pkt.",
+      "result": "Ergebnis",
+      "addRow": "Zu {{q}} hinzufügen",
+      "wholeGame": "Ganzes Spiel",
+      "save": "{{n}} Angriffe speichern",
+      "pickWhose": "Wähle, wessen Spielzüge das sind",
+      "savedTitle": "Spielzüge importiert",
+      "savedMsg": "{{n}} Angriffe für dieses Spiel gespeichert."
+    }
   }
 }

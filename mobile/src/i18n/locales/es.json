@@ -2969,6 +2969,23 @@
     },
     "done": "Listo",
     "whoFor": "¿Quién? {{stat}}",
-    "noPlayers": "Añade jugadores en la sección de estadísticas de arriba."
+    "noPlayers": "Añade jugadores en la sección de estadísticas de arriba.",
+    "import": {
+      "button": "Importar llamado de jugadas",
+      "title": "Importar llamado de jugadas",
+      "reading": "Leyendo la hoja…",
+      "readFailed": "No se pudo leer la hoja. Prueba una foto más clara, o un PDF, CSV o Excel.",
+      "checkHint": "Compárala con la hoja y corrige lo mal leído antes de guardar.",
+      "whose": "¿De quién son estas jugadas?",
+      "count": "{{n}} posesiones · {{scored}} anotadas",
+      "pts": "Pts",
+      "result": "Resultado",
+      "addRow": "Añadir a {{q}}",
+      "wholeGame": "Partido completo",
+      "save": "Guardar {{n}} posesiones",
+      "pickWhose": "Elige de quién son las jugadas",
+      "savedTitle": "Llamado de jugadas importado",
+      "savedMsg": "{{n}} posesiones guardadas en este partido."
+    }
   }
 }

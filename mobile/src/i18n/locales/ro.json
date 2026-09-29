@@ -2969,6 +2969,23 @@
     },
     "done": "Gata",
     "whoFor": "Cine? {{stat}}",
-    "noPlayers": "Adaugă jucători în secțiunea de statistici de mai sus."
+    "noPlayers": "Adaugă jucători în secțiunea de statistici de mai sus.",
+    "import": {
+      "button": "Importă sistemele",
+      "title": "Importă sistemele",
+      "reading": "Se citește foaia…",
+      "readFailed": "Foaia nu a putut fi citită. Încearcă o poză mai clară sau PDF, CSV, Excel.",
+      "checkHint": "Compară cu foaia și corectează greșelile înainte de salvare.",
+      "whose": "Ale cui sunt aceste sisteme?",
+      "count": "{{n}} posesii · {{scored}} reușite",
+      "pts": "Pct",
+      "result": "Rezultat",
+      "addRow": "Adaugă la {{q}}",
+      "wholeGame": "Tot meciul",
+      "save": "Salvează {{n}} posesii",
+      "pickWhose": "Alege ale cui sunt sistemele",
+      "savedTitle": "Sisteme importate",
+      "savedMsg": "{{n}} posesii salvate la acest meci."
+    }
   }
 }

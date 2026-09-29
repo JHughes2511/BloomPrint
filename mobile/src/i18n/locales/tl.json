@@ -2969,6 +2969,23 @@
     },
     "done": "Tapos",
     "whoFor": "Sino? {{stat}}",
-    "noPlayers": "Magdagdag ng player sa Stats sa itaas."
+    "noPlayers": "Magdagdag ng player sa Stats sa itaas.",
+    "import": {
+      "button": "I-import ang play calling",
+      "title": "I-import ang play calling",
+      "reading": "Binabasa ang sheet…",
+      "readFailed": "Hindi mabasa ang sheet. Subukan ang mas malinaw na litrato, o PDF, CSV, Excel.",
+      "checkHint": "Ihambing sa sheet at itama ang maling basa bago i-save.",
+      "whose": "Kanino ang mga play na ito?",
+      "count": "{{n}} possession · {{scored}} naka-score",
+      "pts": "Pts",
+      "result": "Resulta",
+      "addRow": "Idagdag sa {{q}}",
+      "wholeGame": "Buong laro",
+      "save": "I-save ang {{n}} possession",
+      "pickWhose": "Piliin kung kanino ang mga play",
+      "savedTitle": "Na-import ang play calling",
+      "savedMsg": "{{n}} possession ang na-save sa larong ito."
+    }
   }
 }

@@ -2969,6 +2969,23 @@
     },
     "done": "Gotowe",
     "whoFor": "Kto? {{stat}}",
-    "noPlayers": "Dodaj zawodników w sekcji statystyk powyżej."
+    "noPlayers": "Dodaj zawodników w sekcji statystyk powyżej.",
+    "import": {
+      "button": "Importuj zagrywki",
+      "title": "Importuj zagrywki",
+      "reading": "Odczytywanie arkusza…",
+      "readFailed": "Nie udało się odczytać arkusza. Spróbuj wyraźniejszego zdjęcia albo PDF, CSV lub Excel.",
+      "checkHint": "Porównaj z arkuszem i popraw błędy przed zapisaniem.",
+      "whose": "Czyje to zagrywki?",
+      "count": "{{n}} posiadań · {{scored}} celnych",
+      "pts": "Pkt",
+      "result": "Wynik",
+      "addRow": "Dodaj do {{q}}",
+      "wholeGame": "Cały mecz",
+      "save": "Zapisz {{n}} posiadań",
+      "pickWhose": "Wybierz, czyje to zagrywki",
+      "savedTitle": "Zagrywki zaimportowane",
+      "savedMsg": "Zapisano {{n}} posiadań w tym meczu."
+    }
   }
 }

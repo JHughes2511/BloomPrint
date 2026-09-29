@@ -2969,6 +2969,23 @@
     },
     "done": "Baigta",
     "whoFor": "Kas? {{stat}}",
-    "noPlayers": "Pridėkite žaidėjų statistikos skiltyje aukščiau."
+    "noPlayers": "Pridėkite žaidėjų statistikos skiltyje aukščiau.",
+    "import": {
+      "button": "Importuoti derinius",
+      "title": "Importuoti derinius",
+      "reading": "Skaitomas lapas…",
+      "readFailed": "Lapo nepavyko perskaityti. Pabandykite aiškesnę nuotrauką arba PDF, CSV, Excel.",
+      "checkHint": "Palyginkite su lapu ir ištaisykite klaidas prieš išsaugodami.",
+      "whose": "Kieno tai deriniai?",
+      "count": "{{n}} atakų · {{scored}} sėkmingų",
+      "pts": "Tšk.",
+      "result": "Rezultatas",
+      "addRow": "Pridėti prie {{q}}",
+      "wholeGame": "Visos rungtynės",
+      "save": "Išsaugoti {{n}} atakų",
+      "pickWhose": "Pasirinkite, kieno deriniai",
+      "savedTitle": "Deriniai importuoti",
+      "savedMsg": "Išsaugota {{n}} atakų šioms rungtynėms."
+    }
   }
 }

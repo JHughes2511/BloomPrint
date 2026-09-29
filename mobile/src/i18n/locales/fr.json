@@ -2969,6 +2969,23 @@
     },
     "done": "Terminé",
     "whoFor": "Qui ? {{stat}}",
-    "noPlayers": "Ajoutez des joueurs dans la section Stats ci-dessus."
+    "noPlayers": "Ajoutez des joueurs dans la section Stats ci-dessus.",
+    "import": {
+      "button": "Importer les systèmes",
+      "title": "Importer les systèmes",
+      "reading": "Lecture de la feuille…",
+      "readFailed": "Impossible de lire la feuille. Essayez une photo plus nette, ou un PDF, CSV ou Excel.",
+      "checkHint": "Vérifiez avec la feuille et corrigez les erreurs avant d'enregistrer.",
+      "whose": "À qui sont ces systèmes ?",
+      "count": "{{n}} possessions · {{scored}} marquées",
+      "pts": "Pts",
+      "result": "Résultat",
+      "addRow": "Ajouter à {{q}}",
+      "wholeGame": "Match entier",
+      "save": "Enregistrer {{n}} possessions",
+      "pickWhose": "Choisissez à qui sont ces systèmes",
+      "savedTitle": "Systèmes importés",
+      "savedMsg": "{{n}} possessions enregistrées pour ce match."
+    }
   }
 }

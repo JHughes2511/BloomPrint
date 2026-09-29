@@ -2969,6 +2969,23 @@
     },
     "done": "Gotovo",
     "whoFor": "Tko? {{stat}}",
-    "noPlayers": "Dodaj igrače u dijelu za statistiku iznad."
+    "noPlayers": "Dodaj igrače u dijelu za statistiku iznad.",
+    "import": {
+      "button": "Uvezi pozivanje akcija",
+      "title": "Uvezi pozivanje akcija",
+      "reading": "Čitanje lista…",
+      "readFailed": "List se nije mogao pročitati. Probaj jasniju fotografiju ili PDF, CSV, Excel.",
+      "checkHint": "Usporedi s listom i ispravi pogreške prije spremanja.",
+      "whose": "Čije su ovo akcije?",
+      "count": "{{n}} napada · {{scored}} uspješnih",
+      "pts": "Koš.",
+      "result": "Ishod",
+      "addRow": "Dodaj u {{q}}",
+      "wholeGame": "Cijela utakmica",
+      "save": "Spremi {{n}} napada",
+      "pickWhose": "Odaberi čije su akcije",
+      "savedTitle": "Akcije uvezene",
+      "savedMsg": "Spremljeno {{n}} napada za ovu utakmicu."
+    }
   }
 }

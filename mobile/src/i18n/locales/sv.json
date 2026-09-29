@@ -2969,6 +2969,23 @@
     },
     "done": "Klar",
     "whoFor": "Vem? {{stat}}",
-    "noPlayers": "Lägg till spelare i statistikdelen ovan."
+    "noPlayers": "Lägg till spelare i statistikdelen ovan.",
+    "import": {
+      "button": "Importera spelval",
+      "title": "Importera spelval",
+      "reading": "Läser bladet…",
+      "readFailed": "Bladet gick inte att läsa. Prova ett skarpare foto, eller PDF, CSV eller Excel.",
+      "checkHint": "Jämför med bladet och rätta felläsningar innan du sparar.",
+      "whose": "Vems spel är det här?",
+      "count": "{{n}} anfall · {{scored}} gav poäng",
+      "pts": "P",
+      "result": "Resultat",
+      "addRow": "Lägg till i {{q}}",
+      "wholeGame": "Hela matchen",
+      "save": "Spara {{n}} anfall",
+      "pickWhose": "Välj vems spel det är",
+      "savedTitle": "Spelval importerade",
+      "savedMsg": "{{n}} anfall sparade i matchen."
+    }
   }
 }

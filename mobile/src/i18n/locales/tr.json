@@ -2969,6 +2969,23 @@
     },
     "done": "Tamam",
     "whoFor": "Kim? {{stat}}",
-    "noPlayers": "Yukarıdaki istatistik bölümünden oyuncu ekle."
+    "noPlayers": "Yukarıdaki istatistik bölümünden oyuncu ekle.",
+    "import": {
+      "button": "Set seçimini içe aktar",
+      "title": "Set seçimini içe aktar",
+      "reading": "Kâğıt okunuyor…",
+      "readFailed": "Kâğıt okunamadı. Daha net bir fotoğraf ya da PDF, CSV, Excel dene.",
+      "checkHint": "Kaydetmeden önce kâğıtla karşılaştır ve yanlışları düzelt.",
+      "whose": "Bu setler kimin?",
+      "count": "{{n}} hücum · {{scored}} sayı",
+      "pts": "Sayı",
+      "result": "Sonuç",
+      "addRow": "{{q}} ekle",
+      "wholeGame": "Tüm maç",
+      "save": "{{n}} hücumu kaydet",
+      "pickWhose": "Setlerin kime ait olduğunu seç",
+      "savedTitle": "Set seçimi içe aktarıldı",
+      "savedMsg": "Bu maça {{n}} hücum kaydedildi."
+    }
   }
 }

@@ -399,6 +399,20 @@ export const playCallingAPI = {
   orb: (gameId: number, side: 'our' | 'opponent', quarter: number, delta: number) =>
     api.post(`/play-calling/games/${gameId}/orb`, { side, quarter, delta }).then(r => r.data),
   countDuplicate: (dupId: number) => api.post(`/game-eval/duplicates/${dupId}/count`).then(r => r.data),
+  /** Read a play-calling sheet (photo, PDF, CSV, Excel) into a preview; nothing is saved. */
+  importRead: async (gameId: number, f: { uri: string; name: string; type: string }) => {
+    const form = new FormData();
+    if (Platform.OS === 'web') {
+      const blob = await (await fetch(f.uri)).blob();
+      (form.append as any)('file', blob, f.name || 'sheet');
+    } else {
+      form.append('file', f as any);
+    }
+    return api.post(`/play-calling/games/${gameId}/import/read`, form,
+      { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(r => r.data);
+  },
+  importSave: (gameId: number, data: { side: 'our' | 'opponent'; possessions: any[]; orb: any[]; replace?: boolean }) =>
+    api.post(`/play-calling/games/${gameId}/import/save`, data).then(r => r.data),
   undoStat: (statId: number) => api.delete(`/game-eval/stats/${statId}`, { params: { adjust_score: true } }).then(r => r.data),
 };
 

@@ -2969,6 +2969,23 @@
     },
     "done": "Klaar",
     "whoFor": "Wie? {{stat}}",
-    "noPlayers": "Voeg spelers toe in het statistiekengedeelte hierboven."
+    "noPlayers": "Voeg spelers toe in het statistiekengedeelte hierboven.",
+    "import": {
+      "button": "Spelkeuze importeren",
+      "title": "Spelkeuze importeren",
+      "reading": "Blad wordt gelezen…",
+      "readFailed": "Het blad kon niet worden gelezen. Probeer een scherpere foto, of een PDF, CSV of Excel.",
+      "checkHint": "Vergelijk met het blad en herstel fouten voordat je opslaat.",
+      "whose": "Van wie zijn deze spelen?",
+      "count": "{{n}} balbezit · {{scored}} gescoord",
+      "pts": "Ptn",
+      "result": "Resultaat",
+      "addRow": "Toevoegen aan {{q}}",
+      "wholeGame": "Hele wedstrijd",
+      "save": "{{n}} balbezit opslaan",
+      "pickWhose": "Kies van wie de spelen zijn",
+      "savedTitle": "Spelkeuze geïmporteerd",
+      "savedMsg": "{{n}} balbezit opgeslagen bij deze wedstrijd."
+    }
   }
 }

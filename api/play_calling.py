@@ -160,7 +160,9 @@ def _estimated_points(calls: list, game: models.GameSession | None, side: str) -
     scores = sum(1 for c in calls if c.result == "score")
     if game is not None and scores:
         pts = game.our_score if side == "our" else game.opponent_score
-        if pts:
+        # Only when the possessions cover the game: five imported trips
+        # against a final score of 74 are not worth 25 points a basket.
+        if pts and 1.0 <= pts / scores <= 3.5:
             return pts / scores
     return 2.0
 

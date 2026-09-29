@@ -2,6 +2,8 @@
 and read the numbers. See api/play_calling.py for the vocabulary and maths."""
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func
@@ -293,3 +295,213 @@ def add_catalog_play(game_id: int, body: CatalogIn, db: Session = Depends(get_db
             entry.aliases = sorted({*(entry.aliases or []), *(a.strip() for a in body.aliases if a.strip())})
     db.commit()
     return pc.catalog_for_game(db, game)
+
+
+# ── Import after the game ────────────────────────────────────────────────────
+# A sheet (photo, PDF, spreadsheet, CSV) is READ into a preview the coach
+# corrects, and only then SAVED — with the team whose plays they are, which the
+# sheet itself rarely says.
+
+IMPORT_INSTRUCTION = """This is a basketball play-calling sheet. For each possession it records the
+play that was called, whether it scored, and the defense it was run against. It may be handwritten,
+photographed, a PDF or a spreadsheet, with one column block per quarter.
+
+Transcribe EVERY possession exactly as written, in order, quarter by quarter. Return ONLY JSON:
+{"title": "<the heading, e.g. 'Senegal vs. Angola', or null>",
+ "teams": ["<each team name written on the sheet>"],
+ "possessions": [
+   {"quarter": <1-4, 5 for OT, 6 for OT2...>,
+    "play": "<the play exactly as written: keep abbreviations and symbols like 'S.T.', 'Tran Drag', 'Δ', '4/', '??'>",
+    "result": "+" | "-" | "",
+    "points": <number only if points are written, else null>,
+    "defense": "<exactly as written, e.g. 'M', '2', '2-3', or '' if blank>",
+    "player": "<a name or number if one is written for that row, else ''>"}],
+ "orb": [{"team": "<team name as written>", "quarter": <number, or 0 if for the whole game>,
+          "count": <number; count tally marks — a crossed group of four is 5>}]}
+
+A mark in the "+" column means the possession scored; a mark in the "-" column means it did not;
+neither means leave result "". Never guess a play you cannot read: write "?". Skip crossed-out
+entries. Do not add possessions that are not on the sheet."""
+
+
+class ImportRow(BaseModel):
+    quarter: int
+    play: str = ""
+    result: str = ""                 # + / - / ""
+    points: int | None = None
+    defense: str = ""
+    player: str = ""
+
+
+class ImportOrb(BaseModel):
+    side: str
+    quarter: int = 0
+    count: int
+
+
+class ImportSave(BaseModel):
+    side: str                         # whose possessions these are
+    possessions: list[ImportRow]
+    orb: list[ImportOrb] = []
+    replace: bool = True              # replace what an earlier import of this side saved
+
+
+def _side_guess(name: str, game: models.GameSession, our_name: str) -> str | None:
+    k = pc.key(name)
+    if not k:
+        return None
+    if k in (pc.key(our_name),) or (pc.key(our_name) and (k in pc.key(our_name) or pc.key(our_name) in k)):
+        return "our"
+    opp = pc.key(game.opponent_name)
+    if k == opp or (opp and (k in opp or opp in k)):
+        return "opponent"
+    return None
+
+
+from fastapi import File, UploadFile  # noqa: E402
+
+
+_HEADINGS = {
+    "quarter": {"quarter", "qtr", "q", "period", "per"},
+    "play": {"play", "call", "set", "playcall", "offense", "offensiveplay"},
+    "result": {"result", "+/-", "+-", "score", "scored", "outcome"},
+    "points": {"points", "pts", "point"},
+    "defense": {"defense", "def", "d", "defence"},
+    "player": {"player", "scorer", "who"},
+}
+
+
+def _read_table(data: bytes, filename: str) -> dict | None:
+    """A CSV or Excel sheet with column headings (Quarter, Play, Result,
+    Points, Defense, Player), read directly. None when it is not one."""
+    import csv
+    import io
+    name = filename.lower()
+    rows: list[list] = []
+    try:
+        if name.endswith((".xlsx", ".xls")):
+            import openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+            rows = [list(r) for r in wb.active.iter_rows(values_only=True)]
+        elif name.endswith((".csv", ".tsv", ".txt")):
+            text = data.decode("utf-8-sig", errors="ignore")
+            rows = list(csv.reader(io.StringIO(text), delimiter="\t" if name.endswith(".tsv") else ","))
+        else:
+            return None
+    except Exception:
+        return None
+    for h, head in enumerate(rows[:5]):
+        cols = {}
+        for i, cell in enumerate(head):
+            k = re.sub(r"[^a-z+/-]", "", str(cell or "").lower())
+            for field, names in _HEADINGS.items():
+                if k in names and field not in cols:
+                    cols[field] = i
+        if "play" in cols and ("result" in cols or "points" in cols):
+            break
+    else:
+        return None
+    out = []
+    for r in rows[h + 1:]:
+        def cell(f):
+            i = cols.get(f)
+            return "" if i is None or i >= len(r) or r[i] is None else str(r[i]).strip()
+        play, res, pts = cell("play"), cell("result").lower(), cell("points")
+        if not play and not res:
+            continue
+        q = re.sub(r"[^0-9]", "", cell("quarter")) or "1"
+        points = int(float(pts)) if re.fullmatch(r"-?\d+(\.\d+)?", pts or "") else None
+        result = ("+" if res in ("+", "y", "yes", "score", "scored", "1", "made") or (points or 0) > 0
+                  else "-" if res in ("-", "n", "no", "0", "miss", "missed") or points == 0 else "")
+        out.append({"quarter": int(q), "play": play, "result": result, "points": points,
+                    "defense": cell("defense"), "player": cell("player")})
+    return {"title": None, "teams": [], "possessions": out, "orb": []}
+
+
+@router.post("/games/{game_id}/import/read")
+async def import_read(game_id: int, file: UploadFile = File(...), db: Session = Depends(get_db),
+                      coach: models.Coach = Depends(get_current_coach)):
+    """Read a play-calling sheet into a preview. Nothing is saved."""
+    from .. import ai_import
+    from ..uploadguard import read_upload
+    game = _get_game_trackable(db, game_id, coach)
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    our_name = (team.name if team else None) or coach.program_name or ""
+    data = await read_upload(file, what="document")
+    # A spreadsheet with plain column headings is read as it is: exact, and
+    # free. Anything else (a photo, a PDF, a sheet laid out by hand) is read
+    # by the model.
+    got = _read_table(data, file.filename or "")
+    if got is None:
+        try:
+            got = ai_import.ai_extract_json(data, file.filename or "", file.content_type, IMPORT_INSTRUCTION) or {}
+        except RuntimeError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    if not isinstance(got, dict):
+        got = {}
+    rows = []
+    for r in got.get("possessions") or []:
+        if not isinstance(r, dict):
+            continue
+        try:
+            q = int(r.get("quarter") or 1)
+        except (TypeError, ValueError):
+            q = 1
+        res = str(r.get("result") or "").strip()
+        res = "+" if res in ("+", "plus", "score", "scored", "1", "yes") else "-" if res in ("-", "−", "minus", "no", "0") else ""
+        pts = r.get("points")
+        rows.append({"quarter": max(1, min(q, 20)), "play": str(r.get("play") or "").strip()[:60],
+                     "result": res, "points": int(pts) if isinstance(pts, (int, float)) else None,
+                     "defense": str(r.get("defense") or "").strip()[:40],
+                     "player": str(r.get("player") or "").strip()[:80]})
+    orb = []
+    for o in got.get("orb") or []:
+        if isinstance(o, dict) and isinstance(o.get("count"), (int, float)):
+            orb.append({"team": str(o.get("team") or ""), "quarter": int(o.get("quarter") or 0),
+                        "count": int(o["count"]),
+                        "side": _side_guess(str(o.get("team") or ""), game, our_name)})
+    teams = [str(x) for x in (got.get("teams") or []) if str(x).strip()]
+    return {"title": got.get("title"), "teams": teams, "possessions": rows, "orb": orb,
+            "sides": {"our": our_name, "opponent": game.opponent_name}}
+
+
+@router.post("/games/{game_id}/import/save")
+def import_save(game_id: int, body: ImportSave, db: Session = Depends(get_db),
+                coach: models.Coach = Depends(get_current_coach)):
+    """Save a corrected preview as the game's possessions for one side."""
+    game = _get_game_trackable(db, game_id, coach)
+    if body.side not in ("our", "opponent"):
+        raise HTTPException(status_code=400, detail="Say whose plays these are.")
+    if body.replace:
+        old = db.query(models.PlayCall).filter_by(game_id=game.id, side=body.side, source="import").all()
+        for c in old:
+            db.query(models.GamePlayerStat).filter_by(possession_id=c.id).update({"possession_id": None})
+            db.delete(c)
+        db.flush()
+    seq = db.query(func.max(models.PlayCall.seq)).filter_by(game_id=game.id).scalar() or 0
+    saved = 0
+    for r in body.possessions:
+        if not r.play.strip() and not r.result:
+            continue
+        seq += 1
+        name, typ = pc.resolve_play(db, game, body.side, r.play or "?")
+        db.flush()
+        call = models.PlayCall(
+            game_id=game.id, side=body.side, quarter=max(1, min(r.quarter, 20)), seq=seq,
+            play=name, play_type=typ, defense=pc.resolve_defense(db, game.coach_id, r.defense),
+            result="score" if r.result == "+" else "no_score" if r.result == "-" else None,
+            points=(r.points if r.result == "+" else 0 if r.result == "-" else None),
+            player_name=r.player.strip() or None, source="import", logged_by=coach.id)
+        db.flush()
+        db.add(call)
+        saved += 1
+    for o in body.orb:
+        if o.side not in ("our", "opponent") or not 0 <= o.quarter <= 20 or o.count < 0:
+            continue
+        row = db.query(models.GameTally).filter_by(game_id=game.id, side=o.side, quarter=o.quarter, stat="orb").first()
+        if row is None:
+            db.add(models.GameTally(game_id=game.id, side=o.side, quarter=o.quarter, stat="orb", count=o.count))
+        else:
+            row.count = o.count
+    db.commit()
+    return {"saved": saved}

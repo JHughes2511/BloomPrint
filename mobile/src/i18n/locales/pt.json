@@ -2969,6 +2969,23 @@
     },
     "done": "Pronto",
     "whoFor": "Quem? {{stat}}",
-    "noPlayers": "Adicione jogadores na seção de estatísticas acima."
+    "noPlayers": "Adicione jogadores na seção de estatísticas acima.",
+    "import": {
+      "button": "Importar chamada de jogadas",
+      "title": "Importar chamada de jogadas",
+      "reading": "Lendo a folha…",
+      "readFailed": "Não foi possível ler a folha. Tente uma foto mais nítida, ou PDF, CSV ou Excel.",
+      "checkHint": "Confira com a folha e corrija o que foi mal lido antes de salvar.",
+      "whose": "De quem são estas jogadas?",
+      "count": "{{n}} posses · {{scored}} convertidas",
+      "pts": "Pts",
+      "result": "Resultado",
+      "addRow": "Adicionar ao {{q}}",
+      "wholeGame": "Jogo inteiro",
+      "save": "Salvar {{n}} posses",
+      "pickWhose": "Escolha de quem são as jogadas",
+      "savedTitle": "Chamada de jogadas importada",
+      "savedMsg": "{{n}} posses salvas neste jogo."
+    }
   }
 }

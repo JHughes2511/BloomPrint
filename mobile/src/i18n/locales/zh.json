@@ -2969,6 +2969,23 @@
     },
     "done": "完成",
     "whoFor": "谁？{{stat}}",
-    "noPlayers": "请在上方的数据区添加球员。"
+    "noPlayers": "请在上方的数据区添加球员。",
+    "import": {
+      "button": "导入战术调用",
+      "title": "导入战术调用",
+      "reading": "正在读取表格…",
+      "readFailed": "无法读取表格。请换一张更清晰的照片，或使用 PDF、CSV、Excel。",
+      "checkHint": "保存前请对照表格修正识别错误。",
+      "whose": "这些是哪队的战术？",
+      "count": "{{n}}个回合 · {{scored}}次得分",
+      "pts": "分",
+      "result": "结果",
+      "addRow": "添加到{{q}}",
+      "wholeGame": "全场",
+      "save": "保存{{n}}个回合",
+      "pickWhose": "请选择是哪队的战术",
+      "savedTitle": "已导入战术调用",
+      "savedMsg": "已为本场比赛保存{{n}}个回合。"
+    }
   }
 }

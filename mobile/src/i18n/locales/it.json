@@ -2969,6 +2969,23 @@
     },
     "done": "Fatto",
     "whoFor": "Chi? {{stat}}",
-    "noPlayers": "Aggiungi giocatori nella sezione statistiche qui sopra."
+    "noPlayers": "Aggiungi giocatori nella sezione statistiche qui sopra.",
+    "import": {
+      "button": "Importa chiamate di gioco",
+      "title": "Importa chiamate di gioco",
+      "reading": "Lettura del foglio…",
+      "readFailed": "Impossibile leggere il foglio. Prova una foto più nitida, o un PDF, CSV o Excel.",
+      "checkHint": "Confronta con il foglio e correggi gli errori prima di salvare.",
+      "whose": "Di chi sono questi giochi?",
+      "count": "{{n}} possessi · {{scored}} a segno",
+      "pts": "Pt",
+      "result": "Risultato",
+      "addRow": "Aggiungi a {{q}}",
+      "wholeGame": "Partita intera",
+      "save": "Salva {{n}} possessi",
+      "pickWhose": "Scegli di chi sono i giochi",
+      "savedTitle": "Chiamate importate",
+      "savedMsg": "{{n}} possessi salvati in questa partita."
+    }
   }
 }

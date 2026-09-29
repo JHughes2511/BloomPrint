@@ -30,6 +30,7 @@ import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
 import PlayCallingPanel from '../components/PlayCallingPanel';
+import PlayCallingImport from '../components/PlayCallingImport';
 import TeamLabelPrompt from '../components/TeamLabelPrompt';
 import GameReportPanel from '../components/GameReportPanel';
 import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
@@ -409,6 +410,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // panel stats changed (someone else's, or ours).
   const [recent, setRecent] = useState<any[]>([]);
   const [pcKey, setPcKey] = useState(0);
+  // A play-calling sheet picked for import, being read and checked.
+  const [pcImportFile, setPcImportFile] = useState<{ uri: string; name: string; type: string } | null>(null);
+  const pickPlayCallingSheet = async () => {
+    const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+    if (res.canceled || !res.assets?.[0]) return;
+    const f = res.assets[0];
+    setPcImportFile({ uri: f.uri, name: f.name ?? 'sheet', type: f.mimeType ?? 'application/octet-stream' });
+  };
   // The circle whose name is showing: hovered on a computer, tapped on a phone.
   const [peekTracker, setPeekTracker] = useState<number | null>(null);
   const peekTimer = useRef<any>(null);
@@ -3877,6 +3886,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 : <><Ionicons name="grid-outline" size={14} color={t.muted} />
                   <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>{tr('teamGrade.exportCsv')}</Text></>}
             </TouchableOpacity>
+            {canTrack(detailGame) && (
+              <TouchableOpacity
+                style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
+                onPress={pickPlayCallingSheet}
+              >
+                <Ionicons name="clipboard-outline" size={14} color={t.muted} />
+                <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>{tr('playCalling.import.button')}</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: t.accent }]}
               onPress={() => openGameReport(detailGame)}
@@ -3885,6 +3903,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>{tr('teamGrade.generateGameReport')}</Text>
             </TouchableOpacity>
           </View>
+
+          <PlayCallingImport
+            game={detailGame}
+            file={pcImportFile}
+            sideNames={{
+              our: detailGame.team_name ?? (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
+                ?? coach?.program_name ?? tr('teamGrade.ourTeam'),
+              opponent: detailGame.opponent_name || tr('teamGrade.opponent'),
+            }}
+            qLabel={qLabel}
+            onClose={() => setPcImportFile(null)}
+            onSaved={(n) => {
+              setPcImportFile(null);
+              Alert.alert(tr('playCalling.import.savedTitle'), tr('playCalling.import.savedMsg', { n }));
+            }}
+            t={t}
+            tr={tr}
+          />
 
           {/* Live entry shortcut if in_progress — anyone who can track it */}
           {detailGame.status === 'in_progress' && canTrack(detailGame) && (

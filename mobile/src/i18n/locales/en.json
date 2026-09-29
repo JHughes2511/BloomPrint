@@ -2969,6 +2969,23 @@
     },
     "done": "Done",
     "whoFor": "Who? {{stat}}",
-    "noPlayers": "Add players in the Stats section above."
+    "noPlayers": "Add players in the Stats section above.",
+    "import": {
+      "button": "Import play calling",
+      "title": "Import play calling",
+      "reading": "Reading the sheet…",
+      "readFailed": "The sheet could not be read. Try a clearer photo, or a PDF, CSV or Excel file.",
+      "checkHint": "Check it against the sheet and fix anything misread before saving.",
+      "whose": "Whose plays are these?",
+      "count": "{{n}} possessions · {{scored}} scored",
+      "pts": "Pts",
+      "result": "Result",
+      "addRow": "Add to {{q}}",
+      "wholeGame": "Whole game",
+      "save": "Save {{n}} possessions",
+      "pickWhose": "Pick whose plays these are",
+      "savedTitle": "Play calling imported",
+      "savedMsg": "{{n}} possessions saved to this game."
+    }
   }
 }
