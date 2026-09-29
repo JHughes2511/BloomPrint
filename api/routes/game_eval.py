@@ -4655,13 +4655,33 @@ async def ai_play(
             )
     except Exception:
         style_block = ""
+    # Drawn from a game's whiteboard: what has worked, from the play calling
+    # recorded for both teams across their games — which plays scored against
+    # which defense, and what beat the opponent's defense. The scene still wins.
+    works_block = ""
+    if body.get("game_id"):
+        try:
+            game = _get_game_readable(db, int(body["game_id"]), coach)
+            from .. import play_calling as pc
+            names = pc.side_names(db, game)
+            parts = [team_play_calling_text(db, coach, names["our"]),
+                     team_play_calling_text(db, coach, names["opponent"])]
+            parts = [p for p in parts if p]
+            if parts:
+                works_block = (
+                    "\n\nWHAT HAS WORKED — recorded play calling. When the scene names a defense, favor actions "
+                    f"that have scored against that defense for {names['our']}, and attack what has worked "
+                    f"against {names['opponent']}'s defense; say so in the key. Small samples are hints, not "
+                    "rules, and the scene always wins:\n" + "\n\n".join(parts) + "\n")
+        except HTTPException:
+            works_block = ""
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
             model=OPUS,
             max_tokens=8000,
-            messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}{style_block}\n\nSCENE:\n{description}"}],
+            messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}{style_block}{works_block}\n\nSCENE:\n{description}"}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
         raw = (blocks[0].text if blocks else "{}").strip()

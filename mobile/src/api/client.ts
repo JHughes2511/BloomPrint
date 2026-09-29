@@ -1031,8 +1031,9 @@ export const whiteboardAPI = {
   update: (boardId: number, data: { name?: string; court_type?: string; data?: string }) =>
     api.patch(`/game-eval/whiteboards/${boardId}`, data).then(r => r.data),
   delete: (boardId: number) => api.delete(`/game-eval/whiteboards/${boardId}`).then(r => r.data),
-  aiPlay: (description: string) =>
-    api.post('/game-eval/ai-play', { description }).then(r => r.data),
+  /** gameId: drawn on a game's whiteboard, so the play can lean on what has worked in its play calling. */
+  aiPlay: (description: string, gameId?: number | null) =>
+    api.post('/game-eval/ai-play', { description, game_id: gameId || undefined }).then(r => r.data),
   describeMove: (body: { schemes: any; scheme: string; player_id: string; source?: string }) =>
     api.post('/game-eval/ai-play-describe', body).then(r => r.data),
   adaptPlay: (body: { edited: string; downstream: string[]; schemes: any; key: any[]; locked: any; source?: string }) =>

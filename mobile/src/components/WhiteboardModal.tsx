@@ -489,7 +489,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         buildByPlayerBlock(),
         attachedReport ? `REPORT (${attachedReport.title}):\n${attachedReport.text.trim().slice(0, 4000)}` : '',
       ].filter(Boolean).join('\n\n');
-      const res = await whiteboardAPI.aiPlay(composed);
+      const res = await whiteboardAPI.aiPlay(composed, playbook ? null : gameId);
       syncOffenseAcrossSchemes(res);   // same offense across defense/counter
       const idx = boards.length;
       // Seed standing per-player guidance from any By-Player draw-up notes so the
@@ -563,7 +563,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const baseSource = b.ai.source || b.ai.play_name || '';
     const sticky = buildStickyBlock(gmap);
     const promptToSend = [baseSource, sticky, extra].filter(Boolean).join('\n\n');
-    const res = await whiteboardAPI.aiPlay(promptToSend);
+    const res = await whiteboardAPI.aiPlay(promptToSend, playbook ? null : gameId);
     // Minimal-change mode (Players panel): keep every current starting position;
     // take only the new roles + movement so it's a minor edit, like Adapt.
     let finalSchemes = res.schemes;
