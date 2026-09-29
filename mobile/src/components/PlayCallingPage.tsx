@@ -178,7 +178,19 @@ export default function PlayCallingPage({ game, sideNames, qLabel, statLabel, on
                     {orbTotal ? `  ·  ${tr('playCalling.orb')} ${orbTotal}` : ''}
                   </Text>
                   <Table title={tr('playCalling.page.byPlay')} rows={x.by_play} label={k => String(k)} />
-                  <Table title={tr('playCalling.page.byType')} rows={x.by_type} label={k => typeLabel(String(k))} />
+                  {/* Only when it groups something: if every type holds exactly one
+                      play (all standard calls like Transition), it would repeat By play. */}
+                  {(() => {
+                    const done = possessions.filter(p => p.side === sd && p.result);
+                    const playsPerType = new Map<string, Set<string>>();
+                    for (const p of done) {
+                      if (!playsPerType.has(p.play_type)) playsPerType.set(p.play_type, new Set());
+                      playsPerType.get(p.play_type)!.add(p.play);
+                    }
+                    const repeats = [...playsPerType.values()].every(set => set.size === 1);
+                    return repeats ? null
+                      : <Table title={tr('playCalling.page.byType')} rows={x.by_type} label={k => typeLabel(String(k))} />;
+                  })()}
                   <Table title={tr('playCalling.page.byDefense')} rows={x.by_defense}
                          label={k => (k === 'Not noted' ? tr('playCalling.page.notNoted') : String(k))} />
                   <Table title={tr('playCalling.page.byPlayDefense')} rows={x.by_play_defense} label={k => String(k)} />
