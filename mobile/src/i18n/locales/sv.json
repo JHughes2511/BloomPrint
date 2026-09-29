@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Inkast",
       "press_break": "Pressbrytning",
-      "unknown": "Okänt"
+      "unknown": "Okänt",
+      "sob": "Inkast sida",
+      "bob": "Inkast baslinje",
+      "zone": "Zon",
+      "free_throw": "Straffkast",
+      "cob": "Specialsituationer"
     },
     "hows": {
       "made2": "Tvåa",

@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Oyuna sokma",
       "press_break": "Pres kırma",
-      "unknown": "Bilinmiyor"
+      "unknown": "Bilinmiyor",
+      "sob": "Yan çizgi oyunu",
+      "bob": "Dip çizgi oyunu",
+      "zone": "Alan",
+      "free_throw": "Serbest atış",
+      "cob": "Özel durumlar"
     },
     "hows": {
       "made2": "İkilik",

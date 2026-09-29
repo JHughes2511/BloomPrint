@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Remise en jeu",
       "press_break": "Sortie de presse",
-      "unknown": "Inconnu"
+      "unknown": "Inconnu",
+      "sob": "Remise en jeu côté",
+      "bob": "Remise en jeu ligne de fond",
+      "zone": "Zone",
+      "free_throw": "Lancer franc",
+      "cob": "Situations spéciales"
     },
     "hows": {
       "made2": "Panier à 2",

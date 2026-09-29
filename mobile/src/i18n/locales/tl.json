@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Out of bounds",
       "press_break": "Press break",
-      "unknown": "Hindi alam"
+      "unknown": "Hindi alam",
+      "sob": "Sideline inbound",
+      "bob": "Baseline inbound",
+      "zone": "Zone",
+      "free_throw": "Free throw",
+      "cob": "Espesyal na sitwasyon"
     },
     "hows": {
       "made2": "2-pointer",

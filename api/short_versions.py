@@ -79,6 +79,99 @@ def source_text(db: Session, kind: str, ref_id: int) -> tuple[str | None, int | 
     return None, None
 
 
+# Play sheet groups, from Play Calling's play types.
+TYPE_GROUP = {"transition": "trans", "semi_transition": "trans", "transition_drag": "trans",
+              "half_court": "half_court", "ato": "half_court", "sob": "sob", "bob": "bob", "zone": "zone",
+              "free_throw": "free_throw", "cob": "cob"}
+GROUP_TYPE = {"trans": "transition", "half_court": "half_court", "sob": "sob", "bob": "bob", "zone": "zone",
+              "free_throw": "free_throw", "cob": "cob"}
+
+
+def team_for(db: Session, kind: str, ref_id: int) -> models.Team | None:
+    """The team a team-training report is about: the one it was made for; for
+    an older report without one, the coach's team when they have just one."""
+    tid = None
+    if kind == "team_report":
+        r = db.get(models.TeamReport, ref_id)
+        tid = getattr(r, "team_id", None) if r else None
+        if tid is None and r is not None:
+            own = db.query(models.Team).filter_by(coach_id=r.coach_id, parent_team_id=None).all() \
+                if hasattr(models.Team, "parent_team_id") else db.query(models.Team).filter_by(coach_id=r.coach_id).all()
+            tid = own[0].id if len(own) == 1 else None
+    elif kind == "packet_training":
+        gr = db.get(models.GameReport, ref_id)
+        tid = gr.my_team_id if gr else None
+    return db.get(models.Team, tid) if tid else None
+
+
+def _initials(name: str) -> str:
+    parts = [p for p in re.split(r"\s+", (name or "").strip()) if p]
+    if not parts:
+        return ""
+    return (parts[0][0] + (parts[-1][0] if len(parts) > 1 else "")).upper()
+
+
+def staff_for(db: Session, team: models.Team | None) -> list[dict]:
+    """The team's staff with initials, head coach (owner) first. Two with the
+    same initials get more of the surname so each cell names one person."""
+    if team is None:
+        return []
+    people = [db.get(models.Coach, team.coach_id)] + [ts.coach for ts in db.query(models.TeamStaff).filter_by(team_id=team.id).all()]
+    seen, out = set(), []
+    for c in people:
+        if c is None or c.id in seen:
+            continue
+        seen.add(c.id)
+        out.append({"id": c.id, "name": c.name, "title": c.job_title or "", "initials": _initials(c.name)})
+    counts: dict[str, int] = {}
+    for p in out:
+        counts[p["initials"]] = counts.get(p["initials"], 0) + 1
+    for p in out:
+        if counts[p["initials"]] > 1:
+            last = p["name"].split()[-1] if p["name"].split() else ""
+            p["initials"] = (p["name"][:1] + last[:2]).upper()
+    out[0]["head"] = True
+    return out
+
+
+def catalog_groups(db: Session, team: models.Team | None) -> dict[str, list[str]]:
+    """The team's own plays from Play Calling, most used first, by sheet group."""
+    groups: dict[str, list[str]] = {g: [] for g in PLAY_GROUPS}
+    if team is None:
+        return groups
+    for e in (db.query(models.PlayCatalogEntry).filter_by(team_id=team.id)
+              .order_by(models.PlayCatalogEntry.uses.desc()).all()):
+        g = TYPE_GROUP.get(e.play_type or "")
+        if g and e.name not in groups[g]:
+            groups[g].append(e.name)
+    return groups
+
+
+def _merge_catalog(data: dict, groups: dict[str, list[str]]) -> dict:
+    plays = data.setdefault("plays", {g: [] for g in PLAY_GROUPS})
+    for g in PLAY_GROUPS:
+        have = {x.lower() for x in plays.get(g, [])}
+        for name in groups.get(g, []):
+            if name.lower() not in have and len(plays.setdefault(g, [])) < 12:
+                plays[g].append(name)
+                have.add(name.lower())
+    return data
+
+
+def learn_play_types(db: Session, team: models.Team | None, data: dict) -> None:
+    """A play the coach moved to another group on the sheet takes that type in
+    the team's catalog, so the next sheet puts it there without being told."""
+    if team is None:
+        return
+    by_name = {e.name.lower(): e for e in db.query(models.PlayCatalogEntry).filter_by(team_id=team.id).all()}
+    for g, names in (data.get("plays") or {}).items():
+        typ = GROUP_TYPE.get(g)
+        for n in names or []:
+            e = by_name.get(str(n).lower())
+            if e is not None and typ and TYPE_GROUP.get(e.play_type or "") != g:
+                e.play_type = typ
+
+
 def _parse(raw: str) -> dict | None:
     raw = (raw or "").strip()
     raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw)
@@ -129,19 +222,32 @@ def _clean(layout: str, d: dict) -> dict:
             "checklist": checklist, "cues": strs(d.get("cues"), 4, 120)}
 
 
-def _make(kind: str, ref_id: int, text: str, text_hash: str) -> None:
+def _make(kind: str, ref_id: int, text: str, text_hash: str, staff: list | None = None,
+          groups: dict | None = None) -> None:
     """Write the short version (its own session; runs in a thread)."""
     import asyncio
     from .ai_models import long_text
     from .database import SessionLocal
     layout = KIND_LAYOUT[kind]
-    prompt = (f"{LAYOUTS[layout]}\n\nWrite every text value in the same language as the program.\n\n"
+    staff_block = ""
+    if staff:
+        def who(p):
+            bits = [p["name"]] + (["head coach"] if p.get("head") else []) + ([p["title"]] if p.get("title") else [])
+            return f"{p['initials']} = " + ", ".join(bits)
+        staff_block = ("\n\nSTAFF (fill each drill's \"coach\" with ONE of these initials): "
+                       + "; ".join(who(p) for p in staff)
+                       + ". Use the coach the program names for a drill if it names one. Otherwise: the head coach "
+                         "runs team segments (walk-throughs, script, scrimmage, situations); spread skill and "
+                         "position work across the others by their titles.")
+    prompt = (f"{LAYOUTS[layout]}{staff_block}\n\nWrite every text value in the same language as the program.\n\n"
               f"THE PROGRAM:\n{text[:24000]}")
     data, err = None, None
     try:
         raw = asyncio.run(long_text(prompt, max_tokens=4000))
         got = _parse(raw)
         data = _clean(layout, got) if got else None
+        if data is not None and layout == "team_training" and groups:
+            data = _merge_catalog(data, groups)
         if data is None:
             err = "The short version came back unreadable."
     except Exception as e:  # noqa: BLE001 — recorded on the row, shown as failed
@@ -182,7 +288,12 @@ def ensure(db: Session, kind: str, ref_id: int, *, force: bool = False) -> model
     row.source_hash, row.status, row.error, row.edited = h, "making", None, False
     db.commit()
     db.refresh(row)
-    threading.Thread(target=_make, args=(kind, ref_id, text, h), daemon=True).start()
+    staff, groups = None, None
+    if KIND_LAYOUT[kind] == "team_training":
+        team = team_for(db, kind, ref_id)
+        staff = [{k: v for k, v in p.items() if k != "id"} for p in staff_for(db, team)]
+        groups = catalog_groups(db, team)
+    threading.Thread(target=_make, args=(kind, ref_id, text, h, staff, groups), daemon=True).start()
     return row
 
 
@@ -205,6 +316,8 @@ def save_edit(db: Session, kind: str, ref_id: int, data: dict) -> models.ShortVe
         row = models.ShortVersion(kind=kind, ref_id=ref_id, coach_id=coach_id, source_hash=_hash(text or ""))
         db.add(row)
     row.data, row.status, row.error, row.edited = _clean(KIND_LAYOUT[kind], data or {}), "ready", None, True
+    if KIND_LAYOUT[kind] == "team_training":
+        learn_play_types(db, team_for(db, kind, ref_id), row.data)
     db.commit()
     db.refresh(row)
     return row

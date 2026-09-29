@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from . import models
 
 PLAY_TYPES = ["half_court", "transition", "semi_transition", "transition_drag", "ato", "oob",
-              "press_break", "unknown"]
+              "press_break", "unknown", "sob", "bob", "zone", "free_throw", "cob"]
 
 # (name, type, short forms). The short forms are what a coach writes on a
 # sheet; they resolve to the name. Deliberately few — a team's own plays are
@@ -538,7 +538,9 @@ def recent_activity(db: Session, game_id: int, me: int, limit: int = 6) -> list[
 
 TYPE_WORDS = {"half_court": "half court", "transition": "transition", "semi_transition": "semi-transition",
               "transition_drag": "transition drag", "ato": "ATO", "oob": "out of bounds",
-              "press_break": "press break", "unknown": "unknown"}
+              "press_break": "press break", "unknown": "unknown", "sob": "sideline out of bounds",
+              "bob": "baseline out of bounds", "zone": "zone offense", "free_throw": "free throw",
+              "cob": "COB"}
 ENDING_WORDS = {"miss2": "missed 2", "miss3": "missed 3", "turnover": "turnover", "ft_miss": "missed free throws",
                 "made2": "made 2", "made3": "made 3", "and1_2": "and-1 on a 2", "and1_3": "and-1 on a 3",
                 "ft": "free throws", "other": "other"}

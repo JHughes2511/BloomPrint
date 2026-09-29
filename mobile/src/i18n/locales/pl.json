@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Wybicie",
       "press_break": "Wyjście z presingu",
-      "unknown": "Nieznana"
+      "unknown": "Nieznana",
+      "sob": "Wznowienie z boku",
+      "bob": "Wznowienie spod kosza",
+      "zone": "Strefa",
+      "free_throw": "Rzut wolny",
+      "cob": "Sytuacje specjalne"
     },
     "hows": {
       "made2": "Za 2",

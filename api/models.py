@@ -234,6 +234,9 @@ class TeamReport(SoftDeleteMixin, Base):
     output_type  = Column(String, nullable=False)
     focus_prompt = Column(Text, nullable=True)
     report_text  = Column(Text, nullable=True)
+    # The team it is about, when one was picked (its staff and plays go on
+    # the short version's practice sheet).
+    team_id      = Column(Integer, ForeignKey("teams.id"), nullable=True)
     created_at   = Column(DateTime, default=datetime.utcnow)
 
     coach        = relationship("Coach")

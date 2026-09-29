@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Reposição",
       "press_break": "Saída de pressão",
-      "unknown": "Desconhecida"
+      "unknown": "Desconhecida",
+      "sob": "Reposição lateral",
+      "bob": "Reposição de fundo",
+      "zone": "Zona",
+      "free_throw": "Lance livre",
+      "cob": "Situações especiais"
     },
     "hows": {
       "made2": "Cesta de 2",

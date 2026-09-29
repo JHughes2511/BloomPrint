@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Įmetimas",
       "press_break": "Presingo įveikimas",
-      "unknown": "Nežinoma"
+      "unknown": "Nežinoma",
+      "sob": "Įmetimas iš šono",
+      "bob": "Įmetimas iš galinės linijos",
+      "zone": "Zona",
+      "free_throw": "Baudos metimas",
+      "cob": "Ypatingos situacijos"
     },
     "hows": {
       "made2": "Dvitaškis",

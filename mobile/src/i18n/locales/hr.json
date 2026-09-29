@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Ubacivanje",
       "press_break": "Izlazak iz preše",
-      "unknown": "Nepoznato"
+      "unknown": "Nepoznato",
+      "sob": "Ubacivanje sa strane",
+      "bob": "Ubacivanje ispod koša",
+      "zone": "Zona",
+      "free_throw": "Slobodno bacanje",
+      "cob": "Posebne situacije"
     },
     "hows": {
       "made2": "Dvica",

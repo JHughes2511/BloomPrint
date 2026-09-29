@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Out of bounds",
       "press_break": "Press break",
-      "unknown": "Unknown"
+      "unknown": "Unknown",
+      "sob": "SOB",
+      "bob": "BOB",
+      "zone": "Zone",
+      "free_throw": "Free throw",
+      "cob": "COB"
     },
     "hows": {
       "made2": "2-pointer",

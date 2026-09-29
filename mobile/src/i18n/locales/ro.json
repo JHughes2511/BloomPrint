@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Repunere",
       "press_break": "Ieșire din presing",
-      "unknown": "Necunoscut"
+      "unknown": "Necunoscut",
+      "sob": "Aut lateral",
+      "bob": "Aut de la linia de fund",
+      "zone": "Zonă",
+      "free_throw": "Aruncare liberă",
+      "cob": "Situații speciale"
     },
     "hows": {
       "made2": "Coș de 2",

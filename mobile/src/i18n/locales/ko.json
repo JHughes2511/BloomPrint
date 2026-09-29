@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "인바운드",
       "press_break": "프레스 브레이크",
-      "unknown": "알 수 없음"
+      "unknown": "알 수 없음",
+      "sob": "사이드 인바운드",
+      "bob": "베이스라인 인바운드",
+      "zone": "존",
+      "free_throw": "자유투",
+      "cob": "특수 상황"
     },
     "hows": {
       "made2": "2점슛",

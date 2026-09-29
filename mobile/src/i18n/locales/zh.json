@@ -2955,7 +2955,12 @@
       "ato": "暂停后战术",
       "oob": "边线/底线球",
       "press_break": "破全场紧逼",
-      "unknown": "未知"
+      "unknown": "未知",
+      "sob": "边线球",
+      "bob": "底线球",
+      "zone": "联防",
+      "free_throw": "罚球",
+      "cob": "特殊情况"
     },
     "hows": {
       "made2": "两分球",

@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Einwurf",
       "press_break": "Press Break",
-      "unknown": "Unbekannt"
+      "unknown": "Unbekannt",
+      "sob": "Einwurf Seite",
+      "bob": "Einwurf Grundlinie",
+      "zone": "Zone",
+      "free_throw": "Freiwurf",
+      "cob": "Sondersituationen"
     },
     "hows": {
       "made2": "Zweier",

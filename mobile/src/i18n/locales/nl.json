@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Inworp",
       "press_break": "Press break",
-      "unknown": "Onbekend"
+      "unknown": "Onbekend",
+      "sob": "Inworp zijlijn",
+      "bob": "Inworp achterlijn",
+      "zone": "Zone",
+      "free_throw": "Vrije worp",
+      "cob": "Speciale situaties"
     },
     "hows": {
       "made2": "Tweepunter",

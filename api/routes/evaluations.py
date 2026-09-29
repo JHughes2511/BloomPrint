@@ -627,7 +627,7 @@ def _build_team_report_prompt(output_type, team_label, roster_context, focus, vi
 def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_prompt: str | None,
                          team_label: str, roster_context: str, video_path: str,
                          coach_program: str, coach_weight: int, system_block: str = "",
-                         coach_level: str = "HS Varsity"):
+                         coach_level: str = "HS Varsity", team_id: int | None = None):
     """Background task: analyze a (potentially long) film for a team report and
     generate the report. The client polls the job."""
     import asyncio
@@ -680,7 +680,7 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
         text_blocks = [b for b in response.content if hasattr(b, "text")]
         report_text = text_blocks[0].text if text_blocks else ""
         rec = models.TeamReport(coach_id=coach_id, output_type=output_type,
-                                focus_prompt=focus_prompt, report_text=report_text)
+                                focus_prompt=focus_prompt, report_text=report_text, team_id=team_id)
         db = SessionLocal()
         try:
             db.add(rec)
@@ -830,7 +830,7 @@ async def team_report(
             coach_id=coach.id, output_type=output_type, focus_prompt=focus_prompt,
             team_label=team_label, roster_context=roster_context, video_path=vid_ref,
             coach_program=coach.program_name, coach_weight=coach.weight, system_block=system_block,
-            coach_level=team_level,
+            coach_level=team_level, team_id=team_obj.id if team_obj else None,
         )
         return {"job_id": job.id, "status": "processing"}
 
@@ -852,6 +852,7 @@ async def team_report(
             output_type=output_type,
             focus_prompt=focus_prompt,
             report_text=text_blocks[0].text,
+            team_id=team_obj.id if team_obj else None,
         )
         db.add(team_report_record)
         db.commit()

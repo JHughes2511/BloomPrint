@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Saque",
       "press_break": "Contra presión",
-      "unknown": "Desconocida"
+      "unknown": "Desconocida",
+      "sob": "Saque de banda",
+      "bob": "Saque de fondo",
+      "zone": "Zona",
+      "free_throw": "Tiro libre",
+      "cob": "Situaciones especiales"
     },
     "hows": {
       "made2": "Doble",

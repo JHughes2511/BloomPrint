@@ -2955,7 +2955,12 @@
       "ato": "ATO",
       "oob": "Rimessa",
       "press_break": "Uscita dal pressing",
-      "unknown": "Sconosciuto"
+      "unknown": "Sconosciuto",
+      "sob": "Rimessa laterale",
+      "bob": "Rimessa dal fondo",
+      "zone": "Zona",
+      "free_throw": "Tiro libero",
+      "cob": "Situazioni speciali"
     },
     "hows": {
       "made2": "Canestro da 2",
