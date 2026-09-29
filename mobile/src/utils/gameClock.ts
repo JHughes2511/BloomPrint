@@ -55,10 +55,14 @@ export function periodLabel(fmt: GameFormat, periodIndex: number): string {
   return fmt.format === 'halves' ? `H${periodIndex}` : `Q${periodIndex}`;
 }
 
-// The weight bucket (1-4, or 5 for OT) for a given period + remaining seconds.
-// This is the integer we send to the backend as `quarter`.
+// The weight bucket for a given period + remaining seconds: 1-4 for regulation,
+// then one per overtime — 5 for OT, 6 for OT2, 7 for OT3. This is the integer
+// sent to the backend as `quarter`, and every overtime weighs 1.5 there.
+//
+// All overtimes used to be 5, so a second overtime was filed on top of the
+// first: its stats merged into OT's, and nothing could tell them apart.
 export function weightBucket(fmt: GameFormat, periodIndex: number, remainingSeconds: number): number {
-  if (periodIndex > fmt.numPeriods) return 5; // OT → 1.5 weight (existing OT behavior)
+  if (periodIndex > fmt.numPeriods) return 4 + (periodIndex - fmt.numPeriods);
   if (fmt.format === 'quarters') {
     return Math.min(periodIndex, 4);
   }
@@ -78,7 +82,7 @@ export function weightBucket(fmt: GameFormat, periodIndex: number, remainingSeco
 // under a quarter the coach thought they had left. The row sets the period now,
 // and this is what it sets it to.
 export function periodForBucket(fmt: GameFormat, bucket: number): { periodIndex: number; remaining: number } {
-  if (bucket >= 5) return { periodIndex: fmt.numPeriods + 1, remaining: fmt.periodSeconds };
+  if (bucket >= 5) return { periodIndex: fmt.numPeriods + (bucket - 4), remaining: fmt.periodSeconds };
   if (fmt.format === 'quarters') {
     return { periodIndex: Math.min(bucket, fmt.numPeriods), remaining: fmt.periodSeconds };
   }

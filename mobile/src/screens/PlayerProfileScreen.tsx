@@ -925,7 +925,7 @@ export default function PlayerProfileScreen() {
                       <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 6 }}>{tr('playerProfile.perQuarter')}</Text>
                       {Object.entries(game.per_quarter as Record<string, any>).sort(([a], [b]) => Number(a) - Number(b)).map(([q, data]: [string, any]) => (
                         <View key={q} style={{ flexDirection: 'row', gap: 12, marginBottom: 3 }}>
-                          <Text style={{ color: t.muted, fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
+                          <Text style={{ color: t.muted, fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : Number(q) > 5 ? `OT${Number(q) - 4}` : `Q${q}`}</Text>
                           <Text style={{ color: t.muted, fontSize: 11 }}>OFF {data.offense.toFixed(1)} · DEF {data.defense.toFixed(1)}</Text>
                         </View>
                       ))}

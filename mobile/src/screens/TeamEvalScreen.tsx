@@ -236,7 +236,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const phaseLabel = (p: string) => tr(`teamGrade.phases.${p}`, { defaultValue: p ? p.charAt(0).toUpperCase() + p.slice(1) : p });
   const statLabelMap = tr('teamGrade.stats', { returnObjects: true }) as Record<string, string>;
   const statLabel = (k: string) => (statLabelMap && (statLabelMap as any)[k]) || k;
-  const qLabel = (q: number) => (q === 5 ? tr('teamGrade.otShort') : tr('teamGrade.quarterShort', { q }));
+  // Buckets past 4 are overtimes, one each: 5 is OT, 6 is OT2, 7 is OT3.
+  const qLabel = (q: number) => (q === 5 ? tr('teamGrade.otShort')
+    : q > 5 ? `${tr('teamGrade.otShort')}${q - 4}` : tr('teamGrade.quarterShort', { q }));
+  const qLabelLong = (q: number) => (q === 5 ? tr('teamGrade.overtime')
+    : q > 5 ? `${tr('teamGrade.overtime')} ${q - 4}` : tr('teamGrade.quarterN', { q }));
   const scoutScrollRef = useRef<any>(null);
   const noteInputY = useRef(0);
   const [whiteboardGameId, setWhiteboardGameId] = useState<number | null>(null);
@@ -337,6 +341,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [activeQuarter, setActiveQuarter] = useState(1);
   // ── Live game clock ──
   const [periodIndex, setPeriodIndex] = useState(1);        // 1-based; > numPeriods = OT
+  // The furthest bucket this game has reached, so an overtime already played
+  // keeps its button after the coach steps back to an earlier period.
+  const [highestBucket, setHighestBucket] = useState(5);
   const [clockRemaining, setClockRemaining] = useState(480);
   const [clockRunning, setClockRunning] = useState(false);
   const [showClockEdit, setShowClockEdit] = useState(false);
@@ -410,6 +417,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   }, [teams, sessions]);
   const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
   const [expandedQuarterPlayer, setExpandedQuarterPlayer] = useState<string | null>(null);
+  // Teams folded away in Quarter Comparison ('our' / 'opp'), to save scrolling.
+  const [collapsedQuarterTeams, setCollapsedQuarterTeams] = useState<Set<string>>(new Set());
   // Team Grade player-grades list search
   const [showGradeSearch, setShowGradeSearch] = useState(false);
   const [gradeSearch, setGradeSearch] = useState('');
@@ -763,6 +772,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setOppScore(game.opponent_score ?? 0);
     setActiveQuarter(1);
     setPeriodIndex(1);
+    setHighestBucket(5);
+    // Reopening a game that went to a second overtime shows OT2 again.
+    gameEvalAPI.listStats(game.id)
+      .then((rows: any[]) => setHighestBucket(h => Math.max(h, ...rows.map(r => r.quarter || 0))))
+      .catch(() => {});
     setClockRemaining(game.period_seconds ?? 480);
     setClockRunning(false);
     setSelectedPlayer(null);
@@ -857,6 +871,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   useEffect(() => {
     if (activeView === 'live') setActiveQuarter(derivedBucket);
   }, [derivedBucket, activeView]);
+  useEffect(() => { setHighestBucket(h => Math.max(h, activeQuarter)); }, [activeQuarter]);
 
   /**
    * Move the whole game to a period — clock, header and stat tagging together.
@@ -1480,7 +1495,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           P.total += st.weighted_points;
         }
         const qNums = Array.from(qSet).sort((a, b) => a - b);
-        const qLabel = (q: number) => (q === 5 ? 'OT' : `Q${q}`);
+        const qLabel = (q: number) => (q === 5 ? 'OT' : q > 5 ? `OT${q - 4}` : `Q${q}`);
         const playerNames = Object.keys(players).sort((a, b) => players[b].total - players[a].total);
         const teamQ: Record<number, number> = {};
         for (const q of qNums) teamQ[q] = playerNames.reduce((s, n) => s + (players[n].quarters[q]?.weighted || 0), 0);
@@ -1682,7 +1697,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           Q.counts[st.stat_name] = (Q.counts[st.stat_name] || 0) + (st.count || 1);
         }
         const qNums = Array.from(qSet).sort((a, b) => a - b);
-        const qLabel = (q: number) => (q === 5 ? 'OT' : `Q${q}`);
+        const qLabel = (q: number) => (q === 5 ? 'OT' : q > 5 ? `OT${q - 4}` : `Q${q}`);
         const playerNames = Object.keys(players).sort();
         const trad = (c: Record<string, number>) => {
           const fgm = (c['2 FG Made'] || 0) + (c['3 FG Made'] || 0);
@@ -2719,7 +2734,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Period bucket — auto-follows the clock; tap to override */}
           {activeGame.tracking_mode !== 'post' && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.quarterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' }}>
-            {[1, 2, 3, 4, 5].map(q => (
+            {Array.from({ length: highestBucket }, (_, i) => i + 1).map(q => (
               <TouchableOpacity
                 key={q}
                 style={[s.quarterBtn, activeQuarter === q && s.quarterBtnActive]}
@@ -2730,6 +2745,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 </Text>
               </TouchableOpacity>
             ))}
+            {/* Another overtime, in its own bucket — never on top of the last. */}
+            <TouchableOpacity
+              style={s.quarterBtn}
+              onPress={() => goToBucket(highestBucket + 1)}
+              accessibilityLabel={qLabel(highestBucket + 1)}
+            >
+              <Text style={s.quarterBtnText}>+ {qLabel(highestBucket + 1)}</Text>
+            </TouchableOpacity>
           </ScrollView>
           )}
 
@@ -3209,19 +3232,33 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   const teamQ: Record<number, number> = {};
                   for (const q of qNums) teamQ[q] = playerNames.reduce((sum, n) => sum + (players[n].quarters[q]?.weighted || 0), 0);
                   const teamTotal = playerNames.reduce((sum, n) => sum + players[n].total, 0);
+                  const side = g.isOpp ? 'opp' : 'our';
+                  const collapsed = collapsedQuarterTeams.has(side);
                   return (
                     <View key={String(g.isOpp)} style={gi > 0 ? { marginTop: 18 } : null}>
                       {/* Team totals */}
-                      <View style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8, marginTop: 4, marginBottom: 8 }]}>
-                        <Text style={[s.qPlayerName, { color: g.color, fontFamily: fonts[800] }]} numberOfLines={1}>{g.name}</Text>
+                      <TouchableOpacity
+                        style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8, marginTop: 4, marginBottom: 8 }]}
+                        onPress={() => setCollapsedQuarterTeams(prev => {
+                          const next = new Set(prev);
+                          if (next.has(side)) next.delete(side); else next.add(side);
+                          return next;
+                        })}
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: !collapsed }}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 4 }}>
+                          <Ionicons name={collapsed ? 'chevron-forward' : 'chevron-down'} size={12} color={g.color} />
+                          <Text style={[s.qPlayerName, { color: g.color, fontFamily: fonts[800] }]} numberOfLines={1}>{g.name}</Text>
+                        </View>
                         {qNums.map(q => (
                           <Text key={q} style={[s.qCell, { color: cellColor(teamQ[q]), fontFamily: fonts[800] }]}>{fmt(teamQ[q])}</Text>
                         ))}
                         <Text style={[s.qCell, { color: g.color, fontFamily: fonts[800] }]}>{fmt(teamTotal)}</Text>
-                      </View>
+                      </TouchableOpacity>
 
-                      {/* Player rows */}
-                      {playerNames.map(name => {
+                      {/* Player rows — folded away with their team */}
+                      {!collapsed && playerNames.map(name => {
                         const P = players[name];
                         const key = `${g.isOpp ? 'opp' : 'our'}:${name}`;
                         const isOpen = expandedQuarterPlayer === key;
@@ -4644,7 +4681,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               )}
 
               {/* Stats by quarter */}
-              {[1, 2, 3, 4, 5].map(q => {
+              {Array.from({ length: Math.max(5, ...gameStats.map((st: any) => st.quarter || 0)) }, (_, i) => i + 1).map(q => {
                 const qStats = gameStats.filter(st =>
                   st.player_name === detailModalPlayer &&
                   st.is_opponent === (detailTab === 'opponent') &&
@@ -4657,7 +4694,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <View key={q} style={{ marginBottom: 14 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                       <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[800] }}>
-                        {q === 5 ? tr('teamGrade.overtime') : tr('teamGrade.quarterN', { q })}
+                        {qLabelLong(q)}
                       </Text>
                       <Text style={{ color: t.muted, fontSize: 11 }}>
                         {tr('teamGrade.offDef', { off: `${offTotal > 0 ? '+' : ''}${offTotal.toFixed(1)}`, def: `${defTotal > 0 ? '+' : ''}${defTotal.toFixed(1)}` })}
@@ -4712,7 +4749,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {/* Quarter selector */}
               <Text style={{ color: t.muted, fontSize: 11, marginBottom: 6 }}>{tr('teamGrade.quarterLabel')}</Text>
               <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
-                {[1, 2, 3, 4, 5].map(q => (
+                {Array.from({ length: Math.max(5, ...gameStats.map((st: any) => st.quarter || 0)) }, (_, i) => i + 1).map(q => (
                   <TouchableOpacity
                     key={q}
                     style={{ flex: 1, paddingVertical: 7, borderRadius: 8, alignItems: 'center',
