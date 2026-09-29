@@ -333,7 +333,12 @@
     "nothingToImportMsg": "Tame faile nerasta įskaitomo teksto.",
     "importFailedTitle": "Importavimas nepavyko",
     "importFailedMsg": "Nepavyko perskaityti to failo.",
-    "gamesSelected": "Pasirinkta {{count}} rungtynių"
+    "gamesSelected": "Pasirinkta {{count}} rungtynių",
+    "findPlayerTitle": "Raskite {{name}} įraše",
+    "findPlayerHint": "Numeris ir aprangos spalva leidžia įrašui fiksuoti, ką žaidėjas daro, kad ataskaita galėtų pasakyti, kaip dažnai. Praleidus ataskaita rašoma be suskaičiuotų tendencijų.",
+    "jerseyNumber": "Numeris",
+    "jerseyColour": "Aprangos spalva",
+    "continueBtn": "Tęsti"
   },
   "evalReport": {
     "pillars": {

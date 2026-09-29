@@ -333,7 +333,12 @@
     "nothingToImportMsg": "U toj datoteci nije pronađen čitljiv tekst.",
     "importFailedTitle": "Uvoz nije uspeo",
     "importFailedMsg": "Nije moguće pročitati tu datoteku.",
-    "gamesSelected": "{{count}} utakmica izabrano"
+    "gamesSelected": "{{count}} utakmica izabrano",
+    "findPlayerTitle": "Pronađi {{name}} na snimku",
+    "findPlayerHint": "Broj i boja dresa omogućavaju snimku da beleži šta igrač radi, kako bi izveštaj rekao koliko često. Ako preskočiš, izveštaj se piše bez izbrojanih tendencija.",
+    "jerseyNumber": "Broj",
+    "jerseyColour": "Boja dresa",
+    "continueBtn": "Nastavi"
   },
   "evalReport": {
     "pillars": {

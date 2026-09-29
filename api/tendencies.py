@@ -324,6 +324,35 @@ REPORT_DIRECTIVE = (
 )
 
 
+def player_block(events: list[dict], name: str, jersey: str, several_films: bool = False) -> str:
+    """A player report's tendencies: one player, counted from their film.
+
+    The log was asked for this player only, but anything logged for someone
+    else is dropped rather than trusted. Across several films a timestamp
+    points nowhere, so none are given.
+    """
+    mine = [e for e in events if str(e.get("no")) == str(jersey)]
+    who = f"#{jersey} {name}".strip()
+    facts = _facts(mine) if len(mine) >= MIN_EVENTS else []
+    if several_films:
+        for f in facts:
+            f.pop("ex", None)
+    if not facts:
+        return (f"\n\nPLAYER TENDENCIES FROM FILM: the film showed too little of {who} to count "
+                f"tendencies ({len(mine)} actions logged).\n\nInclude a PLAYER TENDENCIES section that "
+                "says the film showed too little of this player to call tendencies — do not "
+                "describe any.")
+    lines = "\n".join(f"  - {english(f)}" for f in facts)
+    return (f"\n\nPLAYER TENDENCIES FROM FILM — {who} ({len(mine)} actions logged; each figure is "
+            f"how many times it was seen):\n{lines}\n\nInclude a PLAYER TENDENCIES section: what "
+            "this player likes to do — which way they go, whether they pull up or get all the way "
+            "to the rim, where they shoot from, how they use ball screens, whether and when they "
+            "run the floor, move without the ball, cut, or go stagnant on offense or defense — "
+            "using ONLY these counts and quoting them (except running the floor, which is said "
+            "without a count). Say what each means for coaching or guarding this player. Never "
+            "describe a tendency these counts do not show.")
+
+
 # ── Rosters: jersey -> name for the teams on screen ──────────────────────────
 
 def _team_roster(db: Session, team_id: int | None) -> dict[str, str]:

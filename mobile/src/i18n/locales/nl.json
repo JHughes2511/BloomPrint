@@ -333,7 +333,12 @@
     "nothingToImportMsg": "Er is geen leesbare tekst gevonden in dat bestand.",
     "importFailedTitle": "Importeren mislukt",
     "importFailedMsg": "Kon dat bestand niet lezen.",
-    "gamesSelected": "{{count}} wedstrijd(en) geselecteerd"
+    "gamesSelected": "{{count}} wedstrijd(en) geselecteerd",
+    "findPlayerTitle": "Vind {{name}} in de video",
+    "findPlayerHint": "Rugnummer en shirtkleur laten de video vastleggen wat de speler doet, zodat het rapport kan zeggen hoe vaak. Sla je dit over, dan wordt het rapport zonder getelde tendensen geschreven.",
+    "jerseyNumber": "Rugnummer",
+    "jerseyColour": "Shirtkleur",
+    "continueBtn": "Doorgaan"
   },
   "evalReport": {
     "pillars": {

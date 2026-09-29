@@ -333,7 +333,12 @@
     "nothingToImportMsg": "Bu dosyada okunabilir metin bulunamadı.",
     "importFailedTitle": "İçe aktarma başarısız",
     "importFailedMsg": "Bu dosya okunamadı.",
-    "gamesSelected": "{{count}} maç seçildi"
+    "gamesSelected": "{{count}} maç seçildi",
+    "findPlayerTitle": "{{name}} oyuncusunu videoda bul",
+    "findPlayerHint": "Forma numarası ve rengi, videonun oyuncunun yaptıklarını kaydetmesini sağlar; rapor ne sıklıkla olduğunu söyleyebilir. Atlarsan rapor sayılmış eğilimler olmadan yazılır.",
+    "jerseyNumber": "Forma no",
+    "jerseyColour": "Forma rengi",
+    "continueBtn": "Devam"
   },
   "evalReport": {
     "pillars": {

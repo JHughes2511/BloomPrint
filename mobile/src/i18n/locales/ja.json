@@ -333,7 +333,12 @@
     "nothingToImportMsg": "そのファイルから読み取れるテキストが見つかりませんでした。",
     "importFailedTitle": "インポート失敗",
     "importFailedMsg": "そのファイルを読み取れませんでした。",
-    "gamesSelected": "{{count}}試合選択中"
+    "gamesSelected": "{{count}}試合選択中",
+    "findPlayerTitle": "映像で{{name}}を見つける",
+    "findPlayerHint": "背番号とユニフォームの色で、映像がこの選手のプレーを記録し、レポートで回数を示せます。スキップすると、回数付きの傾向なしでレポートを作成します。",
+    "jerseyNumber": "背番号",
+    "jerseyColour": "ユニフォームの色",
+    "continueBtn": "続ける"
   },
   "evalReport": {
     "pillars": {

@@ -384,6 +384,12 @@ export const playersAPI = {
 const UPLOAD_TIMEOUT = 1800000;
 
 export const evalsAPI = {
+  /** The two uniform colours in an uploaded film, as choices. */
+  detectColours: (token: string) => {
+    const form = new FormData();
+    form.append('video_token', token);
+    return api.post('/evaluations/detect-colours', form).then(r => r.data?.colours ?? []);
+  },
   submit: (formData: FormData) =>
     api.post('/evaluations', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

@@ -333,7 +333,12 @@
     "nothingToImportMsg": "No se encontró texto legible en ese archivo.",
     "importFailedTitle": "Importación fallida",
     "importFailedMsg": "No se pudo leer ese archivo.",
-    "gamesSelected": "{{count}} partido(s) seleccionado(s)"
+    "gamesSelected": "{{count}} partido(s) seleccionado(s)",
+    "findPlayerTitle": "Encuentra a {{name}} en el video",
+    "findPlayerHint": "Su número y color de camiseta permiten al video registrar lo que hace, para que el informe diga con qué frecuencia. Si lo omites, el informe se escribe sin tendencias contadas.",
+    "jerseyNumber": "Número",
+    "jerseyColour": "Color de camiseta",
+    "continueBtn": "Continuar"
   },
   "evalReport": {
     "pillars": {

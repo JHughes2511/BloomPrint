@@ -333,7 +333,12 @@
     "nothingToImportMsg": "لم يُعثر على نص قابل للقراءة في هذا الملف.",
     "importFailedTitle": "فشل الاستيراد",
     "importFailedMsg": "تعذّرت قراءة هذا الملف.",
-    "gamesSelected": "تم تحديد {{count}} مباراة"
+    "gamesSelected": "تم تحديد {{count}} مباراة",
+    "findPlayerTitle": "ابحث عن {{name}} في الفيديو",
+    "findPlayerHint": "رقم القميص ولونه يتيحان للفيديو تسجيل ما يفعله اللاعب، ليذكر التقرير كم مرة. إن تخطيت، يُكتب التقرير دون ميول محسوبة.",
+    "jerseyNumber": "رقم القميص",
+    "jerseyColour": "لون القميص",
+    "continueBtn": "متابعة"
   },
   "evalReport": {
     "pillars": {

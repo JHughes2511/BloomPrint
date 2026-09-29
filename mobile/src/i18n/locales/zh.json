@@ -333,7 +333,12 @@
     "nothingToImportMsg": "该文件中未找到可读文本。",
     "importFailedTitle": "导入失败",
     "importFailedMsg": "无法读取该文件。",
-    "gamesSelected": "已选 {{count}} 场比赛"
+    "gamesSelected": "已选 {{count}} 场比赛",
+    "findPlayerTitle": "在视频中找到{{name}}",
+    "findPlayerHint": "球衣号码和颜色让视频记录该球员的动作，报告就能说明频率。跳过的话，报告将不含统计出的倾向。",
+    "jerseyNumber": "球衣号码",
+    "jerseyColour": "球衣颜色",
+    "continueBtn": "继续"
   },
   "evalReport": {
     "pillars": {

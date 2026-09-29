@@ -55,7 +55,8 @@ VOCAB: dict[str, dict[str, set[str]]] = {
 MARKER = "PLAYER EVENTS:"
 
 
-def directive(uniforms: dict[str, str] | None, colour_words: list[str] | None = None) -> str:
+def directive(uniforms: dict[str, str] | None, colour_words: list[str] | None = None,
+              focus: dict | None = None) -> str:
     """What each segment is asked to log, after its notes.
 
     `uniforms` is {colour: team name} from the coach. With it, the model is
@@ -68,14 +69,18 @@ def directive(uniforms: dict[str, str] | None, colour_words: list[str] | None = 
         teams = "; ".join(f'"{c}" = {t}' for c, t in uniforms.items())
         uni_rule = (f'"uni" is the uniform colour, using EXACTLY one of these words: '
                     f'{", ".join(json.dumps(c) for c in uniforms)} ({teams}).')
+    elif focus:
+        uni_rule = f'"uni" is always {json.dumps(focus["uni"])} and "no" always {json.dumps(focus["no"])}.'
     elif colour_words:
         uni_rule = (f'"uni" is the uniform colour, using EXACTLY one of these words: '
                     f'{", ".join(json.dumps(c) for c in colour_words)}.')
     else:
         uni_rule = ('"uni" is the uniform colour as one or two plain words (e.g. "white", '
                     '"dark blue"), the SAME words every time for the same team.')
+    who = ("INDIVIDUAL players" if not focus else
+           f"ONE player — the one in {focus['uni']} #{focus['no']}, and nobody else")
     return (
-        "\n\nThen log what INDIVIDUAL players did in these frames. After your notes, write a "
+        f"\n\nThen log what {who} did in these frames. After your notes, write a "
         f"line that says exactly {MARKER} and then ONE JSON array, nothing after it. One object "
         "per action you can actually see, in time order:\n"
         '{"t": "MM:SS", "uni": ..., "no": "<jersey number>", "ev": ..., ...fields}\n'
@@ -102,10 +107,11 @@ def directive(uniforms: dict[str, str] | None, colour_words: list[str] | None = 
     )
 
 
-def events_only_prompt(uniforms: dict[str, str] | None, colour_words: list[str] | None = None) -> str:
+def events_only_prompt(uniforms: dict[str, str] | None, colour_words: list[str] | None = None,
+                       focus: dict | None = None) -> str:
     """For a short film read in one pass: no segment notes to hang the log on."""
     return ("Watch these frames of game film and log individual players' actions. Write no "
-            "notes: only the line and the array described below." + directive(uniforms, colour_words))
+            "notes: only the line and the array described below." + directive(uniforms, colour_words, focus))
 
 
 COLOURS_PROMPT = (

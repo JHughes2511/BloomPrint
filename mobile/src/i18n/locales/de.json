@@ -333,7 +333,12 @@
     "nothingToImportMsg": "In dieser Datei wurde kein lesbarer Text gefunden.",
     "importFailedTitle": "Import fehlgeschlagen",
     "importFailedMsg": "Diese Datei konnte nicht gelesen werden.",
-    "gamesSelected": "{{count}} Spiel(e) ausgewählt"
+    "gamesSelected": "{{count}} Spiel(e) ausgewählt",
+    "findPlayerTitle": "{{name}} im Video finden",
+    "findPlayerHint": "Trikotnummer und -farbe lassen das Video festhalten, was der Spieler macht, damit der Bericht sagen kann, wie oft. Überspringst du das, wird der Bericht ohne gezählte Tendenzen geschrieben.",
+    "jerseyNumber": "Trikotnummer",
+    "jerseyColour": "Trikotfarbe",
+    "continueBtn": "Weiter"
   },
   "evalReport": {
     "pillars": {

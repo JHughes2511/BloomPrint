@@ -333,7 +333,12 @@
     "nothingToImportMsg": "У цьому файлі не знайдено читабельного тексту.",
     "importFailedTitle": "Імпорт не вдався",
     "importFailedMsg": "Не вдалося прочитати цей файл.",
-    "gamesSelected": "Обрано {{count}} гру(ор)"
+    "gamesSelected": "Обрано {{count}} гру(ор)",
+    "findPlayerTitle": "Знайдіть {{name}} на відео",
+    "findPlayerHint": "Номер і колір форми дозволяють відео відмічати дії гравця, щоб звіт показав, як часто. Якщо пропустити, звіт буде без підрахованих тенденцій.",
+    "jerseyNumber": "Номер",
+    "jerseyColour": "Колір форми",
+    "continueBtn": "Продовжити"
   },
   "evalReport": {
     "pillars": {

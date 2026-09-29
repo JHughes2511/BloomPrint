@@ -333,7 +333,12 @@
     "nothingToImportMsg": "לא נמצא טקסט קריא בקובץ הזה.",
     "importFailedTitle": "הייבוא נכשל",
     "importFailedMsg": "לא ניתן לקרוא את הקובץ הזה.",
-    "gamesSelected": "נבחרו {{count}} משחקים"
+    "gamesSelected": "נבחרו {{count}} משחקים",
+    "findPlayerTitle": "מצאו את {{name}} בסרטון",
+    "findPlayerHint": "מספר החולצה והצבע מאפשרים לסרטון לתעד מה השחקן עושה, כדי שהדוח יגיד באיזו תדירות. דילוג — והדוח ייכתב בלי נטיות שנספרו.",
+    "jerseyNumber": "מספר חולצה",
+    "jerseyColour": "צבע חולצה",
+    "continueBtn": "המשך"
   },
   "evalReport": {
     "pillars": {

@@ -137,11 +137,13 @@ interface FixedSectionDef {
 
 const FIXED_DEFS: Record<string, FixedSectionDef[]> = {
   scouting_report: [
+    { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'offense', labelKey: 'evalReport.fixed.offensiveSkills', icon: 'basketball-outline', tone: 'label', match: /offens|scoring|shoot|elite skill/i },
     { key: 'defense', labelKey: 'evalReport.fixed.defense', icon: 'shield-outline',     tone: 'label', match: /defens/i },
     { key: 'projection', labelKey: 'evalReport.fixed.projection', icon: 'flag-outline',       tone: 'brown', match: /projection|rating|status|comp|recruit|outlook|mental|intel|physical|medical|key question|3-year|development/i },
   ],
   recruitment_profile: [
+    { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'fit', labelKey: 'evalReport.fixed.systemFit', icon: 'git-compare-outline', tone: 'label', match: /system fit|recommendation|alignment|snapshot|position-less/i },
     { key: 'dev', labelKey: 'evalReport.fixed.development', icon: 'trending-up-outline', tone: 'label', match: /correctable|structural|3-year|development|projection/i },
     { key: 'outlook', labelKey: 'evalReport.fixed.outlook', icon: 'flag-outline', tone: 'brown', match: /comparable|key question|partnership|unique|best-case|realistic/i },
@@ -152,15 +154,18 @@ const FIXED_DEFS: Record<string, FixedSectionDef[]> = {
     { key: 'adjust', labelKey: 'evalReport.fixed.adjustments', icon: 'construct-outline', tone: 'brown', match: /adjust|scheme tendenc|scout against|kpi|overview|pace/i },
   ],
   coaching_report: [
+    { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'analysis', labelKey: 'evalReport.fixed.analysis', icon: 'film-outline', tone: 'label', match: /overview|possession|player-specific|player specific/i },
     { key: 'adjust', labelKey: 'evalReport.fixed.adjustments', icon: 'construct-outline', tone: 'brown', match: /scheme adjust|priorit|next session/i },
     { key: 'working', labelKey: 'evalReport.fixed.whatsWorking', icon: 'checkmark-circle-outline', tone: 'label', match: /what is working|do not change|reinforce/i },
   ],
   position_analysis: [
+    { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'players', labelKey: 'evalReport.fixed.players', icon: 'people-outline', tone: 'label', match: /player\s*\d|position|pillar|standout|weakness|role|system fit/i },
     { key: 'lineups', labelKey: 'evalReport.fixed.lineupsDepth', icon: 'grid-outline', tone: 'brown', match: /comparison|lineup|combination|depth/i },
   ],
   film_breakdown: [
+    { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'clips', labelKey: 'evalReport.fixed.clips', icon: 'film-outline', tone: 'label', match: /timestamp|concept|clip|decision|kpi/i },
     { key: 'summary', labelKey: 'evalReport.fixed.summary', icon: 'flag-outline', tone: 'brown', match: /summary/i },
   ],

@@ -333,7 +333,12 @@
     "nothingToImportMsg": "Nu s-a găsit text lizibil în acel fișier.",
     "importFailedTitle": "Import eșuat",
     "importFailedMsg": "Fișierul nu a putut fi citit.",
-    "gamesSelected": "{{count}} meci(uri) selectat(e)"
+    "gamesSelected": "{{count}} meci(uri) selectat(e)",
+    "findPlayerTitle": "Găsește-l pe {{name}} în film",
+    "findPlayerHint": "Numărul și culoarea tricoului permit filmului să noteze ce face jucătorul, ca raportul să spună cât de des. Dacă sari, raportul se scrie fără tendințe numărate.",
+    "jerseyNumber": "Număr",
+    "jerseyColour": "Culoarea tricoului",
+    "continueBtn": "Continuă"
   },
   "evalReport": {
     "pillars": {

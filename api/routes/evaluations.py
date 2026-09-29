@@ -1,3 +1,4 @@
+import json
 import re
 import shutil
 import tempfile
@@ -10,7 +11,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, revive_if_stalled, SessionLocal
 from ..auth import get_current_coach
 from .. import genjob
-from .. import job_notify, models, report_titles, schemas
+from .. import job_notify, models, report_titles, schemas, tendencies
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from ..ai_models import OPUS, text_of, long_text
@@ -61,7 +62,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
                         competition_level: str, coach_notes: str | None, combined_focus: str,
                         interval_seconds: float, max_frames: int, include_audio: bool,
                         video_paths: list[str], player_name: str, coach_program: str, coach_weight: int,
-                        title: str | None = None):
+                        title: str | None = None, focus_player: dict | None = None):
     """Background task: analyze one or more films and create ONE evaluation. The
     client polls the job for completion, so nothing times out."""
     import asyncio
@@ -101,8 +102,22 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             "audio_auto": True,         # gauge during pre-scan whether audio is worth transcribing
             "include_audio": include_audio,
             "_progress": _prog,
+            # The player the report is about, by jersey and colour: only they
+            # are logged, and the report is written from the counts.
+            **({"player_events": True, "focus_player": focus_player,
+                "_tendencies_block": lambda evs: tendencies.player_block(
+                    evs, player_name, focus_player["no"], several_films=len(local_paths) > 1)}
+               if focus_player else {}),
         }))
         report_text = result[0].text
+        from video_vision.server import EVENTS_PREFIX
+        film_events = None
+        for extra in result[1:]:
+            if extra.text.startswith(EVENTS_PREFIX):
+                try:
+                    film_events = json.loads(extra.text[len(EVENTS_PREFIX):])
+                except ValueError:
+                    film_events = None
         db = SessionLocal()
         try:
             coach = db.get(models.Coach, coach_id)
@@ -112,6 +127,8 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
                 video_path=video_paths[0] if video_paths else None, report_text=report_text,
                 title=title,
             )
+            if film_events is not None:
+                eval_record.film_events = film_events
             # Keep every film in the player's video catalog, linked to this eval.
             for vp in video_paths:
                 db.add(models.PlayerVideo(player_id=player_id, coach_id=coach_id,
@@ -189,6 +206,46 @@ async def extract_doc_text(
     if not text:
         raise HTTPException(status_code=422, detail="No readable text was found in that file.")
     return {"text": text.strip()}
+
+
+# The player report types whose film is read for the player's tendencies.
+TENDENCY_TYPES = {"player_eval", "scouting_report", "recruitment_profile", "position_analysis",
+                  "film_breakdown", "coaching_report", "matchup"}
+
+
+def _focus_player(output_type: str, jersey: str | None, uniform: str | None) -> dict | None:
+    """{"uni", "no"} for the player a report follows, or None if not given."""
+    import re as _re
+    no = _re.sub(r"[^0-9]", "", jersey or "")
+    uni = " ".join((uniform or "").lower().split())[:40]
+    types = {t.strip() for t in (output_type or "").split(",")}
+    if not no or not uni or not (types & TENDENCY_TYPES):
+        return None
+    return {"uni": uni, "no": str(int(no)) if no != "00" else "00"}
+
+
+@router.post("/detect-colours")
+def detect_film_colours(
+    video_token: str = Form(...),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """The two uniform colours in an uploaded film, as choices for the coach."""
+    refs = _tokens_to_refs(video_token, coach.id)
+    if not refs:
+        raise HTTPException(status_code=404, detail="Film not found")
+    try:
+        from ..storage import ensure_local
+        from video_vision.server import _client
+        from video_vision.player_events import detect_colours
+        from ..ai_models import SONNET, text_of
+
+        def ask(content):
+            r = _client().messages.create(model=SONNET, max_tokens=200,
+                                          messages=[{"role": "user", "content": content}])
+            return text_of(r)
+        return {"colours": detect_colours(ensure_local(refs[0]), ask)}
+    except Exception:
+        return {"colours": []}
 
 
 def _tokens_to_refs(tokens: str | None, coach_id: int) -> list[str]:
@@ -286,6 +343,10 @@ async def submit_evaluation(
     game_ids: str | None = Form(None),   # comma-separated tracked game ids (box score)
     matchup_player_ids: str | None = Form(None),  # comma-separated player ids to compare against
     video_tokens: str | None = Form(None),  # comma-separated tokens from /upload-video
+    # Where the player is in the film: jersey number and uniform colour. With
+    # both, the film logs this player's tendencies for the report to count.
+    player_jersey: str | None = Form(None),
+    player_uniform: str | None = Form(None),
     video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
@@ -367,7 +428,7 @@ async def submit_evaluation(
             combined_focus=combined_focus, interval_seconds=interval_seconds,
             max_frames=max_frames, include_audio=include_audio, video_paths=video_paths,
             player_name=player.name, coach_program=coach.program_name, coach_weight=coach.weight,
-            title=matchup_title,
+            title=matchup_title, focus_player=_focus_player(output_type, player_jersey, player_uniform),
         )
         return {"job_id": job.id, "status": "processing"}
 

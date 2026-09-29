@@ -333,7 +333,12 @@
     "nothingToImportMsg": "Ingen läsbar text hittades i den filen.",
     "importFailedTitle": "Importen misslyckades",
     "importFailedMsg": "Kunde inte läsa den filen.",
-    "gamesSelected": "{{count}} match(er) valda"
+    "gamesSelected": "{{count}} match(er) valda",
+    "findPlayerTitle": "Hitta {{name}} i videon",
+    "findPlayerHint": "Tröjnummer och färg låter videon registrera vad spelaren gör, så att rapporten kan säga hur ofta. Hoppar du över skrivs rapporten utan räknade tendenser.",
+    "jerseyNumber": "Tröjnummer",
+    "jerseyColour": "Tröjfärg",
+    "continueBtn": "Fortsätt"
   },
   "evalReport": {
     "pillars": {

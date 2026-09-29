@@ -333,7 +333,12 @@
     "nothingToImportMsg": "Walang nabasang teksto sa file na iyon.",
     "importFailedTitle": "Nabigo ang pag-import",
     "importFailedMsg": "Hindi mabasa ang file na iyon.",
-    "gamesSelected": "{{count}} larong napili"
+    "gamesSelected": "{{count}} larong napili",
+    "findPlayerTitle": "Hanapin si {{name}} sa video",
+    "findPlayerHint": "Sa numero at kulay ng jersey, maitatala ng video ang ginagawa ng player para masabi ng report kung gaano kadalas. Kapag nilaktawan, isusulat ang report nang walang binilang na tendensiya.",
+    "jerseyNumber": "Numero",
+    "jerseyColour": "Kulay ng jersey",
+    "continueBtn": "Magpatuloy"
   },
   "evalReport": {
     "pillars": {

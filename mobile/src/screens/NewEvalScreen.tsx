@@ -6,6 +6,8 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import Sheet from '../components/Sheet';
+import { sheetCap } from '../responsive/modalSizes';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,6 +25,11 @@ import { GeneratingOverlay, parseGenProgress, jobProgressLabel, uploadProgressCo
 import ChipRow from '../responsive/ChipRow';
 
 // API output_type keys — labels are resolved at render via i18n.
+// Report types whose film is read for the player's tendencies (the server's
+// TENDENCY_TYPES): for these the film needs to know which player to follow.
+const TENDENCY_TYPES = ['player_eval', 'scouting_report', 'recruitment_profile', 'position_analysis',
+  'film_breakdown', 'coaching_report', 'matchup'];
+
 const OUTPUT_TYPES: OutputType[] = [
   'player_eval', 'film_breakdown', 'scouting_report', 'coaching_report',
   'game_analysis', 'box_score', 'training_program', 'recruitment_profile',
@@ -52,6 +59,29 @@ export default function NewEvalScreen() {
   const [importingNotes, setImportingNotes] = useState(false);
   const [importingFocus, setImportingFocus] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+  // "Find the player in the film": asked once the film is up, with the film's
+  // own colours as choices and the roster's jersey number filled in.
+  const [findAsk, setFindAsk] = useState<{ colours: string[] | null; jersey: string; colour: string;
+                                           other: boolean; resolve: (a: { jersey: string; colour: string } | null) => void } | null>(null);
+  const [rosterJersey, setRosterJersey] = useState('');
+  useEffect(() => {
+    playersAPI.get(playerId).then((p: any) => setRosterJersey(String(p?.jersey_number ?? '').replace(/[^0-9]/g, '')))
+      .catch(() => {});
+  }, [playerId]);
+
+  /** Ask where the player is in the film; resolves with the answer, or null if skipped. */
+  const findPlayer = (token: string) => new Promise<{ jersey: string; colour: string } | null>(resolve => {
+    setFindAsk({ colours: null, jersey: rosterJersey, colour: '', other: false, resolve });
+    evalsAPI.detectColours(token)
+      .then((colours: string[]) => setFindAsk(prev => prev && ({ ...prev, colours, other: colours.length === 0 })))
+      .catch(() => setFindAsk(prev => prev && ({ ...prev, colours: [], other: true })));
+  });
+  const answerFind = (save: boolean) => {
+    const ask = findAsk;
+    if (!ask) return;
+    setFindAsk(null);
+    ask.resolve(save && ask.jersey.trim() && ask.colour.trim() ? { jersey: ask.jersey.trim(), colour: ask.colour.trim() } : null);
+  };
 
   // Box-score tracked games (loaded when Box Score is selected)
   const wantsBoxScore = outputType.split(',').includes('box_score');
@@ -167,6 +197,13 @@ export default function NewEvalScreen() {
         if (up?.token) tokens.push(up.token);
       }
       if (tokens.length) fields.video_tokens = tokens.join(',');
+      // Which player to follow in the film, for the tendencies the report
+      // counts. Skipped, the report is written without them.
+      if (tokens.length && outputType.split(',').some(k => TENDENCY_TYPES.includes(k))) {
+        setProgress('');
+        const found = await findPlayer(tokens[0]);
+        if (found) { fields.player_jersey = found.jersey; fields.player_uniform = found.colour; }
+      }
       setProgress(videos.length ? tr('newEval.analyzingFilm') : '');
 
       const form = new FormData();
@@ -439,6 +476,76 @@ export default function NewEvalScreen() {
       />
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
+
+    {/* Find the player in the film: jersey number and colour. */}
+    <Sheet visible={!!findAsk} animationType="slide" transparent onRequestClose={() => answerFind(false)}>
+      <View style={styles.findOverlay}>
+        <View style={styles.findBox}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+            <Text style={styles.findTitle}>{tr('newEval.findPlayerTitle', { name: playerName })}</Text>
+            <TouchableOpacity onPress={() => answerFind(false)} style={{ marginLeft: 'auto' }}>
+              <Ionicons name="close" size={22} color={t.muted} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.findHint}>{tr('newEval.findPlayerHint')}</Text>
+          <Text style={styles.findLabel}>{tr('newEval.jerseyNumber')}</Text>
+          <TextInput
+            style={styles.findJersey}
+            value={findAsk?.jersey ?? ''}
+            keyboardType="number-pad"
+            maxLength={3}
+            accessibilityLabel={tr('newEval.jerseyNumber')}
+            onChangeText={v => setFindAsk(prev => prev && ({ ...prev, jersey: v.replace(/[^0-9]/g, '') }))}
+          />
+          <Text style={styles.findLabel}>{tr('newEval.jerseyColour')}</Text>
+          {findAsk?.colours === null ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8 }}>
+              <ActivityIndicator color={t.accent} size="small" />
+              <Text style={{ color: t.muted, fontSize: 13 }}>{tr('gameBuilder.detectingColours')}</Text>
+            </View>
+          ) : (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {(findAsk?.colours ?? []).map(c => {
+                const on = findAsk?.colour === c && !findAsk?.other;
+                return (
+                  <TouchableOpacity key={c} style={[styles.findChip, on && styles.findChipOn]}
+                                    onPress={() => setFindAsk(prev => prev && ({ ...prev, colour: c, other: false }))}>
+                    <Text style={[styles.findChipText, on && styles.findChipTextOn]}>{c}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+              {(findAsk?.colours ?? []).length > 0 && (
+                <TouchableOpacity style={[styles.findChip, findAsk?.other && styles.findChipOn]}
+                                  onPress={() => setFindAsk(prev => prev && ({ ...prev, colour: '', other: true }))}>
+                  <Text style={[styles.findChipText, findAsk?.other && styles.findChipTextOn]}>{tr('gameBuilder.otherColour')}</Text>
+                </TouchableOpacity>
+              )}
+              {findAsk?.other && (
+                <TextInput
+                  style={[styles.findJersey, { flexBasis: 160, flexGrow: 1, width: undefined }]}
+                  placeholder={tr('gameBuilder.uniformPlaceholder')}
+                  placeholderTextColor={t.muted2}
+                  value={findAsk?.colour ?? ''}
+                  accessibilityLabel={tr('gameBuilder.uniformPlaceholder')}
+                  onChangeText={v => setFindAsk(prev => prev && ({ ...prev, colour: v }))}
+                />
+              )}
+            </View>
+          )}
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
+            <TouchableOpacity style={[styles.findBtn, { borderWidth: 1, borderColor: t.line }]} onPress={() => answerFind(false)}>
+              <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('gameBuilder.skipColours')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.findBtn, { backgroundColor: t.ctaBg }, !(findAsk?.jersey && findAsk?.colour.trim()) && { opacity: 0.5 }]}
+              disabled={!(findAsk?.jersey && findAsk?.colour.trim())}
+              onPress={() => answerFind(true)}>
+              <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('newEval.continueBtn')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Sheet>
     </PageContainer>
     </ScreenBackground>
   );
@@ -464,6 +571,20 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8, marginRight: 8,
   },
   typeChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  findOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'center', padding: 20 },
+  findBox: { backgroundColor: t.sheet, borderRadius: 18, padding: 20, borderWidth: 1, borderColor: t.cardBorder,
+             ...sheetCap(520) },
+  findTitle: { color: t.ink, fontSize: 17, fontFamily: fonts[800], flex: 1 },
+  findHint: { color: t.muted, fontSize: 12.5, lineHeight: 18, marginBottom: 14 },
+  findLabel: { color: t.label, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1.5, textTransform: 'uppercase',
+               marginBottom: 6, marginTop: 6 },
+  findJersey: { width: 90, borderWidth: 1, borderColor: t.line, borderRadius: 10, paddingHorizontal: 12,
+                paddingVertical: 9, color: t.ink, fontSize: 15, fontFamily: fonts[700], backgroundColor: t.card },
+  findChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7 },
+  findChipOn: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  findChipText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] },
+  findChipTextOn: { color: t.ctaText },
+  findBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   typeLabel: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   typeLabelActive: { color: t.ctaText },
   videoPicker: {

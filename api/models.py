@@ -147,6 +147,9 @@ class Evaluation(SoftDeleteMixin, Base):
     coach_notes      = Column(Text)
     video_path       = Column(String)
     report_text      = Column(Text)
+    # What the film logged of this player (video_vision/player_events.py),
+    # kept so the tendencies the report quotes can be checked and counted again.
+    film_events      = Column(JSON, nullable=True)
     overall_grade    = Column(Float)
     pillar_grades    = Column(JSON)   # {"offensive_skills": 7.2, ...}
     key_questions    = Column(JSON)   # list of strings

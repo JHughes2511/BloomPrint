@@ -333,7 +333,12 @@
     "nothingToImportMsg": "No readable text was found in that file.",
     "importFailedTitle": "Import failed",
     "importFailedMsg": "Could not read that file.",
-    "gamesSelected": "{{count}} game(s) selected"
+    "gamesSelected": "{{count}} game(s) selected",
+    "findPlayerTitle": "Find {{name}} in the film",
+    "findPlayerHint": "Their jersey number and colour let the film log what they do, so the report can say how often. Skip and the report is written without counted tendencies.",
+    "jerseyNumber": "Jersey #",
+    "jerseyColour": "Jersey colour",
+    "continueBtn": "Continue"
   },
   "evalReport": {
     "pillars": {

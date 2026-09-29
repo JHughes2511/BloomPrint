@@ -333,7 +333,12 @@
     "nothingToImportMsg": "W tym pliku nie znaleziono czytelnego tekstu.",
     "importFailedTitle": "Import nie powiódł się",
     "importFailedMsg": "Nie udało się odczytać tego pliku.",
-    "gamesSelected": "Wybrano {{count}} mecz(e/ów)"
+    "gamesSelected": "Wybrano {{count}} mecz(e/ów)",
+    "findPlayerTitle": "Znajdź {{name}} na nagraniu",
+    "findPlayerHint": "Numer i kolor stroju pozwalają nagraniu zapisać, co robi zawodnik, by raport mógł podać, jak często. Jeśli pominiesz, raport powstanie bez policzonych tendencji.",
+    "jerseyNumber": "Numer",
+    "jerseyColour": "Kolor stroju",
+    "continueBtn": "Dalej"
   },
   "evalReport": {
     "pillars": {

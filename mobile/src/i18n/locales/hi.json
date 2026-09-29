@@ -333,7 +333,12 @@
     "nothingToImportMsg": "उस फ़ाइल में कोई पठनीय टेक्स्ट नहीं मिला।",
     "importFailedTitle": "इम्पोर्ट विफल",
     "importFailedMsg": "वह फ़ाइल पढ़ी नहीं जा सकी।",
-    "gamesSelected": "{{count}} मैच चुने गए"
+    "gamesSelected": "{{count}} मैच चुने गए",
+    "findPlayerTitle": "वीडियो में {{name}} को ढूँढें",
+    "findPlayerHint": "जर्सी नंबर और रंग से वीडियो खिलाड़ी की हर हरकत दर्ज करता है, ताकि रिपोर्ट बता सके कितनी बार। छोड़ने पर रिपोर्ट गिनी गई प्रवृत्तियों के बिना लिखी जाएगी।",
+    "jerseyNumber": "जर्सी नंबर",
+    "jerseyColour": "जर्सी का रंग",
+    "continueBtn": "जारी रखें"
   },
   "evalReport": {
     "pillars": {

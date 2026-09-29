@@ -1051,6 +1051,11 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     want_events = bool(args.get("player_events"))
     uniforms = args.get("uniforms") or None
     colour_words = args.get("colour_words") or None
+    # A player report follows one player: {"uni": colour, "no": jersey}. Only
+    # they are logged, and `_tendencies_block(events) -> str` turns the log into
+    # counts the report is written from.
+    focus = args.get("focus_player") or None
+    tendencies_block = args.get("_tendencies_block")
     from .player_events import directive as _events_directive, split as _split_events, \
         events_only_prompt as _events_only_prompt
     player_events: list[dict] = []
@@ -1178,22 +1183,25 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
 
     # ── Single pass (short clips) ──
     if len(frames) <= CHUNK:
-        content: list[dict] = [{"type": "text", "text": bim_prompt}]
-        if transcript_text:
-            content.append({"type": "text", "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n"})
-        content += _frames_content(frames)
-        answer = _long_answer([{"role": "user", "content": content}], 16000, _writing_hook(progress))
         if want_events:
             # One pass has no segment notes to carry the log, so it is asked
-            # for on its own. A failure here costs the tendencies, not the report.
+            # for on its own — first, so a report written from the counts has
+            # them. A failure here costs the tendencies, not the report.
             try:
                 r = _client().messages.create(
                     model=OPUS, max_tokens=4000,
                     messages=[{"role": "user", "content":
-                               [{"type": "text", "text": _events_only_prompt(uniforms, colour_words)}] + _frames_content(frames)}])
+                               [{"type": "text", "text": _events_only_prompt(uniforms, colour_words, focus)}]
+                               + _frames_content(frames)}])
                 player_events = _split_events(text_of(r))[1]
             except Exception:
                 player_events = []
+        prompt = bim_prompt + (tendencies_block(player_events) if want_events and tendencies_block else "")
+        content: list[dict] = [{"type": "text", "text": prompt}]
+        if transcript_text:
+            content.append({"type": "text", "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n"})
+        content += _frames_content(frames)
+        answer = _long_answer([{"role": "user", "content": content}], 16000, _writing_hook(progress))
     else:
         # ── Multi-pass: map each chunk to observations, then synthesize ──
         chunks = [frames[i:i + CHUNK] for i in range(0, len(frames), CHUNK)]
@@ -1223,7 +1231,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 + (f"{segment_note} " if segment_note else "") +
                 "Cite specific moments by their film timestamp [MM:SS] (e.g. (12:34)), never frame numbers or raw seconds. "
                 "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
-                + (_events_directive(uniforms, colour_words) if want_events else "")
+                + (_events_directive(uniforms, colour_words, focus) if want_events else "")
             )
             seg_content = [{"type": "text", "text": seg_prompt}] + _frames_content(ch)
             note = None
@@ -1301,7 +1309,10 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 cleaned.append(body)
                 player_events += evs
             seg_notes = cleaned
-        synth = bim_prompt + "\n\nOBSERVATIONS FROM ACROSS THE FULL FILM (synthesize these into the complete report):\n\n"
+        synth = bim_prompt
+        if want_events and tendencies_block:
+            synth += tendencies_block(player_events)
+        synth += "\n\nOBSERVATIONS FROM ACROSS THE FULL FILM (synthesize these into the complete report):\n\n"
         if transcript_text:
             synth += f"AUDIO TRANSCRIPT:\n{transcript_text[:2000]}\n\n"
         synth += "\n\n".join(seg_notes)
