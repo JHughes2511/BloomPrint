@@ -162,6 +162,35 @@ def _line(calls: list) -> dict:
             "points": points, "ppp": round(points / n, 2) if points is not None and n else None}
 
 
+def _block(mine: list) -> dict:
+    """The numbers for one set of finished possessions: overall, by play, by
+    type, by defense, by play against each defense, by quarter, and how the
+    trips that did not score ended."""
+    def by(fn):
+        groups = defaultdict(list)
+        for c in mine:
+            groups[fn(c)].append(c)
+        rows = [{"key": k, **_line(v)} for k, v in groups.items()]
+        return sorted(rows, key=lambda r: (-r["n"], str(r["key"])))
+    ends = defaultdict(int)
+    for c in mine:
+        if c.result == "no_score" and c.ended:
+            ends[c.ended] += 1
+    return {
+        "overall": _line(mine),
+        "by_play": by(lambda c: c.play),
+        "by_type": by(lambda c: c.play_type),
+        "by_defense": by(lambda c: c.defense or "Not noted"),
+        "by_play_defense": by(lambda c: f"{c.play} vs {c.defense or 'not noted'}"),
+        "by_quarter": sorted(by(lambda c: c.quarter), key=lambda r: r["key"]),
+        "no_score_endings": dict(ends),
+    }
+
+
+def _finished(calls: list) -> list:
+    return [c for c in calls if c.result in ("score", "no_score")]
+
+
 def summary(calls: list, game: models.GameSession | None = None) -> dict:
     """The efficiency numbers for one or more games' possessions, per side.
 
@@ -171,30 +200,70 @@ def summary(calls: list, game: models.GameSession | None = None) -> dict:
     """
     out = {}
     for side in ("our", "opponent"):
-        mine = [c for c in calls if c.side == side and c.result in ("score", "no_score")]
-        if not mine:
-            continue
-
-        def by(fn):
-            groups = defaultdict(list)
-            for c in mine:
-                groups[fn(c)].append(c)
-            rows = [{"key": k, **_line(v)} for k, v in groups.items()]
-            return sorted(rows, key=lambda r: (-r["n"], str(r["key"])))
-        ends = defaultdict(int)
-        for c in mine:
-            if c.result == "no_score" and c.ended:
-                ends[c.ended] += 1
-        out[side] = {
-            "overall": _line(mine),
-            "by_play": by(lambda c: c.play),
-            "by_type": by(lambda c: c.play_type),
-            "by_defense": by(lambda c: c.defense or "Not noted"),
-            "by_play_defense": by(lambda c: f"{c.play} vs {c.defense or 'not noted'}"),
-            "by_quarter": sorted(by(lambda c: c.quarter), key=lambda r: r["key"]),
-            "no_score_endings": dict(ends),
-        }
+        mine = [c for c in _finished(calls) if c.side == side]
+        if mine:
+            out[side] = _block(mine)
     return out
+
+
+def side_names(db: Session, game: models.GameSession) -> dict[str, str]:
+    """What each side of a game is called: our team (or the program), and the opponent."""
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    coach = db.get(models.Coach, game.coach_id) if game.coach_id else None
+    ours = (team.name if team else None) or (coach.program_name if coach else None) or "Our team"
+    return {"our": ours, "opponent": game.opponent_name or "Opponent"}
+
+
+def team_profile(db: Session, entries: list[tuple[models.GameSession, str]]) -> dict | None:
+    """One team's play calling across games.
+
+    `entries` pairs each game with the side the team was on in it — the caller
+    decides which games are this team's. Two views: the team's OFFENSE (what it
+    ran, what scored, against which defense) and its DEFENSE (what opponents ran
+    against it, and which of its defenses held). None when nothing is recorded.
+    """
+    ids = {g.id: side for g, side in entries}
+    if not ids:
+        return None
+    calls = _finished(db.query(models.PlayCall).filter(models.PlayCall.game_id.in_(list(ids))).all())
+    if not calls:
+        return None
+    offense = [c for c in calls if c.side == ids[c.game_id]]
+    defense = [c for c in calls if c.side != ids[c.game_id]]
+    games = len({c.game_id for c in calls})
+    return {"games": games, "offense": _block(offense) if offense else None,
+            "defense": _block(defense) if defense else None}
+
+
+def _q(k) -> str:
+    k = int(k)
+    return f"Q{k}" if k <= 4 else "OT" if k == 5 else f"OT{k - 4}"
+
+
+def profile_text(profile: dict | None, team: str, limit: int = 12) -> str:
+    """A team's play calling across games, for a model to read. Points only
+    where recorded (see summary), and said so."""
+    if not profile:
+        return ""
+    out = [f"PLAY CALLING — {team.upper()}, across {profile['games']} game(s) with play calling recorded. "
+           "'Scored' means the possession scored. Points appear only where every score in a line had its "
+           "points recorded; where missing, do not state or estimate points."]
+    off, dfn = profile.get("offense"), profile.get("defense")
+    if off:
+        out.append(f"\n{team.upper()} ON OFFENSE — {_fmt(off['overall'], 'overall')}")
+        for title, rows in (("By play", off["by_play"]), ("By defense faced", off["by_defense"]),
+                            ("Play against defense", off["by_play_defense"])):
+            out.append(f"  {title}:")
+            out += [f"    {_fmt(r, str(r['key']))}" for r in rows[:limit]]
+        out.append("  By quarter: " + "; ".join(_fmt(r, _q(r["key"])) for r in off["by_quarter"]))
+    if dfn:
+        out.append(f"\nAGAINST {team.upper()}'S DEFENSE (what opponents ran at them) — {_fmt(dfn['overall'], 'overall')}")
+        for title, rows in (("By the defense they played", dfn["by_defense"]),
+                            ("Opponents' plays against them", dfn["by_play"]),
+                            ("Play against their defense", dfn["by_play_defense"])):
+            out.append(f"  {title}:")
+            out += [f"    {_fmt(r, str(r['key']))}" for r in rows[:limit]]
+    return "\n".join(out)
 
 
 def tallies(db: Session, game_id: int) -> dict:
@@ -217,7 +286,8 @@ def events_by_call(db: Session, game_id: int) -> dict[int, list[dict]]:
               .order_by(models.GamePlayerStat.id).all()):
         out.setdefault(s.possession_id, []).append(
             {"id": s.id, "stat_name": s.stat_name, "player_name": s.player_name,
-             "is_opponent": bool(s.is_opponent), "points": POINTS.get(s.stat_name, 0) * (s.count or 1)})
+             "is_opponent": bool(s.is_opponent), "points": POINTS.get(s.stat_name, 0) * (s.count or 1),
+             "clock": s.game_clock})
     return out
 
 
@@ -528,6 +598,9 @@ def prompt_block(db: Session, game: models.GameSession, sides: dict[str, str]) -
                            if e["is_opponent"] == (c.side == "opponent"))
         if not detail and c.ended:
             detail = ENDING_WORDS.get(c.ended, c.ended) + (f" ({c.player_name})" if c.player_name else "")
+        # When in the quarter, as the game clock read at its first tap (live only).
+        at = next((e["clock"] for e in events.get(c.id, []) if e.get("clock") is not None), None)
+        when = f" [{at // 60}:{at % 60:02d} left]" if at is not None else ""
         out.append(f"  {sides.get(c.side, c.side)} — {c.play} [{TYPE_WORDS.get(c.play_type, c.play_type)}]"
-                   f" vs {c.defense or 'defense not noted'}: {res}{f' — {detail}' if detail else ''}")
+                   f" vs {c.defense or 'defense not noted'}{when}: {res}{f' — {detail}' if detail else ''}")
     return "\n".join(out)
