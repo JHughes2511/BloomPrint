@@ -3155,9 +3155,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             type QData = { weighted: number; counts: Record<string, number>; list: any[] };
             type PData = { total: number; jersey?: string | null; quarters: Record<number, QData> };
             const qSet = new Set<number>();
-            // Both teams, ours first, each with its own TEAM row. Every player
-            // carries a tag naming their team, in that team's colour, so a row
-            // can be read without scrolling back to see whose group it is in.
+            // Both teams, ours first, each under a totals row named for the team
+            // in its colour. Every player carries a neutral tag naming their
+            // team, as Game Leaders does, so a row reads on its own.
             const groups = [false, true].map(isOpp => {
               const players: Record<string, PData> = {};
               for (const st of gameStats) {
@@ -3214,10 +3214,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     <View key={String(g.isOpp)} style={gi > 0 ? { marginTop: 18 } : null}>
                       {/* Team totals */}
                       <View style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8, marginTop: 4, marginBottom: 8 }]}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={[s.qPlayerName, { color: g.color, fontFamily: fonts[800] }]}>{tr('teamGrade.teamRow')}</Text>
-                          <Text style={[s.qTeamTag, { color: g.color }]} numberOfLines={1}>{g.name}</Text>
-                        </View>
+                        <Text style={[s.qPlayerName, { color: g.color, fontFamily: fonts[800] }]} numberOfLines={1}>{g.name}</Text>
                         {qNums.map(q => (
                           <Text key={q} style={[s.qCell, { color: cellColor(teamQ[q]), fontFamily: fonts[800] }]}>{fmt(teamQ[q])}</Text>
                         ))}
@@ -3241,7 +3238,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                                   <Text style={s.qPlayerName} numberOfLines={1}>
                                     {P.jersey ? `#${P.jersey} ` : ''}{name}
                                   </Text>
-                                  <Text style={[s.qTeamTag, { color: g.color }]} numberOfLines={1}>{g.name}</Text>
+                                  <Text style={s.qTeamTag} numberOfLines={1}>{g.name}</Text>
                                 </View>
                               </View>
                               {qNums.map(q => {
@@ -5090,7 +5087,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   qColHead: { width: 42, textAlign: 'center', color: t.muted, fontSize: 10, fontFamily: fonts[700] },
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
   qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
-  qTeamTag: { fontSize: 10, fontFamily: fonts[600], marginTop: 1 },
+  qTeamTag: { color: t.muted2, fontSize: 10, marginTop: 1 },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontFamily: fonts[700] },
   qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 10 },
   chip: {
