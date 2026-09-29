@@ -3050,7 +3050,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <Text style={{ color: t.ink, fontSize: 28, fontFamily: fonts[900] }}>
                     {detailGame.our_score} - {detailGame.opponent_score}
                   </Text>
-                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700] }}>
+                  {/* Muted, not the accent: the accent is our team's colour on this page. */}
+                  <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700],
+                                 textDecorationLine: 'underline' }}>
                     {tr('teamGrade.editScore')}
                   </Text>
                 </TouchableOpacity>
