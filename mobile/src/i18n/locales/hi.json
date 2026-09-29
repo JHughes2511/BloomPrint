@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "फ़ोटो लें",
     "feedbackPhotoPermTitle": "कैमरा एक्सेस चाहिए",
     "feedbackPhotoPermMsg": "फ़ोटो जोड़ने के लिए कैमरा एक्सेस दें।",
-    "feedbackPhotoError": "वह फ़ोटो संलग्न नहीं हो सकी।"
+    "feedbackPhotoError": "वह फ़ोटो संलग्न नहीं हो सकी।",
+    "liveNow": "अभी लाइव"
   },
   "onboarding": {
     "step": "चरण {{current}} / {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "पूरा मैच डेटा देखें",
     "gameData": "मैच डेटा",
     "trackingNow": "अभी ट्रैक कर रहे हैं",
-    "you": "आप"
+    "you": "आप",
+    "liveBadge": "लाइव",
+    "joinLive": "जुड़ें"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} ने रिपोर्ट साझा करना बंद किया",
       "body": "{{coach}} ने आपके साथ साझा {{type}} वापस ले ली।"
+    },
+    "liveGame": {
+      "title": "लाइव मैच",
+      "body": "{{coach}} {{game}} को लाइव ट्रैक कर रहे हैं। साथ में ट्रैक करने के लिए जुड़ें।"
     }
   },
   "teamInvite": {

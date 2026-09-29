@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "التقاط صورة",
     "feedbackPhotoPermTitle": "مطلوب الوصول إلى الكاميرا",
     "feedbackPhotoPermMsg": "اسمح بالوصول إلى الكاميرا لإرفاق صورة.",
-    "feedbackPhotoError": "تعذّر إرفاق تلك الصورة."
+    "feedbackPhotoError": "تعذّر إرفاق تلك الصورة.",
+    "liveNow": "مباشر الآن"
   },
   "onboarding": {
     "step": "الخطوة {{current}} من {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "عرض بيانات المباراة كاملة",
     "gameData": "بيانات المباراة",
     "trackingNow": "يسجّلون الآن",
-    "you": "أنت"
+    "you": "أنت",
+    "liveBadge": "مباشر",
+    "joinLive": "انضم"
   },
   "whiteboard": {
     "title": "السبورة",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "ألغى {{coach}} مشاركة تقرير",
       "body": "استرجع {{coach}} {{type}} الذي شاركه معك."
+    },
+    "liveGame": {
+      "title": "مباراة مباشرة",
+      "body": "يسجّل {{coach}} مباراة {{game}} مباشرةً. انضم لتسجيلها معًا."
     }
   },
   "teamInvite": {

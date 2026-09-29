@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Λήψη φωτογραφίας",
     "feedbackPhotoPermTitle": "Απαιτείται πρόσβαση στην κάμερα",
     "feedbackPhotoPermMsg": "Επίτρεψε την πρόσβαση στην κάμερα για επισύναψη φωτογραφίας.",
-    "feedbackPhotoError": "Δεν ήταν δυνατή η επισύναψη."
+    "feedbackPhotoError": "Δεν ήταν δυνατή η επισύναψη.",
+    "liveNow": "Ζωντανά τώρα"
   },
   "onboarding": {
     "step": "Βήμα {{current}} από {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Προβολή όλων των δεδομένων αγώνα",
     "gameData": "Δεδομένα αγώνα",
     "trackingNow": "Καταγράφουν τώρα",
-    "you": "Εσύ"
+    "you": "Εσύ",
+    "liveBadge": "ΖΩΝΤΑΝΑ",
+    "joinLive": "Συμμετοχή"
   },
   "whiteboard": {
     "title": "Πίνακας",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "Ο/Η {{coach}} διέκοψε μια κοινοποίηση",
       "body": "Ο/Η {{coach}} πήρε πίσω {{type}} που είχε κοινοποιήσει."
+    },
+    "liveGame": {
+      "title": "Ζωντανός αγώνας",
+      "body": "Ο/Η {{coach}} καταγράφει ζωντανά τον αγώνα {{game}}. Συμμετέχετε για να καταγράφετε μαζί."
     }
   },
   "teamInvite": {

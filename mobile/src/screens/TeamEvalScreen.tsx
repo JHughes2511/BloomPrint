@@ -999,6 +999,25 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     };
   }, [activeView, activeGame?.id]);
 
+  // The Games list keeps its LIVE badges current: who is tracking changes
+  // while the coach is looking at it.
+  useEffect(() => {
+    if (activeView !== 'games') return;
+    let on = true;
+    const refresh = () => gameEvalAPI.liveNow().then((rows: any[]) => {
+      if (!on) return;
+      const who = new Map<number, string[]>(rows.map(r => [r.game_id, r.trackers]));
+      setSessions(prev => prev.map(g => {
+        if (g.status !== 'in_progress') return g;
+        const next = who.get(g.id) ?? [];
+        return (g.live_trackers ?? []).join() === next.join() ? g : { ...g, live_trackers: next };
+      }));
+    }).catch(() => {});
+    refresh();
+    const iv = setInterval(refresh, 20000);
+    return () => { on = false; clearInterval(iv); };
+  }, [activeView]);
+
   // Switching sides shows on everyone else's bar straight away.
   useEffect(() => {
     if (activeView === 'live' && activeGame) liveBeat(activeGame);
@@ -1236,12 +1255,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       (async () => {
         try {
           const game = await gameEvalAPI.getSession(gid);
-          await openDetail(game);
+          // "Join" from Home or a notification: straight into the tracker when
+          // the game is still going and this coach can track it.
+          if (route?.params?.live && game.status === 'in_progress' && canTrack(game)) await openLiveEntry(game);
+          else await openDetail(game);
         } catch {
           Alert.alert(tr('teamGrade.unavailableTitle'), tr('teamGrade.couldNotOpenGame'));
         }
       })();
-      navigation?.setParams?.({ openGameId: undefined });
+      navigation?.setParams?.({ openGameId: undefined, live: undefined });
     }
   }, [route?.params?.openGameId]));
 
@@ -2673,6 +2695,16 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           : tr('teamGrade.sharedByCoach', { name: game.shared_by })}
                       </Text>
                     )}
+                    {/* Someone is in the tracker right now, and who. */}
+                    {game.status === 'in_progress' && (game.live_trackers?.length ?? 0) > 0 && (
+                      <View style={s.liveLine}>
+                        <View style={s.liveDot} />
+                        <Text style={s.liveText}>{tr('teamGrade.liveBadge')}</Text>
+                        <Text style={{ color: t.muted, fontSize: 11, flexShrink: 1 }} numberOfLines={1}>
+                          {game.live_trackers.join(', ')}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                   <View style={{ alignItems: 'flex-end', gap: 4 }}>
                     <View style={[s.statusBadge, game.status === 'in_progress' && { backgroundColor: t.accentSoft }]}>
@@ -2680,6 +2712,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         {game.status === 'in_progress' ? tr('teamGrade.statusInProgress') : tr('teamGrade.statusDone')}
                       </Text>
                     </View>
+                    {game.status === 'in_progress' && canTrack(game) && (game.live_trackers?.length ?? 0) > 0 && (
+                      <TouchableOpacity style={s.joinBtn} onPress={() => openLiveEntry(game)}
+                                        accessibilityRole="button">
+                        <Text style={s.joinBtnText}>{tr('teamGrade.joinLive')}</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                   {isOwnedGame(game) && !game.frozen_from ? (
                     <TouchableOpacity
@@ -5258,6 +5296,11 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
   qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontFamily: fonts[700] },
+  liveLine: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
+  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: t.negative },
+  liveText: { color: t.negative, fontSize: 10, fontFamily: fonts[800], letterSpacing: 0.8 },
+  joinBtn: { backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
+  joinBtnText: { color: t.ctaText, fontSize: 11, fontFamily: fonts[800] },
   trackerBar: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12,
                 paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
   trackerBarLabel: { color: t.muted, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase' },

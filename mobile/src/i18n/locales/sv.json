@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Ta foto",
     "feedbackPhotoPermTitle": "Kameraåtkomst krävs",
     "feedbackPhotoPermMsg": "Tillåt kameraåtkomst för att bifoga ett foto.",
-    "feedbackPhotoError": "Det gick inte att bifoga fotot."
+    "feedbackPhotoError": "Det gick inte att bifoga fotot.",
+    "liveNow": "Live nu"
   },
   "onboarding": {
     "step": "Steg {{current}} av {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Visa all matchdata",
     "gameData": "Matchdata",
     "trackingNow": "Registrerar nu",
-    "you": "Du"
+    "you": "Du",
+    "liveBadge": "LIVE",
+    "joinLive": "Gå med"
   },
   "whiteboard": {
     "title": "Taktiktavla",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} slutade dela en rapport",
       "body": "{{coach}} tog tillbaka {{type}} som delats med dig."
+    },
+    "liveGame": {
+      "title": "Livematch",
+      "body": "{{coach}} registrerar {{game}} live. Gå med och registrera tillsammans."
     }
   },
   "teamInvite": {

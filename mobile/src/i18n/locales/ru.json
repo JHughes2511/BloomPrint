@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Сделать фото",
     "feedbackPhotoPermTitle": "Нужен доступ к камере",
     "feedbackPhotoPermMsg": "Разрешите доступ к камере, чтобы прикрепить фото.",
-    "feedbackPhotoError": "Не удалось прикрепить это фото."
+    "feedbackPhotoError": "Не удалось прикрепить это фото.",
+    "liveNow": "Сейчас в эфире"
   },
   "onboarding": {
     "step": "Шаг {{current}} из {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Все данные о матче",
     "gameData": "Данные матча",
     "trackingNow": "Сейчас ведут",
-    "you": "Вы"
+    "you": "Вы",
+    "liveBadge": "LIVE",
+    "joinLive": "Присоединиться"
   },
   "whiteboard": {
     "title": "Тактическая доска",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} отменил доступ к отчёту",
       "body": "{{coach}} забрал {{type}}, которым делился с вами."
+    },
+    "liveGame": {
+      "title": "Игра в прямом эфире",
+      "body": "{{coach}} ведёт {{game}} в прямом эфире. Присоединяйтесь, чтобы вести вместе."
     }
   },
   "teamInvite": {

@@ -773,6 +773,8 @@ class GameSessionOut(BaseModel):
     stats_need_reimport: bool = False
     # This coach may track the game live: its owner, or staff on its team.
     can_track: bool = False
+    # Names of whoever is in the live tracker right now (empty when nobody is).
+    live_trackers: list[str] = []
     # The name on the game's own side of the scoreboard. Resolved here because
     # the team row can belong to another coach — on a shared game the reader
     # cannot look it up among their own teams, and the card read "SEED vs Mali"

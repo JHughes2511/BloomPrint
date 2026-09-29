@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Tirar foto",
     "feedbackPhotoPermTitle": "Acesso à câmara necessário",
     "feedbackPhotoPermMsg": "Permita o acesso à câmara para anexar uma foto.",
-    "feedbackPhotoError": "Não foi possível anexar essa foto."
+    "feedbackPhotoError": "Não foi possível anexar essa foto.",
+    "liveNow": "Ao vivo agora"
   },
   "onboarding": {
     "step": "Etapa {{current}} de {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Ver todos os dados do jogo",
     "gameData": "Dados do jogo",
     "trackingNow": "Registrando agora",
-    "you": "Você"
+    "you": "Você",
+    "liveBadge": "AO VIVO",
+    "joinLive": "Entrar"
   },
   "whiteboard": {
     "title": "Quadro Tático",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} deixou de compartilhar um relatório",
       "body": "{{coach}} retomou {{type}} que havia compartilhado com você."
+    },
+    "liveGame": {
+      "title": "Jogo ao vivo",
+      "body": "{{coach}} está registrando {{game}} ao vivo. Entre para registrar juntos."
     }
   },
   "teamInvite": {

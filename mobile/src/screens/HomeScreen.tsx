@@ -11,7 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { takePendingJoin } from '../navigation/pendingJoin';
-import { playerAPI, feedbackAPI, authAPI } from '../api/client';
+import { playerAPI, feedbackAPI, authAPI, gameEvalAPI } from '../api/client';
 // Read straight from app.json rather than pulling in expo-application just to
 // stamp a version on a feedback row.
 const APP_VERSION: string | undefined = require('../../app.json')?.expo?.version;
@@ -278,6 +278,19 @@ export default function HomeScreen() {
     }).catch(() => {});
   }, []));
 
+  // Games on my teams that someone is tracking right now, kept current while
+  // Home is on screen.
+  const [liveGames, setLiveGames] = useState<any[]>([]);
+  useFocusEffect(useCallback(() => {
+    let on = true;
+    const load = () => gameEvalAPI.liveNow().then((rows: any[]) => { if (on) setLiveGames(rows); }).catch(() => {});
+    load();
+    const iv = setInterval(load, 20000);
+    return () => { on = false; clearInterval(iv); };
+  }, []));
+  const joinLive = (gameId: number) =>
+    navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openGameId: gameId, live: true } });
+
   const handleSignOut = () => {
     Alert.alert(tr('home.signOut'), tr('home.signOutConfirm'), [
       { text: tr('common.cancel'), style: 'cancel' },
@@ -342,6 +355,37 @@ export default function HomeScreen() {
             {!isDesktop && <CommandBar />}
           </View>
         </View>
+
+        {/* Live now: a teammate is tracking a game — join them. */}
+        {liveGames.length > 0 && (
+          <View style={{ paddingHorizontal: 22, marginTop: 22 }}>
+            <SectionLabel>{tr('home.liveNow')}</SectionLabel>
+            <Card padding={6}>
+              {liveGames.map((g, i) => (
+                <TouchableOpacity
+                  key={g.game_id}
+                  onPress={() => joinLive(g.game_id)}
+                  accessibilityRole="button"
+                  style={[styles.liveRow, i > 0 && { borderTopWidth: 1, borderTopColor: t.divider }]}
+                >
+                  <View style={[styles.liveDot, { backgroundColor: t.negative }]} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>
+                      {[g.team_name, g.opponent_name].filter(Boolean).join(' vs ')}
+                      {g.our_score != null && g.opponent_score != null ? `  ${g.our_score}-${g.opponent_score}` : ''}
+                    </Text>
+                    <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
+                      {(g.trackers || []).join(', ')}
+                    </Text>
+                  </View>
+                  <View style={[styles.liveJoin, { backgroundColor: t.ctaBg }]}>
+                    <Text style={{ color: t.ctaText, fontSize: 12, fontFamily: fonts[800] }}>{tr('teamGrade.joinLive')}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </Card>
+          </View>
+        )}
 
         {/* Report Types */}
         <View style={{ paddingHorizontal: 22, marginTop: 22 }}>
@@ -737,6 +781,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  liveRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 10 },
+  liveDot: { width: 8, height: 8, borderRadius: 4 },
+  liveJoin: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 6 },
   // 64 is safe-area room for the status bar and notch, which the native app has
   // to reserve itself. A browser already sits below its own chrome, so the same
   // 64 is just an empty band above the title — and it is the first thing on the

@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "写真を撮る",
     "feedbackPhotoPermTitle": "カメラへのアクセスが必要です",
     "feedbackPhotoPermMsg": "写真を添付するにはカメラへのアクセスを許可してください。",
-    "feedbackPhotoError": "その写真を添付できませんでした。"
+    "feedbackPhotoError": "その写真を添付できませんでした。",
+    "liveNow": "ライブ中"
   },
   "onboarding": {
     "step": "ステップ {{current}}／{{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "試合データをすべて表示",
     "gameData": "試合データ",
     "trackingNow": "記録中",
-    "you": "あなた"
+    "you": "あなた",
+    "liveBadge": "ライブ",
+    "joinLive": "参加"
   },
   "whiteboard": {
     "title": "ホワイトボード",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} がレポートの共有を解除しました",
       "body": "{{coach}} が共有していた {{type}} を取り消しました。"
+    },
+    "liveGame": {
+      "title": "ライブ試合",
+      "body": "{{coach}}さんが{{game}}をライブで記録しています。参加して一緒に記録しましょう。"
     }
   },
   "teamInvite": {

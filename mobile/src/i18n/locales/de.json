@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Foto aufnehmen",
     "feedbackPhotoPermTitle": "Kamerazugriff nötig",
     "feedbackPhotoPermMsg": "Erlaube den Kamerazugriff, um ein Foto anzuhängen.",
-    "feedbackPhotoError": "Dieses Foto konnte nicht angehängt werden."
+    "feedbackPhotoError": "Dieses Foto konnte nicht angehängt werden.",
+    "liveNow": "Jetzt live"
   },
   "onboarding": {
     "step": "Schritt {{current}} von {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Alle Spieldaten ansehen",
     "gameData": "Spieldaten",
     "trackingNow": "Erfasst gerade",
-    "you": "Du"
+    "you": "Du",
+    "liveBadge": "LIVE",
+    "joinLive": "Beitreten"
   },
   "whiteboard": {
     "title": "Taktiktafel",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} hat eine Freigabe aufgehoben",
       "body": "{{coach}} hat {{type}} zurückgenommen."
+    },
+    "liveGame": {
+      "title": "Live-Spiel",
+      "body": "{{coach}} erfasst {{game}} live. Tritt bei, um gemeinsam zu erfassen."
     }
   },
   "teamInvite": {

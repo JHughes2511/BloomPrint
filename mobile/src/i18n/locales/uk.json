@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Зробити фото",
     "feedbackPhotoPermTitle": "Потрібен доступ до камери",
     "feedbackPhotoPermMsg": "Дозвольте доступ до камери, щоб прикріпити фото.",
-    "feedbackPhotoError": "Не вдалося прикріпити це фото."
+    "feedbackPhotoError": "Не вдалося прикріпити це фото.",
+    "liveNow": "Зараз наживо"
   },
   "onboarding": {
     "step": "Крок {{current}} з {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Переглянути всі дані матчу",
     "gameData": "Дані матчу",
     "trackingNow": "Зараз ведуть",
-    "you": "Ви"
+    "you": "Ви",
+    "liveBadge": "НАЖИВО",
+    "joinLive": "Приєднатися"
   },
   "whiteboard": {
     "title": "Тактична дошка",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} скасував доступ до звіту",
       "body": "{{coach}} забрав {{type}}, яким ділився з вами."
+    },
+    "liveGame": {
+      "title": "Гра наживо",
+      "body": "{{coach}} веде {{game}} наживо. Приєднуйтеся, щоб вести разом."
     }
   },
   "teamInvite": {

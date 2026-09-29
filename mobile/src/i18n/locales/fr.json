@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Prendre une photo",
     "feedbackPhotoPermTitle": "Accès à l'appareil photo requis",
     "feedbackPhotoPermMsg": "Autorisez l'appareil photo pour joindre une photo.",
-    "feedbackPhotoError": "Impossible de joindre cette photo."
+    "feedbackPhotoError": "Impossible de joindre cette photo.",
+    "liveNow": "En direct"
   },
   "onboarding": {
     "step": "Étape {{current}} sur {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Voir toutes les données du match",
     "gameData": "Données du match",
     "trackingNow": "Suivent en direct",
-    "you": "Vous"
+    "you": "Vous",
+    "liveBadge": "EN DIRECT",
+    "joinLive": "Rejoindre"
   },
   "whiteboard": {
     "title": "Tableau blanc",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} a annulé un partage",
       "body": "{{coach}} a repris {{type}} qu'il avait partagé avec vous."
+    },
+    "liveGame": {
+      "title": "Match en direct",
+      "body": "{{coach}} suit {{game}} en direct. Rejoignez-le pour le suivre ensemble."
     }
   },
   "teamInvite": {

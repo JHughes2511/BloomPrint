@@ -962,6 +962,8 @@ export const gameEvalAPI = {
   liveBeat: (gameId: number, side: 'our' | 'opponent') =>
     api.post(`/game-eval/sessions/${gameId}/live`, { side }).then(r => r.data),
   liveLeave: (gameId: number) => api.delete(`/game-eval/sessions/${gameId}/live`).then(r => r.data),
+  // Games on my teams someone is tracking right now.
+  liveNow: () => api.get('/game-eval/live-now').then(r => r.data),
   deleteOpponentPlayer: (playerId: number) => api.delete(`/game-eval/opponent-players/${playerId}`).then(r => r.data),
   playerGameHistory: (playerName: string) =>
     api.get('/game-eval/player-game-history', { params: { player_name: playerName } }).then(r => r.data),

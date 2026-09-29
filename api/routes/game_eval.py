@@ -1761,7 +1761,7 @@ def _gate_context(db: Session, coach: models.Coach, games: list) -> dict:
     ids = [g.id for g in games]
     if not ids:
         return {"scouting": {}, "full": {}, "misses": set(), "imported": set(), "scores": {},
-                "track_teams": set()}
+                "track_teams": set(), "live": {}}
 
     scouting = {r.game_id: r for r in db.query(models.GameScoutingReport)
                 .filter(models.GameScoutingReport.game_id.in_(ids),
@@ -1802,7 +1802,8 @@ def _gate_context(db: Session, coach: models.Coach, games: list) -> dict:
         scores[gid] = (ours, theirs) if ours is not None and theirs is not None else (None, None)
     return {"scouting": scouting, "full": full, "misses": misses,
             "imported": imported, "scores": scores,
-            "track_teams": _accessible_team_ids(db, coach)}
+            "track_teams": _accessible_team_ids(db, coach),
+            "live": _live_trackers_by_game(db, [g.id for g in games if g.status == "in_progress"])}
 
 
 def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession,
@@ -1820,6 +1821,9 @@ def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession,
     track_teams = ctx["track_teams"] if ctx is not None else _accessible_team_ids(db, coach)
     out.can_track = not game.frozen_from and (
         game.coach_id == coach.id or (game.team_id is not None and game.team_id in track_teams))
+    if game.status == "in_progress":
+        live = ctx["live"] if ctx is not None else _live_trackers_by_game(db, [game.id])
+        out.live_trackers = live.get(game.id, [])
     if ctx is not None:
         out.stats_need_reimport = game.id in ctx["imported"] and game.id not in ctx["misses"]
     else:
@@ -2277,10 +2281,100 @@ def live_leave(
     return {"ok": True}
 
 
+def _live_trackers_by_game(db: Session, game_ids: list[int]) -> dict[int, list[str]]:
+    """Who is in each game's live tracker right now, by name, first in first."""
+    if not game_ids:
+        return {}
+    from datetime import timedelta
+    cutoff = datetime.utcnow() - timedelta(seconds=LIVE_PRESENCE_SECONDS)
+    out: dict[int, list[str]] = {}
+    for p, name in (db.query(models.LivePresence, models.Coach.name)
+                    .join(models.Coach, models.Coach.id == models.LivePresence.coach_id)
+                    .filter(models.LivePresence.game_id.in_(game_ids),
+                            models.LivePresence.last_seen >= cutoff)
+                    .order_by(models.LivePresence.started_at).all()):
+        out.setdefault(p.game_id, []).append(name or "")
+    return out
+
+
+def _game_team_members(db: Session, game: models.GameSession) -> set[int]:
+    """Everyone who can track this game: its owner and its team's staff."""
+    ids = {game.coach_id}
+    if game.team_id is not None:
+        team = db.get(models.Team, game.team_id)
+        if team and team.coach_id:
+            ids.add(team.coach_id)
+        ids |= {l.coach_id for l in db.query(models.TeamStaff).filter_by(team_id=game.team_id).all()}
+    return ids
+
+
+LIVE_NOTIFY_QUIET_MINUTES = 30
+
+
 def on_live_join(background_tasks: BackgroundTasks, db: Session, game: models.GameSession,
                  coach: models.Coach, now: datetime) -> None:
-    """Someone started tracking. (Telling teammates comes next.)"""
-    return None
+    """Someone started tracking: if the game has just gone live, tell the team.
+
+    Only when nobody else was already in — the second and third trackers
+    joining are not news — and at most once per game every half hour, so
+    stepping out and back in does not ping everyone again. In the app only:
+    by the time an email was read the game would be over.
+    """
+    from datetime import timedelta
+    others = [t for t in _trackers(db, game.id, coach.id, now) if not t["you"]]
+    if others or game.status != "in_progress":
+        return
+    since = now - timedelta(minutes=LIVE_NOTIFY_QUIET_MINUTES)
+    recent = {n.coach_id for n in db.query(models.CoachNotification).filter(
+        models.CoachNotification.type == "live_game",
+        models.CoachNotification.ref_id == game.id,
+        models.CoachNotification.created_at >= since).all()}
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    matchup = f"{team.name if team else (coach.program_name or '')} vs {game.opponent_name}".strip()
+    params = {"coach": coach.name or "", "game": matchup}
+    told = False
+    for cid in _game_team_members(db, game) - {coach.id} - recent:
+        db.add(models.CoachNotification(
+            coach_id=cid,
+            title="Live game",
+            body=f"{coach.name} is tracking {matchup} live. Join to track together.",
+            i18n_key="notifs.liveGame",
+            i18n_params=params,
+            type="live_game",
+            ref_id=game.id,
+        ))
+        told = True
+    if told:
+        db.commit()
+
+
+@router.get("/live-now")
+def live_now(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Games on my teams that someone is tracking live right now."""
+    from sqlalchemy import or_
+    teams = _accessible_team_ids(db, coach)
+    mine = [models.GameSession.coach_id == coach.id]
+    if teams:
+        mine.append(models.GameSession.team_id.in_(teams))
+    # Deleted games are already out: soft delete filters every query.
+    games = db.query(models.GameSession).filter(
+        models.GameSession.status == "in_progress",
+        models.GameSession.frozen_from.is_(None),
+        or_(*mine)).all()
+    live = _live_trackers_by_game(db, [g.id for g in games])
+    out = []
+    for g in games:
+        if g.id not in live:
+            continue
+        team = db.get(models.Team, g.team_id) if g.team_id else None
+        ours, theirs = _shown_scores(g)
+        out.append({"game_id": g.id, "team_name": team.name if team else None,
+                    "opponent_name": g.opponent_name, "our_score": ours,
+                    "opponent_score": theirs, "trackers": live[g.id]})
+    return out
 
 
 # ── Lineup ────────────────────────────────────────────────────────────────────

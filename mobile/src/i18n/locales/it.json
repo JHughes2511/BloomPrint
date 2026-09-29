@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Scatta foto",
     "feedbackPhotoPermTitle": "Serve l'accesso alla fotocamera",
     "feedbackPhotoPermMsg": "Consenti l'accesso alla fotocamera per allegare una foto.",
-    "feedbackPhotoError": "Impossibile allegare quella foto."
+    "feedbackPhotoError": "Impossibile allegare quella foto.",
+    "liveNow": "Live ora"
   },
   "onboarding": {
     "step": "Passo {{current}} di {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Vedi tutti i dati della partita",
     "gameData": "Dati partita",
     "trackingNow": "Stanno registrando",
-    "you": "Tu"
+    "you": "Tu",
+    "liveBadge": "LIVE",
+    "joinLive": "Unisciti"
   },
   "whiteboard": {
     "title": "Lavagna",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} ha annullato una condivisione",
       "body": "{{coach}} ha ripreso {{type}} che aveva condiviso con te."
+    },
+    "liveGame": {
+      "title": "Partita live",
+      "body": "{{coach}} sta registrando {{game}} dal vivo. Unisciti per registrarla insieme."
     }
   },
   "teamInvite": {

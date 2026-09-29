@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "צילום תמונה",
     "feedbackPhotoPermTitle": "נדרשת גישה למצלמה",
     "feedbackPhotoPermMsg": "אפשר גישה למצלמה כדי לצרף תמונה.",
-    "feedbackPhotoError": "לא ניתן לצרף את התמונה."
+    "feedbackPhotoError": "לא ניתן לצרף את התמונה.",
+    "liveNow": "בשידור חי עכשיו"
   },
   "onboarding": {
     "step": "שלב {{current}} מתוך {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "הצגת כל נתוני המשחק",
     "gameData": "נתוני המשחק",
     "trackingNow": "עוקבים עכשיו",
-    "you": "את/ה"
+    "you": "את/ה",
+    "liveBadge": "חי",
+    "joinLive": "הצטרפות"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} ביטל שיתוף של דוח",
       "body": "{{coach}} לקח בחזרה {{type}} ששיתף איתך."
+    },
+    "liveGame": {
+      "title": "משחק חי",
+      "body": "{{coach}} עוקב/ת אחרי {{game}} בזמן אמת. הצטרפו כדי לעקוב יחד."
     }
   },
   "teamInvite": {

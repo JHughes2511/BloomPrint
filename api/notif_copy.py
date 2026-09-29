@@ -6,7 +6,7 @@ this file: it is overwritten, and the point of it is that the email and
 the in-app notification cannot come to say different things.
 """
 
-SOURCE_DIGEST = "fcb9ae96b319b2bb90642b9bdb2a34ddfd47b6077d3bee80b125a1759d368f70"
+SOURCE_DIGEST = "7ed4c112eb53df4134391aefcbbb61aa7c7f278d10f9800da67b53f470f00e11"
 
 # key -> language -> (title, body). Placeholders are the app's own
 # {{name}} form, interpolated by api/emails.py.
@@ -280,6 +280,33 @@ NOTIF_COPY: dict[str, dict[str, tuple[str, str]]] = {
         'ko': ('연결 요청', '{{player}} 님이 회원님의 계정과 연결을 요청했습니다.'),
         'zh': ('关联请求', '{{player}} 请求关联到你的账户。'),
         'tl': ('Hiling na mag-link', 'Hinihiling ni {{player}} na mag-link sa iyong account.'),
+    },
+    'liveGame': {
+        'en': ('Live game', '{{coach}} is tracking {{game}} live. Join to track together.'),
+        'es': ('Partido en vivo', '{{coach}} está registrando {{game}} en vivo. Únete para registrarlo juntos.'),
+        'fr': ('Match en direct', '{{coach}} suit {{game}} en direct. Rejoignez-le pour le suivre ensemble.'),
+        'pt': ('Jogo ao vivo', '{{coach}} está registrando {{game}} ao vivo. Entre para registrar juntos.'),
+        'it': ('Partita live', '{{coach}} sta registrando {{game}} dal vivo. Unisciti per registrarla insieme.'),
+        'de': ('Live-Spiel', '{{coach}} erfasst {{game}} live. Tritt bei, um gemeinsam zu erfassen.'),
+        'nl': ('Live wedstrijd', '{{coach}} houdt {{game}} live bij. Doe mee om samen bij te houden.'),
+        'sv': ('Livematch', '{{coach}} registrerar {{game}} live. Gå med och registrera tillsammans.'),
+        'pl': ('Mecz na żywo', '{{coach}} rejestruje {{game}} na żywo. Dołącz, aby rejestrować razem.'),
+        'ru': ('Игра в прямом эфире', '{{coach}} ведёт {{game}} в прямом эфире. Присоединяйтесь, чтобы вести вместе.'),
+        'uk': ('Гра наживо', '{{coach}} веде {{game}} наживо. Приєднуйтеся, щоб вести разом.'),
+        'sr': ('Utakmica uživo', '{{coach}} beleži {{game}} uživo. Pridruži se da beležite zajedno.'),
+        'hr': ('Utakmica uživo', '{{coach}} bilježi {{game}} uživo. Pridruži se da bilježite zajedno.'),
+        'tr': ('Canlı maç', '{{coach}}, {{game}} maçını canlı kaydediyor. Birlikte kaydetmek için katıl.'),
+        'ro': ('Meci live', '{{coach}} înregistrează {{game}} live. Alătură-te pentru a înregistra împreună.'),
+        'el': ('Ζωντανός αγώνας', 'Ο/Η {{coach}} καταγράφει ζωντανά τον αγώνα {{game}}. Συμμετέχετε για να καταγράφετε μαζί.'),
+        'lt': ('Tiesioginės rungtynės', '{{coach}} tiesiogiai fiksuoja {{game}}. Prisijunkite ir fiksuokite kartu.'),
+        'ar': ('مباراة مباشرة', 'يسجّل {{coach}} مباراة {{game}} مباشرةً. انضم لتسجيلها معًا.'),
+        'he': ('משחק חי', '{{coach}} עוקב/ת אחרי {{game}} בזמן אמת. הצטרפו כדי לעקוב יחד.'),
+        'hi': ('लाइव मैच', '{{coach}} {{game}} को लाइव ट्रैक कर रहे हैं। साथ में ट्रैक करने के लिए जुड़ें।'),
+        'ka': ('პირდაპირი თამაში', '{{coach}} პირდაპირ აღრიცხავს თამაშს {{game}}. შემოუერთდით, რომ ერთად აღრიცხოთ.'),
+        'ja': ('ライブ試合', '{{coach}}さんが{{game}}をライブで記録しています。参加して一緒に記録しましょう。'),
+        'ko': ('라이브 경기', '{{coach}}님이 {{game}} 경기를 실시간으로 기록하고 있습니다. 참여해서 함께 기록하세요.'),
+        'zh': ('实时比赛', '{{coach}} 正在实时记录 {{game}}。加入一起记录。'),
+        'tl': ('Live na laro', 'Nagta-track si {{coach}} ng {{game}} nang live. Sumali para mag-track nang sabay.'),
     },
     'playerCommentedReport': {
         'en': ('Player responded', '{{player}} commented on {{item}}: "{{text}}"'),

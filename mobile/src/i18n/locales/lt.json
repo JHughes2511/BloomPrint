@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Fotografuoti",
     "feedbackPhotoPermTitle": "Reikia prieigos prie kameros",
     "feedbackPhotoPermMsg": "Leiskite prieigą prie kameros, kad pridėtumėte nuotrauką.",
-    "feedbackPhotoError": "Nepavyko pridėti šios nuotraukos."
+    "feedbackPhotoError": "Nepavyko pridėti šios nuotraukos.",
+    "liveNow": "Dabar tiesiogiai"
   },
   "onboarding": {
     "step": "{{current}} žingsnis iš {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Peržiūrėti visus rungtynių duomenis",
     "gameData": "Rungtynių duomenys",
     "trackingNow": "Dabar fiksuoja",
-    "you": "Jūs"
+    "you": "Jūs",
+    "liveBadge": "TIESIOGIAI",
+    "joinLive": "Prisijungti"
   },
   "whiteboard": {
     "title": "Lenta",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} nustojo bendrinti ataskaitą",
       "body": "{{coach}} atsiėmė {{type}}, kurią su jumis bendrino."
+    },
+    "liveGame": {
+      "title": "Tiesioginės rungtynės",
+      "body": "{{coach}} tiesiogiai fiksuoja {{game}}. Prisijunkite ir fiksuokite kartu."
     }
   },
   "teamInvite": {

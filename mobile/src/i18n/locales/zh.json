@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "拍照",
     "feedbackPhotoPermTitle": "需要相机权限",
     "feedbackPhotoPermMsg": "请允许访问相机以添加照片。",
-    "feedbackPhotoError": "无法添加该照片。"
+    "feedbackPhotoError": "无法添加该照片。",
+    "liveNow": "正在直播"
   },
   "onboarding": {
     "step": "第 {{current}} 步，共 {{total}} 步",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "查看完整比赛数据",
     "gameData": "比赛数据",
     "trackingNow": "正在记录",
-    "you": "你"
+    "you": "你",
+    "liveBadge": "直播",
+    "joinLive": "加入"
   },
   "whiteboard": {
     "title": "战术板",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} 取消了报告共享",
       "body": "{{coach}} 收回了与你共享的 {{type}}。"
+    },
+    "liveGame": {
+      "title": "实时比赛",
+      "body": "{{coach}} 正在实时记录 {{game}}。加入一起记录。"
     }
   },
   "teamInvite": {

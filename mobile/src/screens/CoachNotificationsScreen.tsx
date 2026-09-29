@@ -294,6 +294,13 @@ export default function CoachNotificationsScreen() {
                 navigation.push('Conversation', { conversationId: n.ref_id });
                 return;
               }
+              // A teammate went live: straight into the game — the tracker if
+              // it is still on, the game's page if it has ended.
+              if (n.type === 'live_game' && n.ref_id) {
+                if (!n.read) { try { await playerAPI.coachMarkRead(n.id); } catch {} }
+                navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openGameId: n.ref_id, live: true } });
+                return;
+              }
               const willExpand = expandedId !== n.id;
               setExpandedId(prev => prev === n.id ? null : n.id);
               if (willExpand && n.type === 'player_commented' && n.ref_id) {

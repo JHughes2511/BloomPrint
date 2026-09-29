@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Foto maken",
     "feedbackPhotoPermTitle": "Cameratoegang nodig",
     "feedbackPhotoPermMsg": "Sta cameratoegang toe om een foto bij te voegen.",
-    "feedbackPhotoError": "Die foto kon niet worden bijgevoegd."
+    "feedbackPhotoError": "Die foto kon niet worden bijgevoegd.",
+    "liveNow": "Nu live"
   },
   "onboarding": {
     "step": "Stap {{current}} van {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Alle wedstrijdgegevens bekijken",
     "gameData": "Wedstrijdgegevens",
     "trackingNow": "Nu aan het bijhouden",
-    "you": "Jij"
+    "you": "Jij",
+    "liveBadge": "LIVE",
+    "joinLive": "Meedoen"
   },
   "whiteboard": {
     "title": "Tactiekbord",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} heeft het delen gestopt",
       "body": "{{coach}} heeft {{type}} teruggenomen."
+    },
+    "liveGame": {
+      "title": "Live wedstrijd",
+      "body": "{{coach}} houdt {{game}} live bij. Doe mee om samen bij te houden."
     }
   },
   "teamInvite": {

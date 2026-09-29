@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Slikaj",
     "feedbackPhotoPermTitle": "Potreban pristup kameri",
     "feedbackPhotoPermMsg": "Dopustite pristup kameri za prilaganje fotografije.",
-    "feedbackPhotoError": "Nije moguće priložiti tu fotografiju."
+    "feedbackPhotoError": "Nije moguće priložiti tu fotografiju.",
+    "liveNow": "Uživo sada"
   },
   "onboarding": {
     "step": "Korak {{current}} od {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Prikaži sve podatke utakmice",
     "gameData": "Podaci utakmice",
     "trackingNow": "Trenutno bilježe",
-    "you": "Ti"
+    "you": "Ti",
+    "liveBadge": "UŽIVO",
+    "joinLive": "Pridruži se"
   },
   "whiteboard": {
     "title": "Ploča",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} je prekinuo dijeljenje izvještaja",
       "body": "{{coach}} je povukao {{type}} koji je podijelio s tobom."
+    },
+    "liveGame": {
+      "title": "Utakmica uživo",
+      "body": "{{coach}} bilježi {{game}} uživo. Pridruži se da bilježite zajedno."
     }
   },
   "teamInvite": {

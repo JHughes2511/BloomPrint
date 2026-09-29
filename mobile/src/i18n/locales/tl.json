@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Kumuha ng larawan",
     "feedbackPhotoPermTitle": "Kailangan ng access sa camera",
     "feedbackPhotoPermMsg": "Payagan ang camera para makapaglakip ng larawan.",
-    "feedbackPhotoError": "Hindi mailakip ang larawang iyon."
+    "feedbackPhotoError": "Hindi mailakip ang larawang iyon.",
+    "liveNow": "Live ngayon"
   },
   "onboarding": {
     "step": "Hakbang {{current}} ng {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Tingnan ang buong datos ng laro",
     "gameData": "Datos ng Laro",
     "trackingNow": "Nagta-track ngayon",
-    "you": "Ikaw"
+    "you": "Ikaw",
+    "liveBadge": "LIVE",
+    "joinLive": "Sumali"
   },
   "whiteboard": {
     "title": "Whiteboard",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "Binawi ni {{coach}} ang isang ulat",
       "body": "Binawi ni {{coach}} ang {{type}} na ibinahagi sa iyo."
+    },
+    "liveGame": {
+      "title": "Live na laro",
+      "body": "Nagta-track si {{coach}} ng {{game}} nang live. Sumali para mag-track nang sabay."
     }
   },
   "teamInvite": {

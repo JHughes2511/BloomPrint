@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Fotoğraf çek",
     "feedbackPhotoPermTitle": "Kamera erişimi gerekli",
     "feedbackPhotoPermMsg": "Fotoğraf eklemek için kamera erişimine izin verin.",
-    "feedbackPhotoError": "Bu fotoğraf eklenemedi."
+    "feedbackPhotoError": "Bu fotoğraf eklenemedi.",
+    "liveNow": "Şu an canlı"
   },
   "onboarding": {
     "step": "Adım {{current}} / {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Tüm maç verilerini gör",
     "gameData": "Maç Verileri",
     "trackingNow": "Şu an kaydedenler",
-    "you": "Sen"
+    "you": "Sen",
+    "liveBadge": "CANLI",
+    "joinLive": "Katıl"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} bir rapor paylaşımını kaldırdı",
       "body": "{{coach}}, seninle paylaştığı {{type}} kaydını geri aldı."
+    },
+    "liveGame": {
+      "title": "Canlı maç",
+      "body": "{{coach}}, {{game}} maçını canlı kaydediyor. Birlikte kaydetmek için katıl."
     }
   },
   "teamInvite": {

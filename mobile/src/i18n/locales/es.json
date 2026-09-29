@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Hacer foto",
     "feedbackPhotoPermTitle": "Se necesita la cámara",
     "feedbackPhotoPermMsg": "Permite el acceso a la cámara para adjuntar una foto.",
-    "feedbackPhotoError": "No se pudo adjuntar esa foto."
+    "feedbackPhotoError": "No se pudo adjuntar esa foto.",
+    "liveNow": "En vivo ahora"
   },
   "onboarding": {
     "step": "Paso {{current}} de {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Ver todos los datos del partido",
     "gameData": "Datos del partido",
     "trackingNow": "Registrando ahora",
-    "you": "Tú"
+    "you": "Tú",
+    "liveBadge": "EN VIVO",
+    "joinLive": "Unirse"
   },
   "whiteboard": {
     "title": "Pizarra",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} dejó de compartir un informe",
       "body": "{{coach}} recuperó {{type}} que había compartido contigo."
+    },
+    "liveGame": {
+      "title": "Partido en vivo",
+      "body": "{{coach}} está registrando {{game}} en vivo. Únete para registrarlo juntos."
     }
   },
   "teamInvite": {

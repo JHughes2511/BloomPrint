@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "ფოტოს გადაღება",
     "feedbackPhotoPermTitle": "საჭიროა კამერაზე წვდომა",
     "feedbackPhotoPermMsg": "დაუშვით კამერაზე წვდომა ფოტოს მისამაგრებლად.",
-    "feedbackPhotoError": "ფოტოს მიმაგრება ვერ მოხერხდა."
+    "feedbackPhotoError": "ფოტოს მიმაგრება ვერ მოხერხდა.",
+    "liveNow": "ახლა პირდაპირ"
   },
   "onboarding": {
     "step": "ნაბიჯი {{current}} / {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "მატჩის სრული მონაცემების ნახვა",
     "gameData": "მატჩის მონაცემები",
     "trackingNow": "ახლა აღრიცხავენ",
-    "you": "თქვენ"
+    "you": "თქვენ",
+    "liveBadge": "პირდაპირ",
+    "joinLive": "შეერთება"
   },
   "whiteboard": {
     "title": "დაფა",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}}-მა გააუქმა ანგარიშის გაზიარება",
       "body": "{{coach}}-მა დაიბრუნა {{type}}, რომელიც თქვენ გაგიზიარათ."
+    },
+    "liveGame": {
+      "title": "პირდაპირი თამაში",
+      "body": "{{coach}} პირდაპირ აღრიცხავს თამაშს {{game}}. შემოუერთდით, რომ ერთად აღრიცხოთ."
     }
   },
   "teamInvite": {

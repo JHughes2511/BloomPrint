@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Zrób zdjęcie",
     "feedbackPhotoPermTitle": "Potrzebny dostęp do aparatu",
     "feedbackPhotoPermMsg": "Zezwól na dostęp do aparatu, aby załączyć zdjęcie.",
-    "feedbackPhotoError": "Nie udało się załączyć tego zdjęcia."
+    "feedbackPhotoError": "Nie udało się załączyć tego zdjęcia.",
+    "liveNow": "Teraz na żywo"
   },
   "onboarding": {
     "step": "Krok {{current}} z {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Zobacz pełne dane meczu",
     "gameData": "Dane meczu",
     "trackingNow": "Teraz rejestrują",
-    "you": "Ty"
+    "you": "Ty",
+    "liveBadge": "NA ŻYWO",
+    "joinLive": "Dołącz"
   },
   "whiteboard": {
     "title": "Tablica",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} cofnął udostępnienie raportu",
       "body": "{{coach}} odebrał {{type}}, który Ci udostępnił."
+    },
+    "liveGame": {
+      "title": "Mecz na żywo",
+      "body": "{{coach}} rejestruje {{game}} na żywo. Dołącz, aby rejestrować razem."
     }
   },
   "teamInvite": {

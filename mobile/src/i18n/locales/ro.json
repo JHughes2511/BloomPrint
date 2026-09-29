@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Fă o poză",
     "feedbackPhotoPermTitle": "Este nevoie de acces la cameră",
     "feedbackPhotoPermMsg": "Permite accesul la cameră pentru a atașa o poză.",
-    "feedbackPhotoError": "Nu s-a putut atașa acea poză."
+    "feedbackPhotoError": "Nu s-a putut atașa acea poză.",
+    "liveNow": "Live acum"
   },
   "onboarding": {
     "step": "Pasul {{current}} din {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "Vezi toate datele meciului",
     "gameData": "Date meci",
     "trackingNow": "Înregistrează acum",
-    "you": "Tu"
+    "you": "Tu",
+    "liveBadge": "LIVE",
+    "joinLive": "Alătură-te"
   },
   "whiteboard": {
     "title": "Tablă tactică",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} a anulat partajarea unui raport",
       "body": "{{coach}} a retras {{type}} pe care ți-l partajase."
+    },
+    "liveGame": {
+      "title": "Meci live",
+      "body": "{{coach}} înregistrează {{game}} live. Alătură-te pentru a înregistra împreună."
     }
   },
   "teamInvite": {

@@ -597,7 +597,8 @@
     "feedbackTakePhoto": "Take photo",
     "feedbackPhotoPermTitle": "Camera access needed",
     "feedbackPhotoPermMsg": "Allow camera access to attach a photo.",
-    "feedbackPhotoError": "Could not attach that photo."
+    "feedbackPhotoError": "Could not attach that photo.",
+    "liveNow": "Live now"
   },
   "onboarding": {
     "step": "Step {{current}} of {{total}}",
@@ -2307,7 +2308,9 @@
     "viewFullGameData": "View full game data",
     "gameData": "Game Data",
     "trackingNow": "Tracking now",
-    "you": "You"
+    "you": "You",
+    "liveBadge": "LIVE",
+    "joinLive": "Join"
   },
   "whiteboard": {
     "title": "Whiteboard",
@@ -2630,6 +2633,10 @@
     "staffReportUnshared": {
       "title": "{{coach}} un-shared a report",
       "body": "{{coach}} took back {{type}} they had shared with you."
+    },
+    "liveGame": {
+      "title": "Live game",
+      "body": "{{coach}} is tracking {{game}} live. Join to track together."
     }
   },
   "teamInvite": {
