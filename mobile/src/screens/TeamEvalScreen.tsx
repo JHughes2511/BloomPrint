@@ -3156,8 +3156,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             type PData = { total: number; jersey?: string | null; quarters: Record<number, QData> };
             const qSet = new Set<number>();
             // Both teams, ours first, each under a totals row named for the team
-            // in its colour. Every player carries a neutral tag naming their
-            // team, as Game Leaders does, so a row reads on its own.
+            // in its colour.
             const groups = [false, true].map(isOpp => {
               const players: Record<string, PData> = {};
               for (const st of gameStats) {
@@ -3234,12 +3233,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                             >
                               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 4 }}>
                                 <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={12} color={t.muted2} />
-                                <View style={{ flex: 1 }}>
-                                  <Text style={s.qPlayerName} numberOfLines={1}>
-                                    {P.jersey ? `#${P.jersey} ` : ''}{name}
-                                  </Text>
-                                  <Text style={s.qTeamTag} numberOfLines={1}>{g.name}</Text>
-                                </View>
+                                <Text style={s.qPlayerName} numberOfLines={1}>
+                                  {P.jersey ? `#${P.jersey} ` : ''}{name}
+                                </Text>
                               </View>
                               {qNums.map(q => {
                                 const w = P.quarters[q]?.weighted;
@@ -5087,7 +5083,6 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   qColHead: { width: 42, textAlign: 'center', color: t.muted, fontSize: 10, fontFamily: fonts[700] },
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
   qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
-  qTeamTag: { color: t.muted2, fontSize: 10, marginTop: 1 },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontFamily: fonts[700] },
   qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 10 },
   chip: {
