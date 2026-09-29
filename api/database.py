@@ -528,6 +528,9 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_sessions", "frozen_from_game_id", "INTEGER"),
     ("game_sessions", "frozen_from", "VARCHAR"),
     ("game_sessions", "frozen_at", "TIMESTAMP"),
+    # Player tendencies from film (see FilmPlayerEvent).
+    ("game_report_clips", "uniforms", "JSON"),
+    ("game_report_clips", "player_events", "BOOLEAN"),
     # The shared live-game clock (see GameSession).
     ("game_sessions", "clock_period", "INTEGER"),
     ("game_sessions", "clock_remaining", "INTEGER"),
@@ -1738,6 +1741,9 @@ def _resume_job(job_id: int, kind: str, payload: str):
                     # rather than failing.
                     call.get("report_subject", ""), call.get("report_context", ""),
                     call.get("report_segment_note", ""),
+                    # Absent on a film queued before player tendencies: it
+                    # resumes without the log, as it was asked for.
+                    call.get("uniforms"), bool(call.get("player_events")),
                 )
             elif kind == "packet":
                 from .routes.game_reports import _run_packet_generation

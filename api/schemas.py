@@ -535,6 +535,11 @@ class GameReportClipOut(BaseModel):
     game_id: int | None = None
     game_label: str | None = None
     link_declined: bool = False
+    # Player tendencies: who wore what, and — when nobody said — the colours
+    # the film was logged with, for the coach to put a team to.
+    player_events: bool | None = None
+    uniforms: dict | None = None
+    uniforms_seen: list[str] = []
     created_at: datetime
     model_config = {"from_attributes": True}
 

@@ -1046,6 +1046,13 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     interval = float(args.get("interval_seconds", 2.0))
     max_frames = min(int(args.get("max_frames", 10)), 20)
     include_audio = bool(args.get("include_audio", True))
+    # Log individual players' actions as well as the report's notes (game film
+    # only). `uniforms` is {colour: team name} when the coach said who wore what.
+    want_events = bool(args.get("player_events"))
+    uniforms = args.get("uniforms") or None
+    from .player_events import directive as _events_directive, split as _split_events, \
+        events_only_prompt as _events_only_prompt
+    player_events: list[dict] = []
 
     if not video_paths:
         return [types.TextContent(type="text", text=f"Error: file not found: {video_path}")]
@@ -1175,6 +1182,17 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             content.append({"type": "text", "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n"})
         content += _frames_content(frames)
         answer = _long_answer([{"role": "user", "content": content}], 16000, _writing_hook(progress))
+        if want_events:
+            # One pass has no segment notes to carry the log, so it is asked
+            # for on its own. A failure here costs the tendencies, not the report.
+            try:
+                r = _client().messages.create(
+                    model=OPUS, max_tokens=4000,
+                    messages=[{"role": "user", "content":
+                               [{"type": "text", "text": _events_only_prompt(uniforms)}] + _frames_content(frames)}])
+                player_events = _split_events(text_of(r))[1]
+            except Exception:
+                player_events = []
     else:
         # ── Multi-pass: map each chunk to observations, then synthesize ──
         chunks = [frames[i:i + CHUNK] for i in range(0, len(frames), CHUNK)]
@@ -1204,6 +1222,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 + (f"{segment_note} " if segment_note else "") +
                 "Cite specific moments by their film timestamp [MM:SS] (e.g. (12:34)), never frame numbers or raw seconds. "
                 "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
+                + (_events_directive(uniforms) if want_events else "")
             )
             seg_content = [{"type": "text", "text": seg_prompt}] + _frames_content(ch)
             note = None
@@ -1224,7 +1243,8 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                     )
                 try:
                     calls_made += 1
-                    r = _client().messages.create(model=OPUS, max_tokens=2000,
+                    # The event log needs room of its own beside the notes.
+                    r = _client().messages.create(model=OPUS, max_tokens=5000 if want_events else 2000,
                                                   messages=[{"role": "user", "content": seg_content}])
                     note = f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}"
                     break
@@ -1270,6 +1290,16 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 progress(len(chunks), len(chunks), "job:synthesizing")
             except Exception:
                 pass
+        if want_events:
+            # The log leaves the notes here: it is counted in code, and the
+            # synthesis would only read a wall of JSON. Saved notes (and so a
+            # resumed film) still carry it, which is how it survives a restart.
+            cleaned = []
+            for n in seg_notes:
+                body, evs = _split_events(n)
+                cleaned.append(body)
+                player_events += evs
+            seg_notes = cleaned
         synth = bim_prompt + "\n\nOBSERVATIONS FROM ACROSS THE FULL FILM (synthesize these into the complete report):\n\n"
         if transcript_text:
             synth += f"AUDIO TRANSCRIPT:\n{transcript_text[:2000]}\n\n"
@@ -1280,7 +1310,16 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     # to. On an opponent-vs-opponent packet those are different things, and the
     # title said "Angola" on a report the coach had asked to cover two teams.
     header = f"BIM {output_type.upper().replace('_', ' ')} — {report_subject or program} | {level}\n\n"
-    return [types.TextContent(type="text", text=header + answer)]
+    out = [types.TextContent(type="text", text=header + answer)]
+    if want_events:
+        import json as _json
+        out.append(types.TextContent(type="text", text=EVENTS_PREFIX + _json.dumps(player_events)))
+    return out
+
+
+# The second text a game-film analysis returns: its player-by-player log.
+EVENTS_PREFIX = "PLAYER_EVENTS_JSON:"
+
 
 
 def main() -> None:

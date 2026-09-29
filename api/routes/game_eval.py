@@ -1617,7 +1617,15 @@ def film_notes_for_game(db: Session, coach, game) -> str:
            "describing the possessions the box score is counting."]
     for clip in mine:
         who = clip.team_name or ("our team" if clip.label == "my_team" else "the opponent")
-        out.append(f"\n[Film — {who}]\n{(clip.analysis_text or '')[:6000]}")
+        # Whole. It was cut at 6,000 characters, and a film breakdown puts its
+        # player-by-player notes near the end — which is what got cut.
+        out.append(f"\n[Film — {who}]\n{clip.analysis_text or ''}")
+    # Individual players, counted from what the film logged — and the section
+    # that asks the report to use them. Only when there is something to use.
+    from .. import tendencies
+    block = tendencies.render(tendencies.for_game(db, game, mine))
+    if block:
+        out.append(block + tendencies.REPORT_DIRECTIVE)
     return "\n".join(out)
 
 
@@ -4038,6 +4046,23 @@ def opponent_profile(
 
 
 # ── Opponent Notes ────────────────────────────────────────────────────────────
+
+@router.get("/opponents/{opponent_name}/tendencies")
+def opponent_tendencies(
+    opponent_name: str,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Each of their players, counted across every film of them this coach has.
+
+    Facts with their counts ("drives right 7 of 9"), for the app to write in
+    the coach's language; players the film barely showed come back with no
+    facts, to be listed as seen too little.
+    """
+    from .. import tendencies
+    players = tendencies.for_opponent(db, coach.id, opponent_name)
+    return [{k: p[k] for k in ("jersey", "name", "events", "films", "facts")} for p in players]
+
 
 @router.get("/opponents/{opponent_name}/notes")
 def get_opponent_notes(

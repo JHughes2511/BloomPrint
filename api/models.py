@@ -750,6 +750,26 @@ class GameReportCorrection(Base):
     coach          = relationship("Coach")
 
 
+class FilmPlayerEvent(Base):
+    """One thing one player was seen doing in a film: a drive, a shot, a cut.
+
+    Logged while the film is watched (video_vision/player_events.py), counted
+    into tendencies by api/tendencies.py. A player is who the film shows —
+    uniform colour and jersey number; which TEAM a colour is lives on the clip
+    (GameReportClip.uniforms), so correcting "Duke was in white" re-files every
+    event at once rather than rewriting them.
+    """
+    __tablename__ = "film_player_events"
+
+    id       = Column(Integer, primary_key=True, index=True)
+    clip_id  = Column(Integer, ForeignKey("game_report_clips.id"), nullable=False, index=True)
+    uniform  = Column(String, nullable=False)       # as logged: "white", "dark blue"
+    jersey   = Column(String, nullable=False)
+    t_sec    = Column(Integer, nullable=True)        # film timestamp
+    ev       = Column(String, nullable=False)        # drive / shot / pnr / post / transition / off_ball / defense
+    data     = Column(JSON, nullable=True)           # the event's fields: dir, end, res, zone, ...
+
+
 class GameReportClip(Base):
     __tablename__ = "game_report_clips"
 
@@ -769,6 +789,13 @@ class GameReportClip(Base):
     # both of those and was neither.
     output_type    = Column(String, nullable=True)
     analysis_text  = Column(Text, nullable=True)
+    # Who wore what, as {colour: team name}: given at upload, or confirmed
+    # afterwards from the colours the film was logged with. Until it is set, a
+    # film's player events belong to nobody and count toward no one.
+    uniforms       = Column(JSON, nullable=True)
+    # The film was watched with a player-by-player log (films from before that
+    # have none, and are not asked about uniforms).
+    player_events  = Column(Boolean, nullable=True)
     # The tracked game this film is OF, once the coach has confirmed it.
     #
     # A film and a box score of the same night are two readings of one game,

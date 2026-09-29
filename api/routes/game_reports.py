@@ -8,6 +8,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..database import get_db, SessionLocal, revive_if_stalled
@@ -65,7 +66,8 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
                        program_name: str, opp_name: str, label_text: str,
                        coach_weight: int, focus_prompt: str, level: str = "HS Varsity",
                        report_subject: str = "", report_context: str = "",
-                       report_segment_note: str = ""):
+                       report_segment_note: str = "",
+                       uniforms: dict | None = None, player_events: bool = False):
     """Background task: analyze a (possibly hour-long) film and fill in the clip.
     Reports per-segment progress on the GenerationJob so the app shows the same
     "Analyzing segment i of N" bar as the player-eval flow."""
@@ -173,13 +175,31 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "_on_segment": _save_segment,
             "_resume_profiles": done_profiles,
             "_on_profile": _save_profile,
+            "player_events": player_events,
+            "uniforms": uniforms,
         }))
         text = result[0].text
+        from video_vision.server import EVENTS_PREFIX
+        events = []
+        for extra in result[1:]:
+            if extra.text.startswith(EVENTS_PREFIX):
+                try:
+                    events = json.loads(extra.text[len(EVENTS_PREFIX):])
+                except ValueError:
+                    events = []
         wdb = SessionLocal()
         try:
             clip = wdb.get(models.GameReportClip, clip_id)
             if clip:
                 clip.analysis_text = text
+                if player_events:
+                    clip.player_events = True
+                    # A re-run replaces the log rather than doubling it.
+                    wdb.query(models.FilmPlayerEvent).filter_by(clip_id=clip_id).delete()
+                    for e in events:
+                        wdb.add(models.FilmPlayerEvent(
+                            clip_id=clip_id, uniform=e["uni"], jersey=e["no"], t_sec=e.get("t"),
+                            ev=e["ev"], data={k: v for k, v in e.items() if k not in ("uni", "no", "t", "ev")}))
             job = wdb.get(models.GenerationJob, job_id)
             if job:
                 job.status = "done"
@@ -532,7 +552,43 @@ def _build_out(gr: models.GameReport, db: Session | None = None) -> schemas.Game
             if c.game_id:
                 game = db.get(models.GameSession, c.game_id)
                 c.game_label = _game_label(db, game) if game else None
+            if c.player_events and not c.uniforms and c.analysis_text:
+                c.uniforms_seen = _uniforms_seen(db, c.id)
     return out
+
+
+def _uniforms_seen(db: Session, clip_id: int) -> list[str]:
+    """The two colours a film's players were logged in, most seen first."""
+    rows = (db.query(models.FilmPlayerEvent.uniform, func.count(models.FilmPlayerEvent.id))
+            .filter_by(clip_id=clip_id).group_by(models.FilmPlayerEvent.uniform)
+            .order_by(func.count(models.FilmPlayerEvent.id).desc()).limit(2).all())
+    return [u for u, _ in rows]
+
+
+class UniformsBody(BaseModel):
+    uniforms: dict[str, str]
+
+
+@router.put("/{report_id}/clips/{clip_id}/uniforms")
+def set_clip_uniforms(
+    report_id: int,
+    clip_id: int,
+    body: UniformsBody,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Say which team wore which colour, after the film was read.
+
+    The log already holds every player by colour and number; this is what
+    files them under a team. Changing it later re-files them all.
+    """
+    gr = db.get(models.GameReport, report_id)
+    clip = db.get(models.GameReportClip, clip_id)
+    if not gr or gr.coach_id != coach.id or not clip or clip.game_report_id != gr.id:
+        raise HTTPException(status_code=404, detail="Film not found")
+    clip.uniforms = _parse_uniforms(json.dumps(body.uniforms))
+    db.commit()
+    return {"uniforms": clip.uniforms}
 
 
 def _attach_clip_jobs(db: Session, out: schemas.GameReportOut) -> None:
@@ -952,6 +1008,8 @@ async def add_clip(
     background_tasks: BackgroundTasks,
     label: str = Form(...),
     team_name: str = Form(""),
+    # {colour: team name} as JSON, when the coach said who wore what.
+    uniforms: str = Form(""),
     # Either the film itself, or — for anything long enough to be worth it —
     # a ref to film the browser has already put in storage directly. See
     # routes/film_upload.py: a three-hour game does not survive being sent
@@ -1009,6 +1067,8 @@ async def add_clip(
         # so reading it back later describes the packet, not this analysis.
         output_type=gr.output_type,
         analysis_text=None,
+        uniforms=_parse_uniforms(uniforms),
+        player_events=True,
     )
     db.add(clip)
     db.commit()
@@ -1027,6 +1087,7 @@ async def add_clip(
         # should be the one that was asked for.
         "report_subject": subject, "report_context": directive,
         "report_segment_note": seg_note,
+        "uniforms": clip.uniforms, "player_events": True,
     }
     # payload is what makes this job survivable: with the arguments on the row,
     # a server that comes back up can run it again itself.
@@ -1045,9 +1106,26 @@ async def add_clip(
     background_tasks.add_task(
         _run_clip_analysis, clip.id, job.id, str(dest), gr.output_type,
         my_team_name, opp_name, label_text, coach.weight, (gr.focus_prompt or "") + learned,
-        call["level"], subject, directive, seg_note,
+        call["level"], subject, directive, seg_note, clip.uniforms, True,
     )
     return {"job_id": job.id, "clip_id": clip.id}
+
+
+def _parse_uniforms(raw: str) -> dict | None:
+    """{colour: team} from the upload form, colours as plain lowercase words."""
+    try:
+        data = json.loads(raw) if raw else None
+    except ValueError:
+        return None
+    if not isinstance(data, dict):
+        return None
+    out = {}
+    for colour, team in data.items():
+        c = " ".join(str(colour or "").lower().split())[:40]
+        t = str(team or "").strip()[:120]
+        if c and t:
+            out[c] = t
+    return out or None
 
 
 @router.delete("/{report_id}/clips/{clip_id}")
@@ -1364,6 +1442,12 @@ def _packet_prompt(db: Session, gr: models.GameReport, coach: models.Coach) -> s
             sections.append(f"\nADDITIONAL TEAM: {team_name} (no roster on file — compare from general knowledge and any notes/film provided).")
     if film_context:
         sections.append(f"\nFILM ANALYSIS:{film_context}")
+    # Individual players, counted from what the films logged, and the section
+    # that asks the report to use them — whatever report types are chosen.
+    from .. import tendencies
+    tend_block = tendencies.render(tendencies.for_packet(db, gr))
+    if tend_block:
+        sections.append(tend_block + tendencies.REPORT_DIRECTIVE)
     if gr.box_score:
         sections.append(f"\nBOX SCORE / STATS:\n{gr.box_score}")
     # The tracked stats for the game the film was tied to. The film analysis
