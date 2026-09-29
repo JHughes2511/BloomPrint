@@ -76,6 +76,8 @@ app.include_router(join.router)
 app.include_router(join.link_router)
 app.include_router(decide.router)
 app.include_router(account.router)
+from .routes import play_calling as _play_calling  # noqa: E402
+app.include_router(_play_calling.router)
 
 
 @app.on_event("startup")

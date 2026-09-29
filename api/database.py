@@ -533,6 +533,9 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_report_clips", "player_events", "BOOLEAN"),
     ("game_report_clips", "colours_detected", "JSON"),
     ("evaluations", "film_events", "JSON"),
+    # Play calling (see PlayCall).
+    ("game_player_stats", "possession_id", "INTEGER"),
+    ("game_player_stats", "logged_by", "INTEGER"),
     ("game_report_clips", "uniforms_answered", "BOOLEAN"),
     # The shared live-game clock (see GameSession).
     ("game_sessions", "clock_period", "INTEGER"),

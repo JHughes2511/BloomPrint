@@ -960,6 +960,85 @@ class GameSessionReportCorrection(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class PlayCall(Base):
+    """One possession of play calling: what was called, against what, and
+    whether it scored.
+
+    Recorded live or read from a sheet after the game (see api/play_calling.py).
+    `side` is which team had the ball. Points come from the stats linked to it
+    when tracked live (GamePlayerStat.possession_id), or from the sheet on an
+    import; `points` holds the result either way so the numbers read one column.
+    """
+    __tablename__ = "play_calls"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    game_id    = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    side       = Column(String, nullable=False)            # our / opponent: who had the ball
+    quarter    = Column(Integer, nullable=False)           # weight bucket: 1-4, 5+ overtimes
+    seq        = Column(Integer, nullable=False, default=0)  # order within the game
+    play       = Column(String, nullable=False)            # catalog name, e.g. "Drag", "Unknown"
+    play_type  = Column(String, nullable=False, default="half_court")
+    defense    = Column(String, nullable=True)             # "Man", "2-3"; None when not noted
+    result     = Column(String, nullable=True)             # score / no_score; None while open
+    points     = Column(Integer, nullable=True)            # None: scored, points not known
+    # How it ended, when known: made2, made3, and1_2, and1_3, ft, miss2, miss3,
+    # turnover, ft_miss, other. With free throws, how many of how many.
+    ended      = Column(String, nullable=True)
+    ft_made    = Column(Integer, nullable=True)
+    ft_att     = Column(Integer, nullable=True)
+    player_name = Column(String, nullable=True)            # who scored / ended it
+    source     = Column(String, default="live")            # live / import
+    logged_by  = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class PlayCatalogEntry(Base):
+    """A named play, kept for quick selection next time.
+
+    A team's own plays belong to the team (`team_id`), so the whole staff sees
+    them; plays named while scouting an opponent belong to that opponent under
+    the coach whose program scouts them (`coach_id` + `opponent`). Added the
+    first time a name is used; `aliases` are the short forms a sheet uses.
+    """
+    __tablename__ = "play_catalog"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    team_id    = Column(Integer, ForeignKey("teams.id"), nullable=True, index=True)
+    coach_id   = Column(Integer, ForeignKey("coaches.id"), nullable=True, index=True)
+    opponent   = Column(String, nullable=True)
+    name       = Column(String, nullable=False)
+    play_type  = Column(String, nullable=False, default="half_court")
+    aliases    = Column(JSON, nullable=True)
+    uses       = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class DefenseCatalogEntry(Base):
+    """A defense a coach has named beyond the standard ones (shared by all
+    their teams and opponents)."""
+    __tablename__ = "defense_catalog"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    coach_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False, index=True)
+    name       = Column(String, nullable=False)
+    uses       = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class GameTally(Base):
+    """A running count kept per team per quarter: offensive rebounds, from
+    play-calling tracking or a sheet's tallies."""
+    __tablename__ = "game_tallies"
+    __table_args__ = (UniqueConstraint("game_id", "side", "quarter", "stat", name="uq_game_tally"),)
+
+    id      = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    side    = Column(String, nullable=False)       # our / opponent
+    quarter = Column(Integer, nullable=False)      # 0 when the sheet gives the whole game
+    stat    = Column(String, nullable=False)       # "orb"
+    count   = Column(Integer, nullable=False, default=0)
+
+
 class GamePlayerStat(Base):
     __tablename__ = "game_player_stats"
     id = Column(Integer, primary_key=True, index=True)
@@ -983,6 +1062,11 @@ class GamePlayerStat(Base):
     # without touching anything the coach tracked live.
     source = Column(String, default="live")
     created_at = Column(DateTime, default=datetime.utcnow)
+    # The play-calling possession this stat happened in (live tracking), and
+    # who logged it — the second is what lets two trackers' copies of one
+    # basket be told apart from two baskets.
+    possession_id = Column(Integer, ForeignKey("play_calls.id"), nullable=True)
+    logged_by = Column(Integer, ForeignKey("coaches.id"), nullable=True)
 
     game = relationship("GameSession", back_populates="player_stats")
     player = relationship("Player")
