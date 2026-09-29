@@ -193,7 +193,10 @@ def build_pdf_from_html(html: str, title: str = "Report") -> bytes:
     src = _with_font(src, _font_for(src))
 
     out = io.BytesIO()
-    status = pisa.CreatePDF(io.StringIO(src), dest=out, encoding="utf-8")
+    # Bytes with their encoding. Text plus an encoding is refused by html5lib
+    # 1.1 ("Cannot set an encoding with a unicode input"), which failed every
+    # export wherever that version is installed.
+    status = pisa.CreatePDF(io.BytesIO(src.encode("utf-8")), dest=out, encoding="utf-8")
     if status.err:
         raise ValueError(f"The document could not be laid out ({status.err} errors).")
     data = out.getvalue()

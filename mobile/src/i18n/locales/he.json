@@ -3164,6 +3164,8 @@
     "practiceLabel": "אימון (למשל אימון 1)",
     "minutes": "דק'",
     "focus": "מיקוד",
-    "checklist": "רשימה"
+    "checklist": "רשימה",
+    "print": "הדפסה",
+    "pdf": "PDF"
   }
 }

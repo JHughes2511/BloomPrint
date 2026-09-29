@@ -15,6 +15,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { shortAPI } from '../api/client';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import { useTheme } from '../theme/ThemeProvider';
 import { useTranslation } from 'react-i18next';
 import { ThemeTokens } from '../theme/tokens';
@@ -164,7 +165,14 @@ export function ShortVersionView({ kind, refId, fetcher, readOnly, ticks }: {
   }
 
   if (readOnly) {
-    return kind === 'training' ? <PlayerSheet d={got.data} t={t} tr={tr} ticks={ticks} /> : <TeamSheet d={got.data} t={t} tr={tr} />;
+    return (
+      <View>
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+          <PrintRow kind={kind} d={got.data} pdf={false} t={t} tr={tr} />
+        </View>
+        {kind === 'training' ? <PlayerSheet d={got.data} t={t} tr={tr} ticks={ticks} /> : <TeamSheet d={got.data} t={t} tr={tr} />}
+      </View>
+    );
   }
 
   return (
@@ -179,6 +187,7 @@ export function ShortVersionView({ kind, refId, fetcher, readOnly, ticks }: {
           <Ionicons name="chatbox-ellipses-outline" size={14} color={t.inkSoft} />
           <Text style={s.toolText}>{tr('shortVersion.correct')}</Text>
         </TouchableOpacity>
+        <PrintRow kind={kind} d={got.data} pdf t={t} tr={tr} />
       </View>
       {got.stale && got.edited && (
         <View style={s.stale}>
@@ -341,6 +350,109 @@ function PlayerEdit({ d, set, t, tr }: { d: any; set: (v: any) => void; t: Theme
 }
 
 const PLAY_GROUPS = ['trans', 'half_court', 'sob', 'bob', 'zone', 'free_throw', 'cob'];
+
+// ── One printed page ─────────────────────────────────────────────────────────
+// Laid out like the sheets a staff already hands out: the practice plan in a
+// table under a red header, the emphasis list, the play sheet in columns with
+// coloured heads (yellow transition, green half court, red out of bounds).
+
+const esc = (x: any) => String(x ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const GROUP_COLOUR: Record<string, string> = {
+  trans: '#F2D43D', half_court: '#2E8B57', sob: '#D7263D', bob: '#D7263D', zone: '#E8E8E8', free_throw: '#C9D6E8', cob: '#E8E8E8',
+};
+const GROUP_INK: Record<string, string> = { half_court: '#fff', sob: '#fff', bob: '#fff' };
+
+export function shortHtml(kind: ShortKind, d: any, tr: (k: string, o?: any) => string): string {
+  // Tables only, and plain CSS: the server's PDF renderer (xhtml2pdf) has no
+  // flexbox and no nth-child, and the browser's print dialog is happy with both.
+  const head = `<html><head><title>${esc(d.title)}</title><style>
+    @page { size: letter portrait; margin: 12mm; }
+    body { font-family: Helvetica, Arial, sans-serif; color: #111; font-size: 11px; }
+    h1 { font-size: 18px; margin: 0 0 8px 0; }
+    h2 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin: 12px 0 5px 0; color: #333; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background-color: #D7263D; color: #ffffff; text-transform: uppercase; font-size: 10px; padding: 5px; border: 1px solid #111111; }
+    td { border: 1px solid #111111; padding: 5px 7px; vertical-align: top; }
+    td.z { background-color: #EEF2F6; }
+    td.drill { font-weight: bold; text-transform: uppercase; }
+    td.c { text-align: center; }
+    td.e { border: 0; border-bottom: 1px solid #bbbbbb; font-weight: bold; padding: 4px 0; }
+    td.ph { font-weight: bold; text-align: center; font-size: 10px; text-transform: uppercase; }
+    td.p { text-align: center; font-weight: bold; }
+    td.n { border: 0; padding: 2px 0; }
+    td.f { border: 1px solid #1F6F9B; color: #1F6F9B; font-weight: bold; text-align: center; }
+  </style></head><body>`;
+  const zebra = (i: number) => (i % 2 ? ' z' : '');
+  let body = `<h1>${esc(d.title)}</h1>`;
+  if (kind === 'training') {
+    if ((d.focus ?? []).length) {
+      body += `<table><tr>${d.focus.map((f: string) => `<td class="f">${esc(f)}</td>`).join('')}</tr></table><br/>`;
+    }
+    body += `<table><tr><th width="6%"></th><th width="38%">${esc(tr('shortVersion.drill'))}</th><th width="18%">${esc(tr('shortVersion.amount'))}</th><th width="38%">${esc(tr('shortVersion.cue'))}</th></tr>`
+      + (d.checklist ?? []).map((c: any, i: number) => `<tr><td class="c${zebra(i)}">[&nbsp;&nbsp;]</td><td class="drill${zebra(i)}">${esc(c.drill)}</td><td class="c${zebra(i)}">${esc(c.amount ?? '')}</td><td class="${zebra(i).trim()}">${esc(c.cue ?? '')}</td></tr>`).join('')
+      + `</table>`;
+    if ((d.cues ?? []).length) {
+      body += `<h2>${esc(tr('shortVersion.keyCues'))}</h2><table>${d.cues.map((c: string) => `<tr><td class="e">${esc(c)}</td></tr>`).join('')}</table>`;
+    }
+  } else {
+    for (const sess of d.sessions ?? []) {
+      const total = sess.drills.reduce((a: number, x: any) => a + (x.minutes ?? 0), 0);
+      if (sess.label) body += `<h2>${esc(sess.label)}</h2>`;
+      body += `<table><tr><th width="64%">${esc(tr('shortVersion.drills'))}</th><th width="18%">${esc(tr('shortVersion.time'))}</th><th width="18%">${esc(tr('shortVersion.coach'))}</th></tr>`
+        + sess.drills.map((x: any, i: number) => `<tr><td class="drill${zebra(i)}">${esc(x.drill)}</td><td class="c${zebra(i)}">${x.minutes != null ? esc(tr('shortVersion.min', { n: x.minutes })) : ''}</td><td class="c${zebra(i)}">${esc(x.coach ?? '')}</td></tr>`).join('')
+        + (total ? `<tr><td style="text-align:right">${esc(tr('shortVersion.total'))}</td><td class="c"><b>${esc(tr('shortVersion.min', { n: total }))}</b></td><td></td></tr>` : '')
+        + `</table>`;
+    }
+    if ((d.emphasis ?? []).length) {
+      body += `<h2>${esc(tr('shortVersion.emphasis'))}</h2><table>${d.emphasis.map((e: string) => `<tr><td class="e">${esc(e)}</td></tr>`).join('')}</table>`;
+    }
+    const groups = PLAY_GROUPS.filter(g => (d.plays?.[g] ?? []).length);
+    if (groups.length) {
+      const rows = Math.max(...groups.map(g => d.plays[g].length));
+      const w = Math.floor(100 / groups.length);
+      body += `<h2>${esc(tr('shortVersion.plays'))}</h2><table><tr>`
+        + groups.map(g => `<td class="ph" width="${w}%" style="background-color:${GROUP_COLOUR[g]};color:${GROUP_INK[g] ?? '#111111'}">${esc(tr(`shortVersion.groups.${g}`))}</td>`).join('')
+        + `</tr>` + Array.from({ length: rows }, (_, r) => `<tr>${groups.map(g => `<td class="p">${esc(d.plays[g][r] ?? '')}</td>`).join('')}</tr>`).join('')
+        + `</table>`;
+    }
+    if ((d.notes ?? []).length) {
+      body += `<h2>${esc(tr('shortVersion.notes'))}</h2><table>${d.notes.map((n: string) => `<tr><td class="n">&bull; ${esc(n)}</td></tr>`).join('')}</table>`;
+    }
+  }
+  return head + body + '</body></html>';
+}
+
+/** Print (and, for coaches, PDF) buttons for a short page. */
+function PrintRow({ kind, d, pdf, t, tr }: { kind: ShortKind; d: any; pdf: boolean; t: ThemeTokens; tr: (k: string, o?: any) => string }) {
+  const s = makeStyles(t);
+  const [busy, setBusy] = useState(false);
+  const run = async (what: 'print' | 'pdf') => {
+    setBusy(true);
+    try {
+      const html = shortHtml(kind, d, tr);
+      if (what === 'print') await printRawHtml(html);
+      else await exportHtmlPdf(html, d.title || tr('shortVersion.short'));
+    } catch (e: any) {
+      Alert.alert(tr('common.error'), e?.message ?? tr('common.somethingWentWrong'));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <TouchableOpacity style={s.tool} onPress={() => run('print')} disabled={busy}>
+        <Ionicons name="print-outline" size={14} color={t.inkSoft} />
+        <Text style={s.toolText}>{tr('shortVersion.print')}</Text>
+      </TouchableOpacity>
+      {pdf && (
+        <TouchableOpacity style={s.tool} onPress={() => run('pdf')} disabled={busy}>
+          <Ionicons name="document-outline" size={14} color={t.inkSoft} />
+          <Text style={s.toolText}>{tr('shortVersion.pdf')}</Text>
+        </TouchableOpacity>
+      )}
+    </>
+  );
+}
 
 function TeamSheet({ d, t, tr }: { d: any; t: ThemeTokens; tr: (k: string, o?: any) => string }) {
   const s = makeStyles(t);
