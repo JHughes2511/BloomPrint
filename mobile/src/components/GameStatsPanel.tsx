@@ -294,7 +294,8 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
       <Text style={s.cardLabel}>{title}</Text>
       {section && (
         <TouchableOpacity onPress={() => { setFixing({ section, title, wantAdvanced }); setFixNote(''); }}>
-          <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700], marginBottom: 10 }}>
+          <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 10,
+                         textDecorationLine: 'underline' }}>
             {tr('gameStats.notRight')}
           </Text>
         </TouchableOpacity>
@@ -670,7 +671,9 @@ const makeStyles = (t: ThemeTokens) => ({
   // lines up rather than sitting inset by a few pixels.
   card: { backgroundColor: t.card, borderRadius: 18, padding: 16, marginBottom: 14,
           borderWidth: 1, borderColor: t.cardBorder } as const,
-  cardLabel: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1,
+  // Neutral, not the accent: our team is drawn in the accent and the opponent
+  // in clay, so a blue header read as "this section is ours".
+  cardLabel: { color: t.inkSoft, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1,
                textTransform: 'uppercase', marginBottom: 10 } as const,
   empty: { color: t.muted2, fontSize: 12, lineHeight: 18 } as const,
 
