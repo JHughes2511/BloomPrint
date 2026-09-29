@@ -369,15 +369,10 @@ export default function HomeScreen() {
                   style={[styles.liveRow, i > 0 && { borderTopWidth: 1, borderTopColor: t.divider }]}
                 >
                   <View style={[styles.liveDot, { backgroundColor: t.negative }]} />
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>
-                      {[g.team_name, g.opponent_name].filter(Boolean).join(' vs ')}
-                      {g.our_score != null && g.opponent_score != null ? `  ${g.our_score}-${g.opponent_score}` : ''}
-                    </Text>
-                    <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
-                      {(g.trackers || []).join(', ')}
-                    </Text>
-                  </View>
+                  <Text style={{ flex: 1, minWidth: 0, color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>
+                    {[g.team_name, g.opponent_name].filter(Boolean).join(' vs ')}
+                    {g.our_score != null && g.opponent_score != null ? `  ${g.our_score}-${g.opponent_score}` : ''}
+                  </Text>
                   <View style={[styles.liveJoin, { backgroundColor: t.ctaBg }]}>
                     <Text style={{ color: t.ctaText, fontSize: 12, fontFamily: fonts[800] }}>{tr('teamGrade.joinLive')}</Text>
                   </View>

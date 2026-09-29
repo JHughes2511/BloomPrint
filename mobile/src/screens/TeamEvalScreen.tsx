@@ -5,6 +5,7 @@ import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, RefreshControl,
+  Pressable,
 } from 'react-native';
 import Sheet from '../components/Sheet';
 import { Ionicons } from '@expo/vector-icons';
@@ -368,6 +369,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [ourScore, setOurScore] = useState(0);
   // Everyone tracking the live game right now, from the heartbeat.
   const [trackers, setTrackers] = useState<{ coach_id: number; name: string; side: 'our' | 'opponent'; you: boolean }[]>([]);
+  // The circle whose name is showing: hovered on a computer, tapped on a phone.
+  const [peekTracker, setPeekTracker] = useState<number | null>(null);
+  const peekTimer = useRef<any>(null);
+  const peek = (id: number | null, hold = false) => {
+    clearTimeout(peekTimer.current);
+    setPeekTracker(id);
+    // A tap has no "mouse left", so the name goes away on its own.
+    if (id !== null && hold) peekTimer.current = setTimeout(() => setPeekTracker(null), 3000);
+  };
   // Bumped by every local score / clock change, so a heartbeat that left before
   // the change cannot put the old value back when it returns.
   const scoreSeq = useRef(0);
@@ -2695,14 +2705,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           : tr('teamGrade.sharedByCoach', { name: game.shared_by })}
                       </Text>
                     )}
-                    {/* Someone is in the tracker right now, and who. */}
+                    {/* Someone is in the tracker right now. */}
                     {game.status === 'in_progress' && (game.live_trackers?.length ?? 0) > 0 && (
                       <View style={s.liveLine}>
                         <View style={s.liveDot} />
                         <Text style={s.liveText}>{tr('teamGrade.liveBadge')}</Text>
-                        <Text style={{ color: t.muted, fontSize: 11, flexShrink: 1 }} numberOfLines={1}>
-                          {game.live_trackers.join(', ')}
-                        </Text>
                       </View>
                     )}
                   </View>
@@ -2849,27 +2856,32 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </View>
 
           {/* Who is tracking this game right now, like the faces at the top of
-              a shared spreadsheet: each in their side's colour. */}
+              a shared spreadsheet: initials, in their side's colour. The name
+              and side show on hover, or on a tap on a phone. */}
           {trackers.length > 0 && (
-            <View style={s.trackerBar} accessibilityLabel={tr('teamGrade.trackingNow', { defaultValue: 'Tracking now' })}>
-              <Text style={s.trackerBarLabel}>{tr('teamGrade.trackingNow', { defaultValue: 'Tracking now' })}</Text>
+            <View style={s.trackerBar}>
+              <Text style={s.trackerBarLabel}>{tr('teamGrade.trackingNow')}</Text>
               {trackers.map(tk => {
                 const color = tk.side === 'opponent' ? t.negative : t.accent;
                 const initials = (tk.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]!.toUpperCase()).join('');
+                const who = `${tk.you ? tr('teamGrade.you') : tk.name} · ${tk.side === 'opponent' ? sideLabels.theirs : sideLabels.ours}`;
                 return (
-                  <View key={tk.coach_id} style={s.trackerChip}>
-                    <View style={[s.trackerAvatar, { borderColor: color, backgroundColor: tk.side === 'opponent' ? t.negativeSoft : t.accentSoft }]}>
-                      <Text style={[s.trackerInitials, { color }]}>{initials}</Text>
-                    </View>
-                    <View>
-                      <Text style={s.trackerName} numberOfLines={1}>
-                        {tk.you ? tr('teamGrade.you', { defaultValue: 'You' }) : tk.name}
-                      </Text>
-                      <Text style={[s.trackerSide, { color }]} numberOfLines={1}>
-                        {tk.side === 'opponent' ? sideLabels.theirs : sideLabels.ours}
-                      </Text>
-                    </View>
-                  </View>
+                  <Pressable
+                    key={tk.coach_id}
+                    onPress={() => peek(peekTracker === tk.coach_id ? null : tk.coach_id, true)}
+                    onHoverIn={() => peek(tk.coach_id)}
+                    onHoverOut={() => peek(null)}
+                    accessibilityRole="button"
+                    accessibilityLabel={who}
+                    style={[s.trackerAvatar, { borderColor: color, backgroundColor: tk.side === 'opponent' ? t.negativeSoft : t.accentSoft }]}
+                  >
+                    <Text style={[s.trackerInitials, { color }]}>{initials}</Text>
+                    {peekTracker === tk.coach_id && (
+                      <View style={s.trackerPeek} pointerEvents="none">
+                        <Text style={s.trackerPeekText} numberOfLines={1}>{who}</Text>
+                      </View>
+                    )}
+                  </Pressable>
                 );
               })}
             </View>
@@ -2973,7 +2985,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   theirs; what they need on a stat pad is which of their teams
                   this is and who it is against. */}
               <Text style={[s.teamToggleText, entryMode === 'our' && s.teamToggleTextActive]} numberOfLines={1}>
-                {(teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
+                {activeGame.team_name ?? (teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
                   ?? coach?.program_name ?? tr('teamGrade.ourTeam')}
               </Text>
             </TouchableOpacity>
@@ -4267,7 +4279,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {askLabels.length > 0 && !!activeGame && (
         <TeamLabelPrompt
           labels={askLabels}
-          ourName={(teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
+          ourName={activeGame.team_name ?? (teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
                    ?? coach?.program_name ?? tr('teamGrade.ourTeam')}
           theirName={activeGame.opponent_name || tr('teamGrade.opponent')}
           busy={importing}
@@ -5301,14 +5313,16 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   liveText: { color: t.negative, fontSize: 10, fontFamily: fonts[800], letterSpacing: 0.8 },
   joinBtn: { backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
   joinBtnText: { color: t.ctaText, fontSize: 11, fontFamily: fonts[800] },
-  trackerBar: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12,
-                paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
+  // Above what follows, so a name popping out under a circle is not covered.
+  trackerBar: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8,
+                paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider,
+                zIndex: 30 },
   trackerBarLabel: { color: t.muted, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase' },
-  trackerChip: { flexDirection: 'row', alignItems: 'center', gap: 6, maxWidth: 180 },
-  trackerAvatar: { width: 26, height: 26, borderRadius: 13, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  trackerAvatar: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   trackerInitials: { fontSize: 10, fontFamily: fonts[800] },
-  trackerName: { color: t.ink, fontSize: 12, fontFamily: fonts[700] },
-  trackerSide: { fontSize: 10, fontFamily: fonts[600] },
+  trackerPeek: { position: 'absolute', top: 32, left: 0, backgroundColor: t.badgeBg, borderRadius: 8,
+                 paddingHorizontal: 10, paddingVertical: 6, zIndex: 40 },
+  trackerPeekText: { color: t.badgeText, fontSize: 12, fontFamily: fonts[700] },
   qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 10 },
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
