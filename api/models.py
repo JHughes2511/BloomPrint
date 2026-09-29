@@ -820,10 +820,35 @@ class GameSession(SoftDeleteMixin, Base):
     frozen_from_game_id = Column(Integer, nullable=True, index=True)
     frozen_from = Column(String, nullable=True)   # the coach it came from
     frozen_at = Column(DateTime, nullable=True)
+    # The shared game clock, so everyone tracking a live game runs the same
+    # one. `clock_remaining` is what the clock read at `clock_updated_at`; while
+    # it runs, the time since then comes off it. NULL until someone touches it.
+    clock_period = Column(Integer, nullable=True)       # 1-based; past num_periods is OT
+    clock_remaining = Column(Integer, nullable=True)    # seconds
+    clock_running = Column(Boolean, nullable=True)
+    clock_updated_at = Column(DateTime, nullable=True)
 
     coach = relationship("Coach")
     player_stats = relationship("GamePlayerStat", back_populates="game", cascade="all, delete-orphan")
     lineup_events = relationship("LineupEvent", back_populates="game", cascade="all, delete-orphan")
+
+
+class LivePresence(Base):
+    """Who is in a live game's tracker right now, and on which side.
+
+    One row per coach per game, touched by the tracker's heartbeat. Someone is
+    "in" the game while their row was touched in the last LIVE_PRESENCE_SECONDS;
+    leaving deletes it. Nothing else reads it, so a stale row costs nothing.
+    """
+    __tablename__ = "live_presence"
+    __table_args__ = (UniqueConstraint("game_id", "coach_id", name="uq_live_presence_game_coach"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    side = Column(String, default="our")          # our / opponent
+    started_at = Column(DateTime, default=datetime.utcnow)
+    last_seen = Column(DateTime, default=datetime.utcnow)
 
 
 class GameScoutingReport(Base):

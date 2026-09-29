@@ -623,6 +623,27 @@ def _get_game(db: Session, game_id: int, coach_id: int,
     return game
 
 
+def _get_game_trackable(db: Session, game_id: int,
+                        coach: models.Coach) -> models.GameSession:
+    """A game this coach may track live: they own it, or they are on its team.
+
+    Tracking is a team job — one coach on our side, another on the opponent,
+    a third on the clock — so everyone on the game's team can log stats, change
+    the score, run the clock and take a stat back. A game merely shared with
+    someone stays read-only, and a frozen copy stays frozen.
+    """
+    game = db.get(models.GameSession, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game session not found")
+    if game.coach_id != coach.id and not (
+            game.team_id is not None and game.team_id in _accessible_team_ids(db, coach)):
+        raise HTTPException(status_code=404, detail="Game session not found")
+    if game.frozen_from:
+        raise HTTPException(status_code=403,
+                            detail="This game is a frozen copy of a shared game and can't be edited.")
+    return game
+
+
 def _accessible_team_ids(db: Session, coach: models.Coach) -> set[int]:
     """Teams a coach can see games for: teams they own + teams they've joined
     as staff."""
@@ -1941,8 +1962,16 @@ def update_session(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    game = _get_game(db, game_id, coach.id)
-    for field, value in body.model_dump(exclude_none=True).items():
+    changes = body.model_dump(exclude_none=True)
+    game = db.get(models.GameSession, game_id)
+    if game and game.coach_id != coach.id and set(changes) <= {"status"}:
+        # A teammate tracking the game can end it; everything else about the
+        # game (opponent, date, level, the score as a number) stays the owner's.
+        # The score has its own endpoint, which adds rather than overwrites.
+        game = _get_game_trackable(db, game_id, coach)
+    else:
+        game = _get_game(db, game_id, coach.id)
+    for field, value in changes.items():
         setattr(game, field, value)
     db.commit()
     db.refresh(game)
@@ -2034,7 +2063,7 @@ def log_stat(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    game = _get_game(db, game_id, coach.id)
+    game = _get_game_trackable(db, game_id, coach)
     multiplier = _quarter_multiplier(body.quarter)
     weighted = body.raw_points * multiplier
     stat = models.GamePlayerStat(
@@ -2065,13 +2094,181 @@ def delete_stat(
     stat = db.get(models.GamePlayerStat, stat_id)
     if not stat:
         raise HTTPException(status_code=404, detail="Stat not found")
-    # Verify ownership via game
-    game = db.get(models.GameSession, stat.game_id)
-    if not game or game.coach_id != coach.id:
+    # Anyone tracking the game can take a stat back, including one a teammate
+    # logged: two people on one game correct each other.
+    try:
+        _get_game_trackable(db, stat.game_id, coach)
+    except HTTPException:
         raise HTTPException(status_code=403, detail="Not authorized")
     db.delete(stat)
     db.commit()
     return {"ok": True}
+
+
+# ── Live tracking, together ───────────────────────────────────────────────────
+# Several people can track one game: everyone on the game's team. Three things
+# would otherwise fight: the score (each device sent the total it had, so the
+# last one to tap won), the clock (each device ran its own), and not knowing
+# who else is in there. The score now moves by +/-, the clock lives on the
+# game, and a heartbeat says who is tracking.
+
+LIVE_PRESENCE_SECONDS = 20     # gone if not heard from for this long
+LIVE_TOUCH_SECONDS = 8         # a heartbeat inside this is not written again
+
+
+class ScoreDelta(BaseModel):
+    side: str                  # "our" / "opponent"
+    delta: int
+
+
+@router.post("/sessions/{game_id}/score")
+def change_score(
+    game_id: int,
+    body: ScoreDelta,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Add to (or take from) one side's score, in the database, atomically.
+
+    Two trackers scoring at once both land: this is an UPDATE ... SET score =
+    score + delta, not a write of whatever total a device had in memory.
+    """
+    from sqlalchemy import case, update
+    if body.side not in ("our", "opponent") or not -10 <= body.delta <= 10:
+        raise HTTPException(status_code=400, detail="side must be our/opponent and delta small")
+    game = _get_game_trackable(db, game_id, coach)
+    col = models.GameSession.our_score if body.side == "our" else models.GameSession.opponent_score
+    # An unscored game shows the score worked out from its box score; the
+    # first tap adds to that, not to zero.
+    ours, theirs = effective_scores(game)
+    base = (ours if body.side == "our" else theirs) or 0
+    new = func.coalesce(col, base) + body.delta
+    db.execute(update(models.GameSession).where(models.GameSession.id == game.id)
+               .values({col.key: case((new < 0, 0), else_=new)}))
+    db.commit()
+    db.refresh(game)
+    return {"our_score": game.our_score, "opponent_score": game.opponent_score}
+
+
+class ClockSet(BaseModel):
+    period: int
+    remaining: int
+    running: bool
+
+
+def _clock_now(game: models.GameSession, now: datetime) -> dict | None:
+    """The shared clock as it reads at `now`."""
+    if game.clock_period is None or game.clock_remaining is None:
+        return None
+    remaining = game.clock_remaining
+    if game.clock_running and game.clock_updated_at:
+        remaining = max(0, remaining - int((now - game.clock_updated_at).total_seconds()))
+    return {"period": game.clock_period, "remaining": remaining,
+            "running": bool(game.clock_running) and remaining > 0}
+
+
+@router.post("/sessions/{game_id}/clock")
+def set_clock(
+    game_id: int,
+    body: ClockSet,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Start, stop, set or move the clock for everyone tracking the game."""
+    if body.period < 1 or body.period > 20 or not 0 <= body.remaining <= 3600:
+        raise HTTPException(status_code=400, detail="Clock out of range")
+    game = _get_game_trackable(db, game_id, coach)
+    game.clock_period = body.period
+    game.clock_remaining = body.remaining
+    game.clock_running = body.running
+    game.clock_updated_at = datetime.utcnow()
+    db.commit()
+    return {"clock": _clock_now(game, game.clock_updated_at)}
+
+
+class LiveBeat(BaseModel):
+    side: str = "our"
+
+
+def _trackers(db: Session, game_id: int, me: int, now: datetime) -> list[dict]:
+    from datetime import timedelta
+    cutoff = now - timedelta(seconds=LIVE_PRESENCE_SECONDS)
+    rows = (db.query(models.LivePresence, models.Coach)
+            .join(models.Coach, models.Coach.id == models.LivePresence.coach_id)
+            .filter(models.LivePresence.game_id == game_id,
+                    models.LivePresence.last_seen >= cutoff)
+            .order_by(models.LivePresence.started_at).all())
+    return [{"coach_id": c.id, "name": c.name or "", "side": p.side or "our",
+             "you": c.id == me} for p, c in rows]
+
+
+@router.post("/sessions/{game_id}/live")
+def live_beat(
+    game_id: int,
+    body: LiveBeat,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """The tracker's heartbeat: I am here, on this side. Returns the game as it
+    stands — score, clock, who else is tracking, and whether stats changed."""
+    from datetime import timedelta
+    from sqlalchemy.exc import IntegrityError
+    game = _get_game_trackable(db, game_id, coach)
+    side = body.side if body.side in ("our", "opponent") else "our"
+    now = datetime.utcnow()
+    row = db.query(models.LivePresence).filter_by(game_id=game.id, coach_id=coach.id).first()
+    fresh = row is None or row.last_seen is None or \
+        (now - row.last_seen) > timedelta(seconds=LIVE_PRESENCE_SECONDS)
+    if row is None:
+        db.add(models.LivePresence(game_id=game.id, coach_id=coach.id, side=side,
+                                   started_at=now, last_seen=now))
+    elif fresh or row.side != side or (now - row.last_seen) > timedelta(seconds=LIVE_TOUCH_SECONDS):
+        # Touched only when it matters, so a heartbeat every few seconds is
+        # mostly a read.
+        if fresh:
+            row.started_at = now
+        row.side, row.last_seen = side, now
+    try:
+        db.commit()
+    except IntegrityError:          # two beats from the same coach at once
+        db.rollback()
+    if fresh:
+        on_live_join(background_tasks, db, game, coach, now)
+    count, last_id = db.query(func.count(models.GamePlayerStat.id),
+                              func.max(models.GamePlayerStat.id)).filter(
+        models.GamePlayerStat.game_id == game.id).one()
+    db.refresh(game)
+    ours, theirs = (game.our_score, game.opponent_score)
+    if ours is None or theirs is None:
+        e_ours, e_theirs = effective_scores(game)
+        ours = e_ours if ours is None else ours
+        theirs = e_theirs if theirs is None else theirs
+    return {
+        "status": game.status,
+        "our_score": ours, "opponent_score": theirs,
+        "clock": _clock_now(game, now),
+        "trackers": _trackers(db, game.id, coach.id, now),
+        "stats": {"count": count or 0, "last_id": last_id or 0},
+    }
+
+
+@router.delete("/sessions/{game_id}/live")
+def live_leave(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """I left the tracker: off everyone's list now, not in twenty seconds."""
+    db.query(models.LivePresence).filter_by(game_id=game_id, coach_id=coach.id).delete()
+    db.commit()
+    return {"ok": True}
+
+
+def on_live_join(background_tasks: BackgroundTasks, db: Session, game: models.GameSession,
+                 coach: models.Coach, now: datetime) -> None:
+    """Someone started tracking. (Telling teammates comes next.)"""
+    return None
 
 
 # ── Lineup ────────────────────────────────────────────────────────────────────
@@ -3799,15 +3996,32 @@ def _opp_player_out(p: models.OpponentPlayer) -> dict:
     }
 
 
+def _opponent_roster_owner(db: Session, coach: models.Coach, game_id: int | None) -> int:
+    """Whose opponent list to read and add to.
+
+    Everyone tracking one game works off the game owner's list for that
+    opponent, so a name typed by one tracker is there for the others. Outside a
+    game — or for a game this coach cannot track — it is their own list, as
+    before.
+    """
+    if game_id is None:
+        return coach.id
+    try:
+        return _get_game_trackable(db, game_id, coach).coach_id
+    except HTTPException:
+        return coach.id
+
+
 @router.get("/opponents/{opponent_name}/players")
 def list_opponent_players(
     opponent_name: str,
+    game_id: int | None = None,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     players = (
         db.query(models.OpponentPlayer)
-        .filter_by(coach_id=coach.id, opponent_name=opponent_name)
+        .filter_by(coach_id=_opponent_roster_owner(db, coach, game_id), opponent_name=opponent_name)
         .order_by(models.OpponentPlayer.id)
         .all()
     )
@@ -3818,16 +4032,18 @@ def list_opponent_players(
 def add_opponent_player(
     opponent_name: str,
     body: dict,
+    game_id: int | None = None,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     name = (body.get("player_name") or "").strip()
     if not name:
         raise HTTPException(status_code=400, detail="player_name required")
+    owner_id = _opponent_roster_owner(db, coach, game_id)
     # Avoid duplicates for the same opponent
     existing = (
         db.query(models.OpponentPlayer)
-        .filter_by(coach_id=coach.id, opponent_name=opponent_name, player_name=name)
+        .filter_by(coach_id=owner_id, opponent_name=opponent_name, player_name=name)
         .first()
     )
     if existing:
@@ -3837,7 +4053,7 @@ def add_opponent_player(
         db.refresh(existing)
         return _opp_player_out(existing)
     player = models.OpponentPlayer(
-        coach_id=coach.id,
+        coach_id=owner_id,
         opponent_name=opponent_name,
         player_name=name,
         jersey_number=(body.get("jersey_number") or "").strip() or None,

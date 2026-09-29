@@ -528,6 +528,11 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_sessions", "frozen_from_game_id", "INTEGER"),
     ("game_sessions", "frozen_from", "VARCHAR"),
     ("game_sessions", "frozen_at", "TIMESTAMP"),
+    # The shared live-game clock (see GameSession).
+    ("game_sessions", "clock_period", "INTEGER"),
+    ("game_sessions", "clock_remaining", "INTEGER"),
+    ("game_sessions", "clock_running", "BOOLEAN"),
+    ("game_sessions", "clock_updated_at", "TIMESTAMP"),
     ("share_approvals", "hidden_sections", "TEXT"),
     # The team-totals panel gained the basic totals after its table had already
     # shipped. create_all() adds missing TABLES and not missing COLUMNS, so
