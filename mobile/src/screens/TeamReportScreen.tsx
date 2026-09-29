@@ -21,7 +21,7 @@ import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { useFocusEffect } from '@react-navigation/native';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
-import { outputTypeLabel } from '../utils/reportType';
+import { outputTypeLabel, parseOutputTypes } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad, titleTopPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
@@ -32,6 +32,7 @@ import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 import ChipRow from '../responsive/ChipRow';
 import { sheetCap, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
+import { WithShortVersion } from '../components/ShortVersion';
 
 // Labels come from the `reportTypes.*` translation keys at render time.
 // Quick Report is roster-scoped, so training here is TEAM training. It was
@@ -748,9 +749,12 @@ export default function TeamReportScreen() {
               <ReportSearchButton ctl={find} />
             </View>
             <ReportSearchBar ctl={find} />
+            <WithShortVersion kind="team_report"
+                              refId={parseOutputTypes(outputType).includes('team_training') ? savedTeamReportId : null}>
             <View style={styles.reportBox}>
               {renderReport(reportText, { heading: t.ink, body: t.inkSoft }, find.search)}
             </View>
+            </WithShortVersion>
             <View style={styles.actionGrid}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf} disabled={exporting}>
                 {exporting
@@ -951,7 +955,10 @@ export default function TeamReportScreen() {
             <ReportSearchBar ctl={findPrev} />
             <KeyboardAwareScrollView ref={findPrev.scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {selectedPrevReport?.report_text ? (
-                renderReport(selectedPrevReport.report_text, { heading: t.ink, body: t.inkSoft }, findPrev.search)
+                <WithShortVersion kind="team_report"
+                                  refId={parseOutputTypes(selectedPrevReport.output_type).includes('team_training') ? selectedPrevReport.id : null}>
+                  {renderReport(selectedPrevReport.report_text, { heading: t.ink, body: t.inkSoft }, findPrev.search)}
+                </WithShortVersion>
               ) : (
                 <Text style={{ color: t.muted }}>{tr('teamReport.noReportContent')}</Text>
               )}

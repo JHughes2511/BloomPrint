@@ -384,6 +384,12 @@ export const playersAPI = {
 const UPLOAD_TIMEOUT = 1800000;
 
 /** Play calling: possessions, catalogs, numbers. */
+/** Short versions of reports: the one page to print and hand out (made on the server from the standard text). */
+export const shortAPI = {
+  get: (kind: string, refId: number) => api.get(`/short/${kind}/${refId}`).then(r => r.data),
+  remake: (kind: string, refId: number) => api.post(`/short/${kind}/${refId}/remake`).then(r => r.data),
+};
+
 /** A player's injury log: a roster player by id, or a player known by name (an opponent). */
 export const injuriesAPI = {
   forPlayer: (playerId: number) => api.get(`/injuries/players/${playerId}`).then(r => r.data),

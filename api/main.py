@@ -80,6 +80,9 @@ from .routes import play_calling as _play_calling  # noqa: E402
 app.include_router(_play_calling.router)
 from .routes import injuries as _injuries  # noqa: E402
 app.include_router(_injuries.router)
+from . import short_versions as _sv_hooks  # noqa: E402,F401  (registers the auto-make hooks)
+from .routes import short_versions as _short_versions  # noqa: E402
+app.include_router(_short_versions.router)
 
 
 @app.on_event("startup")

@@ -3112,5 +3112,35 @@
       "pickTeam": "Primero elige un equipo arriba en la Plantilla y luego importa su parte de lesiones.",
       "saved": "Guardadas: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Estándar",
+    "short": "Corta",
+    "making": "Preparando la versión corta…",
+    "noText": "Aún no hay nada que resumir.",
+    "failed": "No se pudo preparar la versión corta.",
+    "retry": "Reintentar",
+    "drills": "Ejercicios",
+    "time": "Tiempo",
+    "coach": "Entrenador",
+    "min": "{{n}} min",
+    "total": "Total",
+    "totalTimed": "Total (ejercicios con tiempo)",
+    "emphasis": "Énfasis",
+    "plays": "Hoja de jugadas",
+    "notes": "Notas",
+    "drill": "Ejercicio",
+    "amount": "Cantidad",
+    "cue": "Clave",
+    "keyCues": "Claves",
+    "groups": {
+      "trans": "Transición / Ataque temprano",
+      "half_court": "Sistemas en media cancha",
+      "sob": "Saque de banda",
+      "bob": "Saque de fondo",
+      "zone": "Zona",
+      "free_throw": "Tiro libre",
+      "cob": "Situaciones especiales"
+    }
   }
 }

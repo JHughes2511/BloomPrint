@@ -3112,5 +3112,35 @@
       "pickTeam": "Pick a team at the top of the Roster first, then import its injury report.",
       "saved": "Saved: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standard",
+    "short": "Short",
+    "making": "Making the short version…",
+    "noText": "Nothing to shorten yet.",
+    "failed": "The short version could not be made.",
+    "retry": "Try again",
+    "drills": "Drills",
+    "time": "Time",
+    "coach": "Coach",
+    "min": "{{n}} min",
+    "total": "Total",
+    "totalTimed": "Total (timed drills)",
+    "emphasis": "Emphasis",
+    "plays": "Play sheet",
+    "notes": "Notes",
+    "drill": "Drill",
+    "amount": "Amount",
+    "cue": "Cue",
+    "keyCues": "Key cues",
+    "groups": {
+      "trans": "Trans / Early off.",
+      "half_court": "½ court sets",
+      "sob": "SOB",
+      "bob": "BOB",
+      "zone": "Zone",
+      "free_throw": "Free throw",
+      "cob": "COB"
+    }
   }
 }

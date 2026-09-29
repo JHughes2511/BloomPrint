@@ -3112,5 +3112,35 @@
       "pickTeam": "请先在名单顶部选择球队，再导入其伤病报告。",
       "saved": "已保存：{{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "标准版",
+    "short": "简版",
+    "making": "正在生成简版…",
+    "noText": "暂无可精简的内容。",
+    "failed": "简版生成失败。",
+    "retry": "重试",
+    "drills": "训练项目",
+    "time": "时间",
+    "coach": "教练",
+    "min": "{{n}} 分钟",
+    "total": "合计",
+    "totalTimed": "合计（有时长的项目）",
+    "emphasis": "重点",
+    "plays": "战术表",
+    "notes": "备注",
+    "drill": "训练项目",
+    "amount": "量",
+    "cue": "要点",
+    "keyCues": "关键要点",
+    "groups": {
+      "trans": "转换 / 早期进攻",
+      "half_court": "半场战术",
+      "sob": "边线球",
+      "bob": "底线球",
+      "zone": "联防",
+      "free_throw": "罚球",
+      "cob": "特殊情况"
+    }
   }
 }

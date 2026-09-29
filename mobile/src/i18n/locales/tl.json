@@ -3112,5 +3112,35 @@
       "pickTeam": "Pumili muna ng team sa itaas ng Roster, saka i-import ang report nito.",
       "saved": "Na-save: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Karaniwan",
+    "short": "Maikli",
+    "making": "Ginagawa ang maikling bersyon…",
+    "noText": "Wala pang maiikli.",
+    "failed": "Hindi nagawa ang maikling bersyon.",
+    "retry": "Subukan ulit",
+    "drills": "Mga drill",
+    "time": "Oras",
+    "coach": "Coach",
+    "min": "{{n}} min",
+    "total": "Kabuuan",
+    "totalTimed": "Kabuuan (may oras)",
+    "emphasis": "Diin",
+    "plays": "Play sheet",
+    "notes": "Mga tala",
+    "drill": "Drill",
+    "amount": "Dami",
+    "cue": "Paalala",
+    "keyCues": "Mahahalagang paalala",
+    "groups": {
+      "trans": "Transition / Early offense",
+      "half_court": "Half-court sets",
+      "sob": "Sideline inbound",
+      "bob": "Baseline inbound",
+      "zone": "Zone",
+      "free_throw": "Free throw",
+      "cob": "Espesyal na sitwasyon"
+    }
   }
 }

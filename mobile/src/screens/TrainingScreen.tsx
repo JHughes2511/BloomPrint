@@ -21,6 +21,7 @@ import PageContainer, { REPORT_MAX_WIDTH } from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
+import { WithShortVersion } from '../components/ShortVersion';
 
 export default function TrainingScreen() {
   const route = useRoute<any>();
@@ -173,7 +174,9 @@ export default function TrainingScreen() {
             <ReportSearchButton ctl={find} />
           </View>
           <ReportSearchBar ctl={find} />
-          {renderReport(current.program_text, { heading: t.ink, body: t.inkSoft }, find.search)}
+          <WithShortVersion kind="training" refId={current.id}>
+            {renderReport(current.program_text, { heading: t.ink, body: t.inkSoft }, find.search)}
+          </WithShortVersion>
         </View>
       )}
 

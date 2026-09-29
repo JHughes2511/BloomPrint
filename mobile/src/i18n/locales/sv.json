@@ -3112,5 +3112,35 @@
       "pickTeam": "Välj först ett lag högst upp i Truppen och importera sedan rapporten.",
       "saved": "Sparade: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standard",
+    "short": "Kort",
+    "making": "Skapar kortversionen…",
+    "noText": "Inget att korta ner än.",
+    "failed": "Kortversionen kunde inte skapas.",
+    "retry": "Försök igen",
+    "drills": "Övningar",
+    "time": "Tid",
+    "coach": "Tränare",
+    "min": "{{n}} min",
+    "total": "Totalt",
+    "totalTimed": "Totalt (tidsatta övningar)",
+    "emphasis": "Fokus",
+    "plays": "Spelblad",
+    "notes": "Anteckningar",
+    "drill": "Övning",
+    "amount": "Mängd",
+    "cue": "Instruktion",
+    "keyCues": "Nyckelinstruktioner",
+    "groups": {
+      "trans": "Omställning / Tidigt anfall",
+      "half_court": "Halvplanssystem",
+      "sob": "Inkast sida",
+      "bob": "Inkast baslinje",
+      "zone": "Zon",
+      "free_throw": "Straffkast",
+      "cob": "Specialsituationer"
+    }
   }
 }

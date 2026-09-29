@@ -3112,5 +3112,35 @@
       "pickTeam": "Kies eerst bovenaan de Selectie een team en importeer dan het rapport.",
       "saved": "Opgeslagen: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standaard",
+    "short": "Kort",
+    "making": "Korte versie wordt gemaakt…",
+    "noText": "Nog niets om in te korten.",
+    "failed": "De korte versie kon niet worden gemaakt.",
+    "retry": "Opnieuw",
+    "drills": "Oefeningen",
+    "time": "Tijd",
+    "coach": "Coach",
+    "min": "{{n}} min",
+    "total": "Totaal",
+    "totalTimed": "Totaal (getimede oefeningen)",
+    "emphasis": "Nadruk",
+    "plays": "Spellenblad",
+    "notes": "Notities",
+    "drill": "Oefening",
+    "amount": "Hoeveelheid",
+    "cue": "Aanwijzing",
+    "keyCues": "Kernaanwijzingen",
+    "groups": {
+      "trans": "Transitie / Vroege aanval",
+      "half_court": "Halfveld-sets",
+      "sob": "Inworp zijlijn",
+      "bob": "Inworp achterlijn",
+      "zone": "Zone",
+      "free_throw": "Vrije worp",
+      "cob": "Speciale situaties"
+    }
   }
 }

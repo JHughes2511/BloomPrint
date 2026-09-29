@@ -3112,5 +3112,35 @@
       "pickTeam": "Prvo izaberi tim na vrhu Rostera, pa uvezi njegov izveštaj.",
       "saved": "Sačuvano: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standardna",
+    "short": "Kratka",
+    "making": "Pravim kratku verziju…",
+    "noText": "Još nema šta da se skrati.",
+    "failed": "Kratka verzija nije napravljena.",
+    "retry": "Pokušaj ponovo",
+    "drills": "Vežbe",
+    "time": "Vreme",
+    "coach": "Trener",
+    "min": "{{n}} min",
+    "total": "Ukupno",
+    "totalTimed": "Ukupno (vežbe sa vremenom)",
+    "emphasis": "Naglasci",
+    "plays": "List akcija",
+    "notes": "Beleške",
+    "drill": "Vežba",
+    "amount": "Obim",
+    "cue": "Uputstvo",
+    "keyCues": "Ključna uputstva",
+    "groups": {
+      "trans": "Tranzicija / Rani napad",
+      "half_court": "Akcije na pola terena",
+      "sob": "Aut sa strane",
+      "bob": "Aut ispod koša",
+      "zone": "Zona",
+      "free_throw": "Slobodno bacanje",
+      "cob": "Posebne situacije"
+    }
   }
 }

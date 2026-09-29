@@ -3112,5 +3112,35 @@
       "pickTeam": "Escolha primeiro um time no topo do Elenco e depois importe o relatório.",
       "saved": "Salvas: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Padrão",
+    "short": "Curta",
+    "making": "Preparando a versão curta…",
+    "noText": "Ainda não há o que resumir.",
+    "failed": "Não foi possível preparar a versão curta.",
+    "retry": "Tentar de novo",
+    "drills": "Exercícios",
+    "time": "Tempo",
+    "coach": "Treinador",
+    "min": "{{n}} min",
+    "total": "Total",
+    "totalTimed": "Total (exercícios com tempo)",
+    "emphasis": "Ênfase",
+    "plays": "Folha de jogadas",
+    "notes": "Notas",
+    "drill": "Exercício",
+    "amount": "Volume",
+    "cue": "Dica",
+    "keyCues": "Dicas-chave",
+    "groups": {
+      "trans": "Transição / Ataque rápido",
+      "half_court": "Jogadas de meia quadra",
+      "sob": "Reposição lateral",
+      "bob": "Reposição de fundo",
+      "zone": "Zona",
+      "free_throw": "Lance livre",
+      "cob": "Situações especiais"
+    }
   }
 }

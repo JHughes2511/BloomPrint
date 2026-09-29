@@ -3112,5 +3112,35 @@
       "pickTeam": "Önce Kadro'nun üstünden bir takım seç, sonra raporunu içe aktar.",
       "saved": "Kaydedildi: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standart",
+    "short": "Kısa",
+    "making": "Kısa sürüm hazırlanıyor…",
+    "noText": "Henüz kısaltılacak bir şey yok.",
+    "failed": "Kısa sürüm hazırlanamadı.",
+    "retry": "Tekrar dene",
+    "drills": "Driller",
+    "time": "Süre",
+    "coach": "Koç",
+    "min": "{{n}} dk",
+    "total": "Toplam",
+    "totalTimed": "Toplam (süreli driller)",
+    "emphasis": "Vurgular",
+    "plays": "Set sayfası",
+    "notes": "Notlar",
+    "drill": "Drill",
+    "amount": "Miktar",
+    "cue": "İpucu",
+    "keyCues": "Ana ipuçları",
+    "groups": {
+      "trans": "Geçiş / Erken hücum",
+      "half_court": "Yarı saha setleri",
+      "sob": "Yan çizgi oyunu",
+      "bob": "Dip çizgi oyunu",
+      "zone": "Alan",
+      "free_throw": "Serbest atış",
+      "cob": "Özel durumlar"
+    }
   }
 }

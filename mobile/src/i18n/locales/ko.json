@@ -3112,5 +3112,35 @@
       "pickTeam": "먼저 로스터 상단에서 팀을 고른 뒤 가져오세요.",
       "saved": "저장됨: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "기본",
+    "short": "요약",
+    "making": "요약본을 만드는 중…",
+    "noText": "아직 요약할 내용이 없습니다.",
+    "failed": "요약본을 만들 수 없습니다.",
+    "retry": "다시 시도",
+    "drills": "드릴",
+    "time": "시간",
+    "coach": "코치",
+    "min": "{{n}}분",
+    "total": "합계",
+    "totalTimed": "합계 (시간 있는 드릴)",
+    "emphasis": "강조점",
+    "plays": "플레이 시트",
+    "notes": "메모",
+    "drill": "드릴",
+    "amount": "분량",
+    "cue": "포인트",
+    "keyCues": "핵심 포인트",
+    "groups": {
+      "trans": "트랜지션 / 얼리 오펜스",
+      "half_court": "하프코트 세트",
+      "sob": "사이드 인바운드",
+      "bob": "베이스라인 인바운드",
+      "zone": "존",
+      "free_throw": "자유투",
+      "cob": "특수 상황"
+    }
   }
 }

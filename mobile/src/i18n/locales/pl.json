@@ -3112,5 +3112,35 @@
       "pickTeam": "Najpierw wybierz drużynę u góry Składu, potem zaimportuj jej raport.",
       "saved": "Zapisano: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standardowa",
+    "short": "Skrócona",
+    "making": "Przygotowuję wersję skróconą…",
+    "noText": "Na razie nie ma czego skracać.",
+    "failed": "Nie udało się przygotować wersji skróconej.",
+    "retry": "Spróbuj ponownie",
+    "drills": "Ćwiczenia",
+    "time": "Czas",
+    "coach": "Trener",
+    "min": "{{n}} min",
+    "total": "Razem",
+    "totalTimed": "Razem (ćwiczenia z czasem)",
+    "emphasis": "Akcenty",
+    "plays": "Arkusz zagrywek",
+    "notes": "Notatki",
+    "drill": "Ćwiczenie",
+    "amount": "Ilość",
+    "cue": "Wskazówka",
+    "keyCues": "Kluczowe wskazówki",
+    "groups": {
+      "trans": "Kontra / Wczesny atak",
+      "half_court": "Zagrywki na połowie",
+      "sob": "Wznowienie z boku",
+      "bob": "Wznowienie spod kosza",
+      "zone": "Strefa",
+      "free_throw": "Rzut wolny",
+      "cob": "Sytuacje specjalne"
+    }
   }
 }

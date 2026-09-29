@@ -3112,5 +3112,35 @@
       "pickTeam": "Choisissez d'abord une équipe en haut de l'Effectif, puis importez son rapport.",
       "saved": "Enregistrées : {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standard",
+    "short": "Courte",
+    "making": "Préparation de la version courte…",
+    "noText": "Rien à résumer pour l'instant.",
+    "failed": "Impossible de préparer la version courte.",
+    "retry": "Réessayer",
+    "drills": "Exercices",
+    "time": "Temps",
+    "coach": "Coach",
+    "min": "{{n}} min",
+    "total": "Total",
+    "totalTimed": "Total (exercices chronométrés)",
+    "emphasis": "Points clés",
+    "plays": "Feuille de systèmes",
+    "notes": "Notes",
+    "drill": "Exercice",
+    "amount": "Volume",
+    "cue": "Consigne",
+    "keyCues": "Consignes clés",
+    "groups": {
+      "trans": "Transition / Attaque rapide",
+      "half_court": "Systèmes demi-terrain",
+      "sob": "Remise en jeu côté",
+      "bob": "Remise en jeu ligne de fond",
+      "zone": "Zone",
+      "free_throw": "Lancer franc",
+      "cob": "Situations spéciales"
+    }
   }
 }

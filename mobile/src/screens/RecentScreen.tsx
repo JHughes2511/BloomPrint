@@ -18,7 +18,7 @@ import { readPage, writePage } from '../storage/pageCache';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
-import { outputTypeLabel, outputTypeNames } from '../utils/reportType';
+import { outputTypeLabel, outputTypeNames, parseOutputTypes } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
@@ -37,6 +37,7 @@ import { sheetCap, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import ChipRow from '../responsive/ChipRow';
 import { desktopOnly } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
+import { WithShortVersion } from '../components/ShortVersion';
 
 type ReportItem = {
   id: number;
@@ -1466,7 +1467,13 @@ export default function RecentScreen() {
                           canToggle={rt.canToggle} isTranslated={rt.isTranslated}
                           showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
                         />
-                        {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+                        <WithShortVersion
+                          kind={activeModal.kind === 'training' ? 'training' : 'team_report'}
+                          refId={activeModal.kind === 'training'
+                            || (activeModal.kind === 'team' && parseOutputTypes(activeModal.outputType).includes('team_training'))
+                            ? activeModal.id : null}>
+                          {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+                        </WithShortVersion>
                       </>
                     )
                     : <Text style={{ color: t.muted2 }}>{tr('recent.noReportContent')}</Text>

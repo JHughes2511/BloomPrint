@@ -20,6 +20,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer, { REPORT_MAX_WIDTH } from '../responsive/PageContainer';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import CommentThread from '../components/CommentThread';
+import { WithShortVersion } from '../components/ShortVersion';
 
 function cleanMarkdown(text: string): string {
   return text
@@ -169,11 +170,13 @@ export default function CoachTrainingDetailScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel} numberOfLines={1}>{tr('coachTraining.trainingProgram')}</Text>
+          <WithShortVersion kind="training" refId={training.program_text ? training.id : null}>
           <View style={styles.programBox}>
             {training.program_text
               ? <Markdown style={markdownStyles}>{cleanMarkdown(training.program_text)}</Markdown>
               : <Text style={{ color: t.muted2 }}>{tr('coachTraining.noProgramText')}</Text>}
           </View>
+          </WithShortVersion>
         </View>
 
         {/* Comments thread */}

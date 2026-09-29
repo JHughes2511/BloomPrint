@@ -3112,5 +3112,35 @@
       "pickTeam": "Pirmiausia pasirinkite komandą Sudėties viršuje, tada importuokite jos ataskaitą.",
       "saved": "Išsaugota: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standartinė",
+    "short": "Trumpa",
+    "making": "Ruošiama trumpa versija…",
+    "noText": "Kol kas nėra ką sutrumpinti.",
+    "failed": "Nepavyko paruošti trumpos versijos.",
+    "retry": "Bandyti dar",
+    "drills": "Pratimai",
+    "time": "Laikas",
+    "coach": "Treneris",
+    "min": "{{n}} min",
+    "total": "Iš viso",
+    "totalTimed": "Iš viso (su laiku)",
+    "emphasis": "Akcentai",
+    "plays": "Derinių lapas",
+    "notes": "Pastabos",
+    "drill": "Pratimas",
+    "amount": "Kiekis",
+    "cue": "Nuoroda",
+    "keyCues": "Pagrindinės nuorodos",
+    "groups": {
+      "trans": "Perėjimas / Greita ataka",
+      "half_court": "Pusės aikštės deriniai",
+      "sob": "Įmetimas iš šono",
+      "bob": "Įmetimas iš galinės linijos",
+      "zone": "Zona",
+      "free_throw": "Baudos metimas",
+      "cob": "Ypatingos situacijos"
+    }
   }
 }

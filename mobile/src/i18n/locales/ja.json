@@ -3112,5 +3112,35 @@
       "pickTeam": "先にロスター上部でチームを選び、その後取り込んでください。",
       "saved": "保存しました: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "標準",
+    "short": "短縮",
+    "making": "短縮版を作成中…",
+    "noText": "まだ短縮する内容がありません。",
+    "failed": "短縮版を作成できませんでした。",
+    "retry": "再試行",
+    "drills": "ドリル",
+    "time": "時間",
+    "coach": "コーチ",
+    "min": "{{n}}分",
+    "total": "合計",
+    "totalTimed": "合計（時間指定のドリル）",
+    "emphasis": "重点",
+    "plays": "プレー表",
+    "notes": "メモ",
+    "drill": "ドリル",
+    "amount": "量",
+    "cue": "ポイント",
+    "keyCues": "重要ポイント",
+    "groups": {
+      "trans": "トランジション / アーリー",
+      "half_court": "ハーフコートセット",
+      "sob": "サイドアウト",
+      "bob": "エンドライン",
+      "zone": "ゾーン",
+      "free_throw": "フリースロー",
+      "cob": "特殊状況"
+    }
   }
 }

@@ -3112,5 +3112,35 @@
       "pickTeam": "Wähle zuerst oben im Kader ein Team und importiere dann dessen Bericht.",
       "saved": "Gespeichert: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standard",
+    "short": "Kurz",
+    "making": "Kurzfassung wird erstellt…",
+    "noText": "Noch nichts zum Kürzen.",
+    "failed": "Die Kurzfassung konnte nicht erstellt werden.",
+    "retry": "Erneut versuchen",
+    "drills": "Übungen",
+    "time": "Zeit",
+    "coach": "Coach",
+    "min": "{{n}} Min.",
+    "total": "Gesamt",
+    "totalTimed": "Gesamt (Übungen mit Zeit)",
+    "emphasis": "Schwerpunkte",
+    "plays": "Spielzugblatt",
+    "notes": "Notizen",
+    "drill": "Übung",
+    "amount": "Umfang",
+    "cue": "Hinweis",
+    "keyCues": "Kernhinweise",
+    "groups": {
+      "trans": "Transition / Early Offense",
+      "half_court": "Halbfeld-Systeme",
+      "sob": "Einwurf Seite",
+      "bob": "Einwurf Grundlinie",
+      "zone": "Zone",
+      "free_throw": "Freiwurf",
+      "cob": "Sondersituationen"
+    }
   }
 }

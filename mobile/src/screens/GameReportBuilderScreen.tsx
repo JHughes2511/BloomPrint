@@ -34,6 +34,7 @@ import { CONTENT_MAX_WIDTH, sheetCap, REPORT_MODAL_WIDTH } from '../responsive/m
 import ChipRow from '../responsive/ChipRow';
 import { parseGameDate, displayGameDate } from '../utils/gameDate';
 import { useSheetScrollHeight } from '../responsive/modalSizes';
+import { WithShortVersion } from '../components/ShortVersion';
 
 // Labels come from `reportTypes.*` translation keys at render time.
 // KEY values are API values — never translate them.
@@ -1365,9 +1366,11 @@ export default function GameReportBuilderScreen() {
                 and reads right; this section sits in the page, so the same
                 width reads as a band across it. */}
             <ReportSearchBar ctl={find} phoneMaxWidth={320} />
+            <WithShortVersion kind="packet_training" refId={report.output_type === 'team_training' ? report.id : null}>
             <View style={styles.reportBox}>
               {renderReport(report.report_text, { heading: t.ink, body: t.inkSoft }, find.search)}
             </View>
+            </WithShortVersion>
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>
                 <Ionicons name="download-outline" size={16} color={t.muted} />
@@ -1505,7 +1508,9 @@ export default function GameReportBuilderScreen() {
             <ReportSearchBar ctl={findVersion} />
             <KeyboardAwareScrollView ref={findVersion.scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
               {versionView?.report_text
-                ? renderReport(versionView.report_text, { heading: t.ink, body: t.inkSoft }, findVersion.search)
+                ? <WithShortVersion kind="packet_training" refId={versionView.output_type === 'team_training' ? (report?.id ?? null) : null}>
+                    {renderReport(versionView.report_text, { heading: t.ink, body: t.inkSoft }, findVersion.search)}
+                  </WithShortVersion>
                 : <Text style={{ color: t.muted }}>{tr('gameBuilder.noContent')}</Text>}
             </KeyboardAwareScrollView>
           </View>

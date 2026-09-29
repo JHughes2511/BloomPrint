@@ -1293,6 +1293,28 @@ class ScoutInsight(Base):
     coach = relationship("Coach")
 
 
+class ShortVersion(Base):
+    """The short version of a report: the one page a staff hands out.
+
+    Made from the standard text and kept beside it, never instead of it.
+    `source_hash` is the text it was made from; when the report's text changes
+    the hashes differ and it is made again, so a correction or a regenerate
+    can never leave a stale one-pager behind. `data` is structured (a practice
+    plan, a checklist) so it can be laid out and printed, not just read.
+    """
+    __tablename__ = "short_versions"
+    __table_args__ = (UniqueConstraint("kind", "ref_id", name="uq_short_kind_ref"),)
+    id = Column(Integer, primary_key=True, index=True)
+    kind = Column(String, nullable=False)          # training / team_report / packet_training
+    ref_id = Column(Integer, nullable=False)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    status = Column(String, nullable=False, default="making")   # making / ready / failed
+    data = Column(JSON, nullable=True)
+    source_hash = Column(String, nullable=True)
+    error = Column(Text, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class PlayerInjury(Base):
     """One injury, as a team's injury report lists it.
 

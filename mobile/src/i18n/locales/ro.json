@@ -3112,5 +3112,35 @@
       "pickTeam": "Alege mai întâi o echipă în partea de sus a Lotului, apoi importă raportul.",
       "saved": "Salvate: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standard",
+    "short": "Scurtă",
+    "making": "Se pregătește versiunea scurtă…",
+    "noText": "Încă nu e nimic de scurtat.",
+    "failed": "Versiunea scurtă nu a putut fi pregătită.",
+    "retry": "Încearcă din nou",
+    "drills": "Exerciții",
+    "time": "Timp",
+    "coach": "Antrenor",
+    "min": "{{n}} min",
+    "total": "Total",
+    "totalTimed": "Total (exerciții cronometrate)",
+    "emphasis": "Accente",
+    "plays": "Foaie de sisteme",
+    "notes": "Note",
+    "drill": "Exercițiu",
+    "amount": "Volum",
+    "cue": "Indicație",
+    "keyCues": "Indicații cheie",
+    "groups": {
+      "trans": "Tranziție / Atac rapid",
+      "half_court": "Sisteme de semiteren",
+      "sob": "Aut lateral",
+      "bob": "Aut de la linia de fund",
+      "zone": "Zonă",
+      "free_throw": "Aruncare liberă",
+      "cob": "Situații speciale"
+    }
   }
 }

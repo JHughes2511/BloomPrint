@@ -3112,5 +3112,35 @@
       "pickTeam": "Scegli prima una squadra in cima alla Rosa, poi importa il suo report.",
       "saved": "Salvati: {{count}}"
     }
+  },
+  "shortVersion": {
+    "standard": "Standard",
+    "short": "Breve",
+    "making": "Preparazione della versione breve…",
+    "noText": "Ancora niente da riassumere.",
+    "failed": "Impossibile preparare la versione breve.",
+    "retry": "Riprova",
+    "drills": "Esercizi",
+    "time": "Tempo",
+    "coach": "Coach",
+    "min": "{{n}} min",
+    "total": "Totale",
+    "totalTimed": "Totale (esercizi a tempo)",
+    "emphasis": "Punti chiave",
+    "plays": "Foglio giochi",
+    "notes": "Note",
+    "drill": "Esercizio",
+    "amount": "Quantità",
+    "cue": "Indicazione",
+    "keyCues": "Indicazioni chiave",
+    "groups": {
+      "trans": "Transizione / Attacco rapido",
+      "half_court": "Giochi a metà campo",
+      "sob": "Rimessa laterale",
+      "bob": "Rimessa dal fondo",
+      "zone": "Zona",
+      "free_throw": "Tiro libero",
+      "cob": "Situazioni speciali"
+    }
   }
 }

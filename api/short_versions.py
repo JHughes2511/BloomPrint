@@ -1,0 +1,256 @@
+"""Short versions of reports: the one page a staff prints and hands out.
+
+A short version is made FROM the standard report — the same facts, cut down
+to what can be read at a glance — so the two can never disagree. It is made
+in the background as soon as the standard text exists, and made again
+whenever that text changes (see ShortVersion.source_hash). Asking for one that
+is missing or stale starts it; the screen shows "Making the short version"
+until it is ready.
+
+Every report kind plugs in with two things: where its text lives
+(`source_text`) and what shape its page takes (`LAYOUTS`). Team training is a
+practice sheet (practice plan, emphasis list, play sheet, notes); a player's
+training program is a checklist (focus, drills with amounts and cues, key
+cues). Other report kinds can be added the same way.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import threading
+
+from sqlalchemy.orm import Session
+
+from . import models
+
+PLAY_GROUPS = ["trans", "half_court", "sob", "bob", "zone", "free_throw", "cob"]
+
+LAYOUTS = {
+    "team_training": """Condense the TEAM TRAINING PROGRAM below into a ONE-PAGE PRACTICE SHEET a staff prints and
+hands to coaches and players. Return JSON only:
+{"title": "<short title, e.g. PRACTICE PLAN — TRANSITION DEFENSE>",
+ "sessions": [{"label": "<e.g. PRACTICE 1, or DAY 1>",
+               "drills": [{"drill": "<SHORT DRILL NAME IN CAPS>", "minutes": <int or null>, "coach": null}]}],
+ "emphasis": ["<one short coaching point, coach's shorthand, e.g. P/R: 4 & 5 coverage — center or ice>"],
+ "plays": {"trans": [], "half_court": [], "sob": [], "bob": [], "zone": [], "free_throw": [], "cob": []},
+ "notes": ["<at most 4 short notes>"]}
+Rules:
+- Only what the program says. Never add a drill, time, play or point it does not contain.
+- minutes: only where the program gives a time; otherwise null. Never estimate.
+- sessions: the program's practices in order (at most 5); one session if it describes a single practice.
+- emphasis: at most 14 lines, each under 70 characters, the way a coach writes them on a sheet.
+- plays: play/set names the program names, under the group it puts them in (trans = transition/early
+  offense, half_court = half-court sets, sob/bob = side/baseline out of bounds, zone = zone offense,
+  free_throw, cob = special situations). Empty lists where it names none.""",
+    "training": """Condense the PLAYER TRAINING PROGRAM below into a ONE-PAGE version the player and staff can scan
+in seconds. Return JSON only:
+{"title": "<short title>",
+ "focus": ["<at most 4 focus areas, a few words each>"],
+ "checklist": [{"drill": "<drill, short>", "amount": "<reps / sets / time as the program gives it, or null>",
+                "cue": "<the one thing to think about, under 60 characters, or null>"}],
+ "cues": ["<at most 4 key coaching cues>"]}
+Rules:
+- Only what the program says. Never add a drill, amount or cue it does not contain.
+- checklist: the program's drills in its order, at most 16; one line each.
+- amount: only as the program states it; otherwise null.""",
+}
+
+KIND_LAYOUT = {"training": "training", "team_report": "team_training", "packet_training": "team_training"}
+
+
+def _hash(text: str) -> str:
+    return hashlib.sha1((text or "").encode("utf-8")).hexdigest()
+
+
+def source_text(db: Session, kind: str, ref_id: int) -> tuple[str | None, int | None]:
+    """(standard text, owning coach id) for a report, or (None, None)."""
+    if kind == "training":
+        s = db.get(models.TrainingSession, ref_id)
+        return (s.program_text if s else None), (s.coach_id if s else None)
+    if kind == "team_report":
+        r = db.get(models.TeamReport, ref_id)
+        return (r.report_text if r else None), (r.coach_id if r else None)
+    if kind == "packet_training":
+        v = (db.query(models.GameReportVersion)
+             .filter_by(game_report_id=ref_id, output_type="team_training").first())
+        gr = db.get(models.GameReport, ref_id)
+        return (v.report_text if v else None), (gr.coach_id if gr else None)
+    return None, None
+
+
+def _parse(raw: str) -> dict | None:
+    raw = (raw or "").strip()
+    raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw)
+    try:
+        v = json.loads(raw)
+    except ValueError:
+        m = re.search(r"\{.*\}", raw, re.S)
+        if not m:
+            return None
+        try:
+            v = json.loads(m.group(0))
+        except ValueError:
+            return None
+    return v if isinstance(v, dict) else None
+
+
+def _clean(layout: str, d: dict) -> dict:
+    """Keep the page to its shape: no stray keys, lists capped, types right."""
+    def strs(xs, n, width=120):
+        return [str(x).strip()[:width] for x in (xs or []) if str(x or "").strip()][:n]
+    if layout == "team_training":
+        sessions = []
+        for sess in (d.get("sessions") or [])[:5]:
+            if not isinstance(sess, dict):
+                continue
+            drills = []
+            for dr in (sess.get("drills") or [])[:20]:
+                if not isinstance(dr, dict) or not str(dr.get("drill") or "").strip():
+                    continue
+                m = dr.get("minutes")
+                drills.append({"drill": str(dr["drill"]).strip()[:80],
+                               "minutes": int(m) if isinstance(m, (int, float)) and 0 < m < 600 else None,
+                               "coach": (str(dr.get("coach")).strip()[:20] if dr.get("coach") else None)})
+            if drills:
+                sessions.append({"label": str(sess.get("label") or "").strip()[:40], "drills": drills})
+        plays = d.get("plays") if isinstance(d.get("plays"), dict) else {}
+        return {"title": str(d.get("title") or "").strip()[:80], "sessions": sessions,
+                "emphasis": strs(d.get("emphasis"), 14, 90),
+                "plays": {g: strs(plays.get(g), 12, 40) for g in PLAY_GROUPS},
+                "notes": strs(d.get("notes"), 4, 200)}
+    checklist = []
+    for c in (d.get("checklist") or [])[:16]:
+        if isinstance(c, dict) and str(c.get("drill") or "").strip():
+            checklist.append({"drill": str(c["drill"]).strip()[:100],
+                              "amount": (str(c.get("amount")).strip()[:40] if c.get("amount") else None),
+                              "cue": (str(c.get("cue")).strip()[:90] if c.get("cue") else None)})
+    return {"title": str(d.get("title") or "").strip()[:80], "focus": strs(d.get("focus"), 4, 60),
+            "checklist": checklist, "cues": strs(d.get("cues"), 4, 120)}
+
+
+def _make(kind: str, ref_id: int, text: str, text_hash: str) -> None:
+    """Write the short version (its own session; runs in a thread)."""
+    import asyncio
+    from .ai_models import long_text
+    from .database import SessionLocal
+    layout = KIND_LAYOUT[kind]
+    prompt = (f"{LAYOUTS[layout]}\n\nWrite every text value in the same language as the program.\n\n"
+              f"THE PROGRAM:\n{text[:24000]}")
+    data, err = None, None
+    try:
+        raw = asyncio.run(long_text(prompt, max_tokens=4000))
+        got = _parse(raw)
+        data = _clean(layout, got) if got else None
+        if data is None:
+            err = "The short version came back unreadable."
+    except Exception as e:  # noqa: BLE001 — recorded on the row, shown as failed
+        err = str(e)[:500]
+    db = SessionLocal()
+    try:
+        row = db.query(models.ShortVersion).filter_by(kind=kind, ref_id=ref_id).first()
+        if row is None:
+            return
+        # A newer text arrived while this one was being written: leave the row
+        # for that run.
+        if row.source_hash != text_hash:
+            return
+        row.data, row.status, row.error = (data, "ready", None) if data else (row.data, "failed", err)
+        db.commit()
+    finally:
+        db.close()
+
+
+def ensure(db: Session, kind: str, ref_id: int, *, force: bool = False) -> models.ShortVersion | None:
+    """The short version as it stands; starts making it when it is missing,
+    failed or made from older text. Returns None when the report has no text."""
+    text, coach_id = source_text(db, kind, ref_id)
+    if not (text or "").strip():
+        return None
+    h = _hash(text)
+    row = db.query(models.ShortVersion).filter_by(kind=kind, ref_id=ref_id).first()
+    if row is not None and row.source_hash == h and row.status in ("ready", "making") and not force:
+        return row
+    if row is None:
+        row = models.ShortVersion(kind=kind, ref_id=ref_id, coach_id=coach_id)
+        db.add(row)
+    row.source_hash, row.status, row.error = h, "making", None
+    db.commit()
+    db.refresh(row)
+    threading.Thread(target=_make, args=(kind, ref_id, text, h), daemon=True).start()
+    return row
+
+
+def kick(db: Session, kind: str, ref_id: int) -> None:
+    """Start the short version for a report just written. Never raises: a
+    report must not fail because its one-pager could not start."""
+    try:
+        ensure(db, kind, ref_id)
+    except Exception:
+        pass
+
+
+def out(row: models.ShortVersion | None) -> dict:
+    if row is None:
+        return {"status": "none", "data": None}
+    return {"status": row.status, "data": row.data, "error": row.error,
+            "updated_at": row.updated_at.isoformat() + "Z" if row.updated_at else None}
+
+
+# ── Made automatically: whenever a report's text is saved ────────────────────
+# Hooked on the database session rather than on each endpoint that writes a
+# report (there are many, and the next one added would be missed): when a
+# training program's, a team training report's or a packet's team-training
+# text is written, its short version starts right after the commit.
+
+from sqlalchemy import event, inspect as _inspect
+from sqlalchemy.orm import Session as _Session
+
+
+def _changed(obj, attr: str) -> bool:
+    try:
+        return _inspect(obj).attrs[attr].history.has_changes()
+    except Exception:
+        return False
+
+
+def _is_team_training(output_type: str | None) -> bool:
+    try:
+        from video_vision.bim import parse_output_types
+        return "team_training" in parse_output_types(output_type or "")
+    except Exception:
+        return "team_training" in (output_type or "")
+
+
+@event.listens_for(_Session, "after_flush")
+def _note_written(session, flush_context):
+    pending = session.info.setdefault("short_pending", set())
+    for obj in list(session.new) + list(session.dirty):
+        if isinstance(obj, models.TrainingSession) and _changed(obj, "program_text") and obj.program_text:
+            pending.add(("training", obj.id))
+        elif isinstance(obj, models.TeamReport) and _changed(obj, "report_text") and obj.report_text \
+                and _is_team_training(obj.output_type):
+            pending.add(("team_report", obj.id))
+        elif isinstance(obj, models.GameReportVersion) and obj.output_type == "team_training" \
+                and _changed(obj, "report_text") and obj.report_text:
+            pending.add(("packet_training", obj.game_report_id))
+
+
+@event.listens_for(_Session, "after_commit")
+def _start_written(session):
+    pending = session.info.pop("short_pending", None)
+    if not pending:
+        return
+    from .database import SessionLocal
+    db = SessionLocal()
+    try:
+        for kind, ref_id in pending:
+            if ref_id:
+                kick(db, kind, ref_id)
+    finally:
+        db.close()
+
+
+@event.listens_for(_Session, "after_rollback")
+def _drop_written(session):
+    session.info.pop("short_pending", None)
