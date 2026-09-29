@@ -3092,6 +3092,11 @@
       "returnedOn": "Voltou em",
       "notes": "Observações",
       "notesPlaceholder": "O que ajudar: limite de minutos, o que ainda não pode fazer, como aconteceu"
+    },
+    "short": {
+      "out": "FORA",
+      "dtd": "DIA A DIA",
+      "questionable": "DÚVIDA"
     }
   }
 }

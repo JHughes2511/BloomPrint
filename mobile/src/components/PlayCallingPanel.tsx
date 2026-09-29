@@ -18,6 +18,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Sheet from './Sheet';
+import { InjuryTag } from './InjuryLog';
 import { playCallingAPI } from '../api/client';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -35,7 +36,8 @@ interface Props {
   refreshKey: number;                      // bumped when anyone's stats change
   onScores: (our: number | null, opp: number | null) => void;
   onScoreBump: (side: Side, points: number) => void;
-  clock?: () => number | null;             // seconds left on the tracker's clock, stamped on each stat   // a basket on the scoreboard now, before the server says so
+  clock?: () => number | null;
+  injuryOf?: (name: string, side: Side) => any;   // a current injury, to tag the player in the picker             // seconds left on the tracker's clock, stamped on each stat   // a basket on the scoreboard now, before the server says so
   statLabel: (k: string) => string;
   t: ThemeTokens;
   tr: (k: string, o?: any) => string;
@@ -47,7 +49,7 @@ const isMade = (k: string) => /Made$/.test(k);
 const PTS: Record<string, number> = { '2 FG Made': 2, '3 FG Made': 3, 'FT Made': 1 };
 
 export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames, players, refreshKey, onScores, onScoreBump,
-                                           clock, statLabel, t, tr }: Props) {
+                                           clock, injuryOf, statLabel, t, tr }: Props) {
   const s = makeStyles(t);
   const [data, setData] = useState<any | null>(null);
   const [side, setSide] = useState<Side>('our');
@@ -384,6 +386,7 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
                 <TouchableOpacity key={p.name} style={s.playerCell} onPress={() => logOutcome(p.name)}>
                   <Text style={[s.playerNo, { color: pickColor }]}>{p.jersey ? `#${p.jersey}` : '—'}</Text>
                   <Text style={s.playerName} numberOfLines={2}>{p.name}</Text>
+                  <InjuryTag injury={injuryOf?.(p.name, pick!.call.side as Side)} t={t} tr={tr} />
                 </TouchableOpacity>
               ))}
               {!roster.length && <Text style={s.empty}>{tr('playCalling.noPlayers')}</Text>}

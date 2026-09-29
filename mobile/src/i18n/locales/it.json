@@ -3092,6 +3092,11 @@
       "returnedOn": "Rientrato il",
       "notes": "Note",
       "notesPlaceholder": "Ciò che aiuta: limite di minuti, cosa non può ancora fare, come è successo"
+    },
+    "short": {
+      "out": "FUORI",
+      "dtd": "IN VALUT.",
+      "questionable": "DUBBIO"
     }
   }
 }

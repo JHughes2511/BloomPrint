@@ -3092,6 +3092,11 @@
       "returnedOn": "Returned on",
       "notes": "Notes",
       "notesPlaceholder": "Anything that helps: minutes limit, what they can't do yet, how it happened"
+    },
+    "short": {
+      "out": "OUT",
+      "dtd": "DTD",
+      "questionable": "Q"
     }
   }
 }

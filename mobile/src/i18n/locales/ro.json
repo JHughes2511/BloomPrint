@@ -3092,6 +3092,11 @@
       "returnedOn": "Revenit pe",
       "notes": "Note",
       "notesPlaceholder": "Orice ajută: limită de minute, ce nu poate face încă, cum s-a întâmplat"
+    },
+    "short": {
+      "out": "INDISP.",
+      "dtd": "ZI CU ZI",
+      "questionable": "INCERT"
     }
   }
 }

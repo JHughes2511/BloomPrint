@@ -30,6 +30,7 @@ import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
 import PlayCallingSummary, { GamePlayCallingCard } from '../components/PlayCallingSummary';
+import InjuryLog, { InjuryTag, useInjuryTags } from '../components/InjuryLog';
 import PlayCallingPanel from '../components/PlayCallingPanel';
 import PlayCallingImport from '../components/PlayCallingImport';
 import PlayCallingPage from '../components/PlayCallingPage';
@@ -422,6 +423,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setPcImportGame(game);
     setPcImportFile({ uri: f.uri, name: f.name ?? 'sheet', type: f.mimeType ?? 'application/octet-stream' });
   };
+  // Current injuries, to tag players on the tracker, Lineup and Scout. Read
+  // again when the view changes or an injury is logged from here.
+  const [injKey, setInjKey] = useState(0);
+  const injuryOf = useInjuryTags(`${activeView}-${injKey}`);
   const sideNamesFor = (g: any) => ({
     our: g?.team_name ?? (teams as any[]).find(tm => tm.id === g?.team_id)?.name ?? coach?.program_name ?? tr('teamGrade.ourTeam'),
     opponent: g?.opponent_name || tr('teamGrade.opponent'),
@@ -3257,23 +3262,25 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 ? roster.map((p: any) => (
                   <TouchableOpacity
                     key={p.id}
-                    style={[s.playerBtn, selectedPlayer === p.name && s.playerBtnActive]}
+                    style={[s.playerBtn, { flexDirection: 'row', alignItems: 'center', gap: 5 }, selectedPlayer === p.name && s.playerBtnActive]}
                     onPress={() => setSelectedPlayer(p.name)}
                   >
                     <Text style={[s.playerBtnText, selectedPlayer === p.name && s.playerBtnTextActive]} numberOfLines={1}>
                       {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.name}{p.position ? ` · ${p.position}` : ''}
                     </Text>
+                    <InjuryTag injury={injuryOf(p.name, activeGame.team_name, p.id)} t={t} tr={tr} />
                   </TouchableOpacity>
                 ))
                 : opponentRoster.map((p: any) => (
                   <TouchableOpacity
                     key={p.id ?? p.player_name}
-                    style={[s.playerBtn, selectedPlayer === p.player_name && s.playerBtnActive]}
+                    style={[s.playerBtn, { flexDirection: 'row', alignItems: 'center', gap: 5 }, selectedPlayer === p.player_name && s.playerBtnActive]}
                     onPress={() => setSelectedPlayer(p.player_name)}
                   >
                     <Text style={[s.playerBtnText, selectedPlayer === p.player_name && s.playerBtnTextActive]} numberOfLines={1}>
                       {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.player_name}{p.position ? ` · ${p.position}` : ''}
                     </Text>
+                    <InjuryTag injury={injuryOf(p.player_name, activeGame.opponent_name)} t={t} tr={tr} />
                   </TouchableOpacity>
                 ))}
               {entryMode === 'our' && !roster.length && !activeGame.team_id && (
@@ -3404,6 +3411,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 refreshKey={pcKey}
                 onScores={(o, p) => { if (o != null) setOurScore(o); if (p != null) setOppScore(p); }}
                 clock={() => clockNow.current.clockRemaining}
+                injuryOf={(name, side) => injuryOf(name, side === 'opponent' ? activeGame.opponent_name : activeGame.team_name)}
                 onScoreBump={(sd, pts) => {
                   scoreSeq.current += 1;
                   (sd === 'opponent' ? setOppScore : setOurScore)(prev => Math.max(0, prev + pts));
@@ -4157,9 +4165,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                             <TouchableOpacity style={s.leaderRow}
                                               onPress={() => openScoutPlayer(p.player_name)}>
                               <View style={{ flex: 1 }}>
-                                <Text style={{ color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] }}>
-                                  {p.jersey_number ? `#${p.jersey_number}  ` : ''}{p.player_name}
-                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                  <Text style={{ color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] }}>
+                                    {p.jersey_number ? `#${p.jersey_number}  ` : ''}{p.player_name}
+                                  </Text>
+                                  <InjuryTag injury={injuryOf(p.player_name, scoutOpponent)} t={t} tr={tr} size="md" />
+                                </View>
                                 <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
                                   {tr('teamGrade.perGameLine', {
                                     pts: a.PTS ?? 0, reb: a.REB ?? 0, ast: a.AST ?? 0,
@@ -4185,6 +4196,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                                       </Text>
                                       <StaleInsight subject={p.player_name} />
                                     </>}
+                                {/* Their injuries: what the scouting report and
+                                    the game plan should know going in. */}
+                                <InjuryLog teamName={scoutOpponent} playerName={p.player_name} t={t} tr={tr}
+                                           style={{ marginTop: 8 }} onChange={() => setInjKey(k => k + 1)} />
                               </View>
                             )}
                           </View>
@@ -5120,7 +5135,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           setSubOutPlayer(null);
                         }}
                       >
-                        <Text style={{ color: t.inkSoft, fontSize: 14, fontFamily: fonts[600] }}>{jersey ? `#${jersey}  ` : ''}{name}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <Text style={{ color: t.inkSoft, fontSize: 14, fontFamily: fonts[600] }}>{jersey ? `#${jersey}  ` : ''}{name}</Text>
+                          <InjuryTag injury={injuryOf(name, (entryMode === 'opponent' ? activeGame?.opponent_name : activeGame?.team_name))} t={t} tr={tr} size="md" />
+                        </View>
                       </TouchableOpacity>
                     ))
                   }
@@ -5157,7 +5175,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       >
                         <Text style={{ color: t.positive, fontFamily: fonts[600] }}>{tr('teamGrade.inShort')}</Text>
                       </TouchableOpacity>
-                      <Text style={{ color: t.ink, fontSize: 13, flex: 2, textAlign: 'center' }}>{jersey ? `#${jersey}  ` : ''}{name}</Text>
+                      <View style={{ flex: 2, alignItems: 'center', gap: 3 }}>
+                        <Text style={{ color: t.ink, fontSize: 13, textAlign: 'center' }}>{jersey ? `#${jersey}  ` : ''}{name}</Text>
+                        <InjuryTag injury={injuryOf(name, (entryMode === 'opponent' ? activeGame?.opponent_name : activeGame?.team_name))} t={t} tr={tr} />
+                      </View>
                       <TouchableOpacity
                         style={[s.modalBtn, { flex: 1, backgroundColor: t.negativeSoft, borderWidth: 1, borderColor: t.negative }]}
                         onPress={() => setSubOutPlayer(name)}

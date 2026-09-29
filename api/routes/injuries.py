@@ -58,6 +58,12 @@ def player_injuries(player_id: int, db: Session = Depends(get_db),
     return [inj.out(i) for i in inj.for_player(db, p)]
 
 
+@router.get("/current")
+def current_injuries(db: Session = Depends(get_db), coach: models.Coach = Depends(get_current_coach)):
+    """Every current injury this coach can see, to tag players with."""
+    return inj.visible_current(db, coach)
+
+
 @router.get("/named")
 def named_injuries(player_name: str, team_name: str | None = None, db: Session = Depends(get_db),
                    coach: models.Coach = Depends(get_current_coach)):
@@ -67,6 +73,11 @@ def named_injuries(player_name: str, team_name: str | None = None, db: Session =
 @router.post("")
 def add_injury(body: InjuryIn, db: Session = Depends(get_db),
                coach: models.Coach = Depends(get_current_coach)):
+    if not body.player_id and body.player_name:
+        # A name that is one of the coach's roster players goes on the player.
+        rp = inj.roster_player(db, coach, body.team_name, body.player_name)
+        if rp is not None:
+            body.player_id = rp.id
     if body.player_id:
         p = _player(db, coach, body.player_id)
         i = models.PlayerInjury(player_id=p.id, player_name=p.name, coach_id=coach.id, source="manual")

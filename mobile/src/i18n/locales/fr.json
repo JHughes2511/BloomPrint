@@ -3092,6 +3092,11 @@
       "returnedOn": "Revenu le",
       "notes": "Notes",
       "notesPlaceholder": "Tout ce qui aide : limite de minutes, ce qu'il ne peut pas encore faire, comment c'est arrivé"
+    },
+    "short": {
+      "out": "FORFAIT",
+      "dtd": "INCERTAIN",
+      "questionable": "DOUTE"
     }
   }
 }

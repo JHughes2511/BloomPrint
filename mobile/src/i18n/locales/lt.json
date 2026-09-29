@@ -3092,6 +3092,11 @@
       "returnedOn": "Grįžo",
       "notes": "Pastabos",
       "notesPlaceholder": "Kas padeda: minučių limitas, ko dar negali, kaip nutiko"
+    },
+    "short": {
+      "out": "NEŽAIS",
+      "dtd": "KASDIEN",
+      "questionable": "ABEJOT."
     }
   }
 }

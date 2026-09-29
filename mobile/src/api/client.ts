@@ -387,6 +387,8 @@ const UPLOAD_TIMEOUT = 1800000;
 /** A player's injury log: a roster player by id, or a player known by name (an opponent). */
 export const injuriesAPI = {
   forPlayer: (playerId: number) => api.get(`/injuries/players/${playerId}`).then(r => r.data),
+  /** Every current injury this coach can see: for tagging players across the app. */
+  current: () => api.get('/injuries/current').then(r => r.data),
   named: (playerName: string, teamName?: string) =>
     api.get('/injuries/named', { params: { player_name: playerName, team_name: teamName } }).then(r => r.data),
   add: (data: any) => api.post('/injuries', data).then(r => r.data),

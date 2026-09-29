@@ -3092,6 +3092,11 @@
       "returnedOn": "Petsa ng balik",
       "notes": "Mga tala",
       "notesPlaceholder": "Anumang makakatulong: limitasyon sa minuto, hindi pa kaya, paano nangyari"
+    },
+    "short": {
+      "out": "OUT",
+      "dtd": "ARAW-ARAW",
+      "questionable": "ALANGANIN"
     }
   }
 }

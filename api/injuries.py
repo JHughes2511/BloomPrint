@@ -77,10 +77,30 @@ def for_player(db: Session, player: models.Player) -> list[models.PlayerInjury]:
     return _ordered(rows)
 
 
+def roster_player(db: Session, coach: models.Coach, team_name: str | None,
+                  player_name: str) -> models.Player | None:
+    """The roster player this name is, if the coach can see one: same name, on
+    a team of this name that is theirs or that they are staff on. So an injury
+    logged from Scout for a team that is on the roster lands on the player."""
+    teams = team_ids_for(db, coach)
+    if not teams or not team_name:
+        return None
+    for tm in db.query(models.Team).filter(models.Team.id.in_(list(teams))).all():
+        if _norm(tm.name) != _norm(team_name):
+            continue
+        for p in db.query(models.Player).filter_by(team_id=tm.id).all():
+            if _norm(p.name) == _norm(player_name) and not getattr(p, "deleted_at", None):
+                return p
+    return None
+
+
 def for_name(db: Session, coach: models.Coach, team_name: str | None,
              player_name: str) -> list[models.PlayerInjury]:
     """A player known by name: logged by name, or a roster player of that name
     on a team of that name that this coach can see."""
+    p = roster_player(db, coach, team_name, player_name)
+    if p is not None:
+        return for_player(db, p)
     rows = [i for i in db.query(models.PlayerInjury)
             .filter(models.PlayerInjury.player_id.is_(None),
                     models.PlayerInjury.coach_id.in_(list(colleague_ids(db, coach)))).all()
@@ -128,3 +148,25 @@ def text(rows: list[models.PlayerInjury], limit_recent: int = 4) -> str:
     if rec:
         out_.append("  Recent (returned): " + " | ".join(line(i) for i in rec))
     return "\n".join(out_)
+
+
+def visible_current(db: Session, coach: models.Coach) -> list[dict]:
+    """Every current injury this coach can see, for tagging players across the
+    app: their own roster's and their teams' players (with the team's name),
+    and players logged by name by them or a colleague."""
+    teams = team_ids_for(db, coach)
+    q = db.query(models.PlayerInjury, models.Player).join(models.Player, models.PlayerInjury.player_id == models.Player.id)
+    from sqlalchemy import or_
+    conds = [models.Player.coach_id == coach.id]
+    if teams:
+        conds.append(models.Player.team_id.in_(list(teams)))
+    rows = [(i, p) for i, p in q.filter(or_(*conds)).all() if is_current(i) and not getattr(p, "deleted_at", None)]
+    tids = {p.team_id for _, p in rows if p.team_id}
+    team_names = {tm.id: tm.name for tm in db.query(models.Team).filter(models.Team.id.in_(list(tids))).all()} if tids else {}
+    out_ = [{**out(i), "player_name": p.name, "team_name": team_names.get(p.team_id)} for i, p in rows]
+    for i in (db.query(models.PlayerInjury)
+              .filter(models.PlayerInjury.player_id.is_(None),
+                      models.PlayerInjury.coach_id.in_(list(colleague_ids(db, coach)))).all()):
+        if is_current(i):
+            out_.append(out(i))
+    return out_

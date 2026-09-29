@@ -3092,6 +3092,11 @@
       "returnedOn": "Terug op",
       "notes": "Notities",
       "notesPlaceholder": "Wat helpt: minutenlimiet, wat nog niet kan, hoe het gebeurde"
+    },
+    "short": {
+      "out": "UIT",
+      "dtd": "DAG/DAG",
+      "questionable": "TWIJFEL"
     }
   }
 }

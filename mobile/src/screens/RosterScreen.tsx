@@ -69,6 +69,7 @@ import { readPage, writePage } from '../storage/pageCache';
 import LearnedPreferences from '../components/LearnedPreferences';
 import { Player, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
+import { InjuryTag, useInjuryTags } from '../components/InjuryLog';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { titleTopPad } from '../responsive/screenPadding';
@@ -190,9 +191,13 @@ export default function RosterScreen() {
   // cleared on blur, so nothing polls in the background.
   useFocusEffect(useCallback(() => {
     load();
+    setFocusCount(n => n + 1);
     const id = setInterval(load, 10_000);
     return () => clearInterval(id);
   }, []));
+  // Injury tags beside names; read again each time the roster comes into view.
+  const [focusCount, setFocusCount] = useState(0);
+  const injuryOf = useInjuryTags(focusCount);
 
   const teamFilteredPlayers = currentTeamId == null
     ? players
@@ -508,12 +513,15 @@ export default function RosterScreen() {
                   only place it is ever written down, and the import has been
                   putting it on the player for a while — this card just never
                   showed it, so it looked as though nothing had been saved. */}
-              <Text style={styles.playerName}>
-                {item.jersey_number ? (
-                  <Text style={styles.playerNumber}>#{item.jersey_number}  </Text>
-                ) : null}
-                {item.name}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <Text style={styles.playerName}>
+                  {item.jersey_number ? (
+                    <Text style={styles.playerNumber}>#{item.jersey_number}  </Text>
+                  ) : null}
+                  {item.name}
+                </Text>
+                <InjuryTag injury={injuryOf(item.name, item.team_name, item.id)} t={t} tr={tr} size="md" />
+              </View>
               <Text style={styles.playerMeta}>
                 {[item.position, item.team_name ?? item.competition_level].filter(Boolean).join(' · ')}
               </Text>

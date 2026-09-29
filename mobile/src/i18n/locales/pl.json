@@ -3092,6 +3092,11 @@
       "returnedOn": "Wrócił",
       "notes": "Notatki",
       "notesPlaceholder": "Co pomoże: limit minut, czego jeszcze nie może, jak to się stało"
+    },
+    "short": {
+      "out": "NIE GRA",
+      "dtd": "CODZIENNIE",
+      "questionable": "NIEPEWNY"
     }
   }
 }

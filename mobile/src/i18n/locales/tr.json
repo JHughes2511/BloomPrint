@@ -3092,6 +3092,11 @@
       "returnedOn": "Dönüş tarihi",
       "notes": "Notlar",
       "notesPlaceholder": "Yardımcı olan her şey: dakika sınırı, henüz yapamadıkları, nasıl oldu"
+    },
+    "short": {
+      "out": "YOK",
+      "dtd": "GÜNLÜK",
+      "questionable": "ŞÜPHELİ"
     }
   }
 }

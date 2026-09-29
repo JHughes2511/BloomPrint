@@ -3092,6 +3092,11 @@
       "returnedOn": "Zurück am",
       "notes": "Notizen",
       "notesPlaceholder": "Was hilft: Minutenlimit, was noch nicht geht, wie es passiert ist"
+    },
+    "short": {
+      "out": "FÄLLT AUS",
+      "dtd": "TÄGLICH",
+      "questionable": "FRAGLICH"
     }
   }
 }

@@ -3092,6 +3092,11 @@
       "returnedOn": "Vratio se",
       "notes": "Beleške",
       "notesPlaceholder": "Šta pomaže: ograničenje minuta, šta još ne može, kako se desilo"
+    },
+    "short": {
+      "out": "VAN",
+      "dtd": "DAN PO DAN",
+      "questionable": "UPITAN"
     }
   }
 }

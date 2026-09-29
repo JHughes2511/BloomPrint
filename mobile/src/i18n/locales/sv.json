@@ -3092,6 +3092,11 @@
       "returnedOn": "Tillbaka",
       "notes": "Anteckningar",
       "notesPlaceholder": "Det som hjälper: minutgräns, vad hen inte kan än, hur det hände"
+    },
+    "short": {
+      "out": "BORTA",
+      "dtd": "DAG/DAG",
+      "questionable": "OSÄKER"
     }
   }
 }

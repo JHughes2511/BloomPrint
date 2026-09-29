@@ -3092,6 +3092,11 @@
       "returnedOn": "Regresó el",
       "notes": "Notas",
       "notesPlaceholder": "Lo que ayude: límite de minutos, qué no puede hacer aún, cómo pasó"
+    },
+    "short": {
+      "out": "BAJA",
+      "dtd": "DÍA A DÍA",
+      "questionable": "DUDA"
     }
   }
 }

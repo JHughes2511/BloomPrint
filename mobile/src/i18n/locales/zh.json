@@ -3092,6 +3092,11 @@
       "returnedOn": "复出日期",
       "notes": "备注",
       "notesPlaceholder": "有用的信息：上场时间限制、暂时不能做的、如何受伤"
+    },
+    "short": {
+      "out": "缺阵",
+      "dtd": "每日观察",
+      "questionable": "成疑"
     }
   }
 }

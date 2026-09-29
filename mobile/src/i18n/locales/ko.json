@@ -3092,6 +3092,11 @@
       "returnedOn": "복귀일",
       "notes": "메모",
       "notesPlaceholder": "도움이 되는 것: 출전 시간 제한, 아직 못 하는 것, 경위"
+    },
+    "short": {
+      "out": "결장",
+      "dtd": "매일 판단",
+      "questionable": "불투명"
     }
   }
 }

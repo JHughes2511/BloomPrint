@@ -3092,6 +3092,11 @@
       "returnedOn": "復帰日",
       "notes": "メモ",
       "notesPlaceholder": "役立つこと：出場時間制限、まだできないこと、経緯"
+    },
+    "short": {
+      "out": "欠場",
+      "dtd": "日々判断",
+      "questionable": "微妙"
     }
   }
 }

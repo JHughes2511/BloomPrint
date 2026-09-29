@@ -27,6 +27,49 @@ const SIDES = ['left', 'right', 'both'];
 export const statusColor = (s: string, t: ThemeTokens) =>
   s === 'out' ? t.negative : s === 'dtd' || s === 'questionable' ? t.brown : s === 'cleared' ? t.positive : t.muted;
 
+const normName = (s?: string | null) => (s ?? '').toLowerCase().replace(/#\d+\s*/g, '').split(/\s+/).filter(Boolean).join(' ');
+
+/**
+ * The current injuries this coach can see, and a lookup to tag a player with:
+ * by roster id when there is one, else by name (and team, when both sides of
+ * the match know it). Reloads when `refreshKey` changes.
+ */
+export function useInjuryTags(refreshKey: any = 0) {
+  const [rows, setRows] = useState<any[]>([]);
+  useEffect(() => {
+    let live = true;
+    injuriesAPI.current().then((r: any[]) => { if (live) setRows(r ?? []); }).catch(() => {});
+    return () => { live = false; };
+  }, [refreshKey]);
+  return useCallback((playerName?: string | null, teamName?: string | null, playerId?: number | null) => {
+    if (playerId) {
+      const byId = rows.find(r => r.player_id === playerId);
+      if (byId) return byId;
+    }
+    const n = normName(playerName);
+    if (!n) return null;
+    return rows.find(r => normName(r.player_name) === n
+      && (!teamName || !r.team_name || normName(r.team_name) === normName(teamName))) ?? null;
+  }, [rows]);
+}
+
+/** A small status tag beside a player's name: OUT, DTD, Q — or a cross for playing through it. */
+export function InjuryTag({ injury, t, tr, size = 'sm' }: { injury: any; t: ThemeTokens; tr: (k: string, o?: any) => string; size?: 'sm' | 'md' }) {
+  if (!injury) return null;
+  const c = statusColor(injury.status, t);
+  const label = injury.status === 'playing_through' ? '' : tr(`injuries.short.${injury.status}`);
+  const what = [injury.side ? tr(`injuries.sides.${injury.side}`, { defaultValue: injury.side }) : '', injury.body_part, injury.description]
+    .filter(Boolean).join(' ');
+  return (
+    <View accessibilityLabel={`${tr(`injuries.status.${injury.status}`)}${what ? ` · ${what}` : ''}`}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 3, borderWidth: 1, borderColor: c, borderRadius: 999,
+                   paddingHorizontal: size === 'md' ? 7 : 5, paddingVertical: size === 'md' ? 2 : 0, alignSelf: 'center' }}>
+      <Ionicons name="medkit" size={size === 'md' ? 11 : 9} color={c} />
+      {!!label && <Text style={{ color: c, fontSize: size === 'md' ? 11 : 9.5, fontFamily: fonts[800] }}>{label}</Text>}
+    </View>
+  );
+}
+
 type Draft = { id?: number; status: string; body_part: string; side: string; description: string;
                injured_on: string; expected_return: string; returned_on: string; notes: string };
 const today = () => new Date().toISOString().slice(0, 10);
