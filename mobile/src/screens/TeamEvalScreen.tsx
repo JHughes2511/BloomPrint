@@ -2864,7 +2864,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {trackers.map(tk => {
                 const color = tk.side === 'opponent' ? t.negative : t.accent;
                 const initials = (tk.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]!.toUpperCase()).join('');
-                const who = `${tk.you ? tr('teamGrade.you') : tk.name} · ${tk.side === 'opponent' ? sideLabels.theirs : sideLabels.ours}`;
+                const person = tk.you ? tr('teamGrade.you') : tk.name;
+                const sideName = tk.side === 'opponent' ? sideLabels.theirs : sideLabels.ours;
+                const who = `${person} · ${sideName}`;
                 return (
                   <Pressable
                     key={tk.coach_id}
@@ -2878,7 +2880,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     <Text style={[s.trackerInitials, { color }]}>{initials}</Text>
                     {peekTracker === tk.coach_id && (
                       <View style={s.trackerPeek} pointerEvents="none">
-                        <Text style={s.trackerPeekText} numberOfLines={1}>{who}</Text>
+                        <Text style={s.trackerPeekName} numberOfLines={1}>{person}</Text>
+                        <View style={[s.trackerPeekDot, { backgroundColor: color }]} />
+                        <Text style={s.trackerPeekSide} numberOfLines={1}>{sideName}</Text>
                       </View>
                     )}
                   </Pressable>
@@ -5320,9 +5324,16 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   trackerBarLabel: { color: t.muted, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase' },
   trackerAvatar: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   trackerInitials: { fontSize: 10, fontFamily: fonts[800] },
-  trackerPeek: { position: 'absolute', top: 32, left: 0, backgroundColor: t.badgeBg, borderRadius: 8,
-                 paddingHorizontal: 10, paddingVertical: 6, zIndex: 40 },
-  trackerPeekText: { color: t.badgeText, fontSize: 12, fontFamily: fonts[700] },
+  // A card, like the app's other popups: the near-black pill was the loudest
+  // thing on a light screen.
+  trackerPeek: { position: 'absolute', top: 34, left: 0, zIndex: 40,
+                 flexDirection: 'row', alignItems: 'center', gap: 6,
+                 backgroundColor: t.sheet, borderWidth: 1, borderColor: t.cardBorder, borderRadius: 10,
+                 paddingHorizontal: 10, paddingVertical: 6,
+                 shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
+  trackerPeekName: { color: t.ink, fontSize: 12, fontFamily: fonts[700] },
+  trackerPeekDot: { width: 7, height: 7, borderRadius: 4 },
+  trackerPeekSide: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
   qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 10 },
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
