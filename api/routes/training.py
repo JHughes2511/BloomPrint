@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import genjob
+from ..localtime import local_day
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import emails, models, notify, schemas
 from ..ownership import get_owned
@@ -280,7 +281,7 @@ def generate_training(
         grade_str = f"{e.overall_grade:.1f}/10" if e.overall_grade is not None else "N/A"
         strengths = ", ".join((e.green_flags or [])[:4]) or "N/A"
         watch = ", ".join((e.watch_flags or [])[:4]) or "N/A"
-        date_str = e.created_at.strftime("%Y-%m-%d") if e.created_at else ""
+        date_str = local_day(e.created_at, "%Y-%m-%d")
         excerpt = (e.report_text or "")[:900]
         report_ctx_parts.append(
             f"ADDITIONAL EVALUATION ({e.output_type}, {date_str}) — Grade {grade_str}; "

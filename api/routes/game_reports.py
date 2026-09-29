@@ -14,6 +14,7 @@ from ..database import get_db, SessionLocal, revive_if_stalled
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import job_notify, models, schemas
+from ..localtime import local_day
 from ..softdelete import soft_delete
 from ..ownership import owns
 from ..ai_models import long_text
@@ -408,7 +409,7 @@ def _game_label(db: Session, game: models.GameSession) -> str:
     team = db.get(models.Team, game.team_id) if game.team_id else None
     ours = (team.name if team else None) or "Us"
     theirs = game.opponent_name or "Opponent"
-    when = game.date.strftime("%b %d, %Y") if game.date else ""
+    when = local_day(game.date, "%b %d, %Y")
     score = ("" if game.our_score is None or game.opponent_score is None
              else f" · {game.our_score}-{game.opponent_score}")
     return f"{ours} vs {theirs}" + (f" · {when}" if when else "") + score

@@ -4,6 +4,7 @@ import difflib
 import io
 from collections import defaultdict
 from datetime import datetime, timezone
+from ..localtime import local_day
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File
@@ -594,7 +595,7 @@ def player_tracked_stats_block(db, coach_id: int, player_name: str, game_ids) ->
         pts = counts.get("2 FG Made", 0) * 2 + counts.get("3 FG Made", 0) * 3 + counts.get("FT Made", 0)
         reb = counts.get("Off. Reb", 0) + counts.get("Def. Reb", 0)
         statline = ", ".join(f"{k}: {v}" for k, v in counts.items())
-        when = game.date.strftime("%Y-%m-%d") if game and game.date else ""
+        when = local_day(game.date, "%Y-%m-%d") if game else ""
         opp = game.opponent_name if game else "opponent"
         lines.append(
             f"vs {opp} ({when}) — PTS {pts}, REB {reb}, AST {counts.get('Assists', 0)}, "
@@ -780,7 +781,7 @@ def box_score_text(db: Session, game: models.GameSession) -> str:
     team = db.get(models.Team, game.team_id) if game.team_id else None
     coach = db.get(models.Coach, game.coach_id)
     our = (team.name if team else None) or (coach.program_name if coach else "My Team")
-    when = game.date.strftime("%B %-d, %Y") if game.date else ""
+    when = local_day(game.date, "%B %-d, %Y")
 
     header = f"{our} vs {game.opponent_name}"
     if when:
@@ -842,7 +843,9 @@ def game_insights_text(db: Session, game: models.GameSession) -> str:
     ours_pts, theirs_pts = effective_scores(game)
     out = [f"{our} vs {theirs}"]
     if game.date:
-        out.append(game.date.strftime("%B %-d, %Y"))
+        # On the reader's calendar: this text is built when it is read, so a
+        # shared game is dated for whoever opened it. See api/localtime.py.
+        out.append(local_day(game.date, "%B %-d, %Y"))
     if ours_pts is not None and theirs_pts is not None:
         # The scoreline says who won. Adding "(WIN)" after it is the same fact
         # twice, and it reads as a second claim about the same game.
@@ -2343,7 +2346,7 @@ def player_game_history(
         result.append({
             "game_id": game.id,
             "opponent_name": game.opponent_name,
-            "date": game.date.strftime("%B %d, %Y") if game.date else None,
+            "date": local_day(game.date, "%B %d, %Y") or None,
             "year": game.date.year if game.date else None,
             "season_year": game.season_year,
             "our_score": game.our_score,

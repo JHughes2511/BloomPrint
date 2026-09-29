@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import emails, models, notify
+from ..localtime import local_day
 from ..ai_models import OPUS
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
@@ -114,7 +115,7 @@ def t_player_detail(db, coach, player: str) -> dict:
         "watch_flags": (latest.watch_flags if latest else None),
         "eval_history": [
             {"id": e.id, "type": e.output_type, "grade": e.overall_grade,
-             "date": e.created_at.strftime("%Y-%m-%d") if e.created_at else None}
+             "date": local_day(e.created_at, "%Y-%m-%d") or None}
             for e in evs
         ],
     }
@@ -140,7 +141,7 @@ def t_list_games(db, coach, season_year: str = "", phase: str = "") -> dict:
         if g.our_score is not None and g.opponent_score is not None:
             res = "W" if g.our_score > g.opponent_score else ("L" if g.our_score < g.opponent_score else "T")
         out.append({"id": g.id, "opponent": g.opponent_name,
-                    "date": g.date.strftime("%Y-%m-%d") if g.date else None,
+                    "date": local_day(g.date, "%Y-%m-%d") or None,
                     "score": (f"{g.our_score}-{g.opponent_score}" if g.our_score is not None else None),
                     "result": res, "phase": g.season_phase, "status": g.status})
     return {"games": out[:80], "count": len(out)}
@@ -197,7 +198,7 @@ def t_season_dashboard(db, coach, season_year: str = "", phase: str = "") -> dic
             else:
                 losses += 1
         trend.append({"opponent": g.opponent_name,
-                      "date": g.date.strftime("%Y-%m-%d") if g.date else None,
+                      "date": local_day(g.date, "%Y-%m-%d") or None,
                       "score": (f"{g.our_score}-{g.opponent_score}" if g.our_score is not None else None)})
     return {"record": {"wins": wins, "losses": losses}, "games": trend[:40]}
 
@@ -209,11 +210,11 @@ def t_list_reports(db, coach, kind: str = "") -> dict:
             pl = db.get(models.Player, e.player_id)
             out.append({"kind": "eval", "id": e.id, "subject": pl.name if pl else "Player",
                         "type": e.output_type, "grade": e.overall_grade,
-                        "date": e.created_at.strftime("%Y-%m-%d") if e.created_at else None})
+                        "date": local_day(e.created_at, "%Y-%m-%d") or None})
     if kind in ("", "team"):
         for tr in db.query(models.TeamReport).filter_by(coach_id=coach.id).order_by(models.TeamReport.created_at.desc()).limit(20).all():
             out.append({"kind": "team", "id": tr.id, "subject": "Team Report", "type": tr.output_type,
-                        "date": tr.created_at.strftime("%Y-%m-%d") if tr.created_at else None})
+                        "date": local_day(tr.created_at, "%Y-%m-%d") or None})
     if kind in ("", "packet", "game"):
         for gr in db.query(models.GameReport).filter_by(coach_id=coach.id).order_by(models.GameReport.updated_at.desc()).limit(20).all():
             out.append({"kind": "packet", "id": gr.id, "subject": gr.title or gr.opponent_name or "Game Report",
@@ -248,7 +249,7 @@ def t_list_plays(db, coach, game_id: int = 0) -> dict:
         out.append({"id": w.id, "name": w.name, "game_id": w.game_id,
                     "opponent": g.opponent_name if g else None,
                     "court_type": w.court_type,
-                    "created_at": w.created_at.strftime("%Y-%m-%d") if w.created_at else None})
+                    "created_at": local_day(w.created_at, "%Y-%m-%d") or None})
     return {"plays": out}
 
 
@@ -258,7 +259,7 @@ def t_list_training(db, coach, player: str = "") -> dict:
     if p:
         q = q.filter_by(player_id=p.id)
     out = [{"id": ts.id, "player_id": ts.player_id,
-            "date": ts.created_at.strftime("%Y-%m-%d") if ts.created_at else None}
+            "date": local_day(ts.created_at, "%Y-%m-%d") or None}
            for ts in q.order_by(models.TrainingSession.created_at.desc()).limit(30).all()]
     return {"training_programs": out}
 
@@ -306,7 +307,7 @@ def t_list_shared_with_me(db, coach) -> dict:
             "subject": subject or "Report",
             "report_kind": otype or sr.report_type,
             "from": sender.name if sender else "A coach",
-            "date": sr.created_at.strftime("%Y-%m-%d") if sr.created_at else None,
+            "date": local_day(sr.created_at, "%Y-%m-%d") or None,
             "grade": grade,
             "allow_regenerate": bool(sr.allow_regenerate),
         })
@@ -330,7 +331,7 @@ def t_get_shared_report_text(db, coach, share_id: int) -> dict:
     sender = db.get(models.Coach, sr.sender_id)
     return {"subject": subject, "report_kind": otype or sr.report_type,
             "from": sender.name if sender else "A coach",
-            "date": sr.created_at.strftime("%Y-%m-%d") if sr.created_at else None,
+            "date": local_day(sr.created_at, "%Y-%m-%d") or None,
             "text": (text or "")[:6000] or "No text available for this share."}
 
 
@@ -368,7 +369,7 @@ def t_get_conversation_messages(db, coach, conversation_id: int = 0, with_name: 
         "messages": [{
             "from": "me" if m.sender_id == coach.id else names.get(m.sender_id, "Staff"),
             "text": (m.text or "[attachment]")[:400],
-            "date": m.created_at.strftime("%Y-%m-%d %H:%M") if m.created_at else None,
+            "date": local_day(m.created_at, "%Y-%m-%d %H:%M") or None,
         } for m in reversed(msgs)],
     }
 

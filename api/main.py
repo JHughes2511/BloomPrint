@@ -37,8 +37,16 @@ app.add_middleware(
     # attaching cookies cross-origin if session cookies are added later.
     allow_credentials=False,
     allow_methods=["*"],
+    # "*" covers X-Timezone, which the app sends on every request so that dates
+    # the server writes are on the reader's calendar. Narrowing this list
+    # without keeping that header would fail every request from the website.
     allow_headers=["*"],
 )
+# Which time zone the reader is in, for dates the server writes as text. See
+# api/localtime.py.
+from .localtime import ReaderTimezoneMiddleware  # noqa: E402
+
+app.add_middleware(ReaderTimezoneMiddleware)
 
 app.include_router(auth.router)
 app.include_router(players.router)

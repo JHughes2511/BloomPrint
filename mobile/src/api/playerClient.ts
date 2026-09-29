@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readerTimezone } from './timezone';
 import * as SecureStore from '../storage/secureStore';
 import { emitPlayerUnauthorized } from './authFailure';
 
@@ -8,6 +9,9 @@ export const playerApi = axios.create({ baseURL: BASE_URL });
 playerApi.interceptors.request.use(async (config) => {
   const token = await SecureStore.getItemAsync('player_auth_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  // So dates the server writes as text are on this reader's calendar.
+  const zone = readerTimezone();
+  if (zone) config.headers['X-Timezone'] = zone;
   return config;
 });
 

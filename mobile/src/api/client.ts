@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readerTimezone } from './timezone';
 import { Platform } from 'react-native';
 import * as SecureStore from '../storage/secureStore';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -193,6 +194,9 @@ export async function authedVideoSource(streamPath: string): Promise<{ uri: stri
 api.interceptors.request.use(async (config) => {
   const token = await SecureStore.getItemAsync('auth_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  // So dates the server writes as text are on this reader's calendar.
+  const zone = readerTimezone();
+  if (zone) config.headers['X-Timezone'] = zone;
   return config;
 });
 

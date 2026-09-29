@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import account_deletion, decisions, emails, models, notify, roster_sync
+from ..localtime import local_day
 
 router = APIRouter(prefix="/team-staff", tags=["team-staff"])
 
@@ -988,7 +989,7 @@ def team_games(
         .all()
     )
     for s in sessions:
-        date_str = s.date.strftime("%B %d, %Y") if s.date else None
+        date_str = local_day(s.date, "%B %d, %Y") or None
         score_str = ""
         if s.our_score is not None and s.opponent_score is not None:
             result_word = "W" if s.our_score > s.opponent_score else ("L" if s.our_score < s.opponent_score else "T")
@@ -1018,7 +1019,7 @@ def team_games(
             "id": r.id,
             "kind": "report",
             "title": r.title or r.opponent_name or "Game Report",
-            "date": r.created_at.strftime("%B %d, %Y") if r.created_at else None,
+            "date": local_day(r.created_at, "%B %d, %Y") or None,
             "report_text": r.report_text,
         })
 
