@@ -3097,6 +3097,20 @@
       "out": "VAN",
       "dtd": "DAN PO DAN",
       "questionable": "UPITAN"
+    },
+    "import": {
+      "button": "Uvezi izveštaj o povredama",
+      "title": "Uvezi izveštaj o povredama",
+      "reading": "Čitam izveštaj…",
+      "none": "Nema povreda u ovom izveštaju.",
+      "hint": "Proveri svaki red. Dodirni status da ga promeniš; odčekiraj ono što izostavljaš.",
+      "include": "Uključi",
+      "onRoster": "U rosteru",
+      "byName": "Po imenu",
+      "save": "Sačuvaj ({{count}})",
+      "readFailed": "Izveštaj nije moguće pročitati.",
+      "pickTeam": "Prvo izaberi tim na vrhu Rostera, pa uvezi njegov izveštaj.",
+      "saved": "Sačuvano: {{count}}"
     }
   }
 }

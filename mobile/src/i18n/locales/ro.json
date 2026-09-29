@@ -3097,6 +3097,20 @@
       "out": "INDISP.",
       "dtd": "ZI CU ZI",
       "questionable": "INCERT"
+    },
+    "import": {
+      "button": "Importă raport accidentări",
+      "title": "Importă raport accidentări",
+      "reading": "Se citește raportul…",
+      "none": "Nicio accidentare găsită în raport.",
+      "hint": "Verifică fiecare rând. Atinge statusul pentru a-l schimba; debifează ce vrei să excluzi.",
+      "include": "Include",
+      "onRoster": "În lot",
+      "byName": "După nume",
+      "save": "Salvează ({{count}})",
+      "readFailed": "Raportul nu a putut fi citit.",
+      "pickTeam": "Alege mai întâi o echipă în partea de sus a Lotului, apoi importă raportul.",
+      "saved": "Salvate: {{count}}"
     }
   }
 }

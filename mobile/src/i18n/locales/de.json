@@ -3097,6 +3097,20 @@
       "out": "FÄLLT AUS",
       "dtd": "TÄGLICH",
       "questionable": "FRAGLICH"
+    },
+    "import": {
+      "button": "Verletzungsbericht importieren",
+      "title": "Verletzungsbericht importieren",
+      "reading": "Bericht wird gelesen…",
+      "none": "Keine Verletzungen in diesem Bericht gefunden.",
+      "hint": "Prüfe jede Zeile. Tippe auf einen Status, um ihn zu ändern; Haken entfernen zum Weglassen.",
+      "include": "Übernehmen",
+      "onRoster": "Im Kader",
+      "byName": "Nach Name",
+      "save": "Speichern ({{count}})",
+      "readFailed": "Bericht konnte nicht gelesen werden.",
+      "pickTeam": "Wähle zuerst oben im Kader ein Team und importiere dann dessen Bericht.",
+      "saved": "Gespeichert: {{count}}"
     }
   }
 }

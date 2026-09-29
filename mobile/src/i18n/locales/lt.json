@@ -3097,6 +3097,20 @@
       "out": "NEŽAIS",
       "dtd": "KASDIEN",
       "questionable": "ABEJOT."
+    },
+    "import": {
+      "button": "Importuoti traumų ataskaitą",
+      "title": "Importuoti traumų ataskaitą",
+      "reading": "Skaitoma ataskaita…",
+      "none": "Ataskaitoje traumų nerasta.",
+      "hint": "Patikrinkite kiekvieną eilutę. Palieskite būseną, kad pakeistumėte; nuimkite žymę, kad praleistumėte.",
+      "include": "Įtraukti",
+      "onRoster": "Sudėtyje",
+      "byName": "Pagal vardą",
+      "save": "Išsaugoti ({{count}})",
+      "readFailed": "Nepavyko nuskaityti ataskaitos.",
+      "pickTeam": "Pirmiausia pasirinkite komandą Sudėties viršuje, tada importuokite jos ataskaitą.",
+      "saved": "Išsaugota: {{count}}"
     }
   }
 }

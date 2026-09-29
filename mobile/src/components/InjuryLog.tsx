@@ -84,9 +84,10 @@ interface Props {
   tr: (k: string, o?: any) => string;
   style?: any;
   onChange?: () => void;
+  refreshKey?: any;              // read again when this changes (an import landed)
 }
 
-export default function InjuryLog({ playerId, teamName, playerName, t, tr, style, onChange }: Props) {
+export default function InjuryLog({ playerId, teamName, playerName, t, tr, style, onChange, refreshKey }: Props) {
   const s = makeStyles(t);
   const [rows, setRows] = useState<any[] | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -97,7 +98,7 @@ export default function InjuryLog({ playerId, teamName, playerName, t, tr, style
       : injuriesAPI.named(playerName ?? '', teamName ?? undefined);
     req.then(setRows).catch(() => setRows([]));
   }, [playerId, teamName, playerName]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); }, [load, refreshKey]);
 
   const fmt = (d?: string | null) => d
     ? new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';

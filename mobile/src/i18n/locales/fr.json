@@ -3097,6 +3097,20 @@
       "out": "FORFAIT",
       "dtd": "INCERTAIN",
       "questionable": "DOUTE"
+    },
+    "import": {
+      "button": "Importer un rapport de blessures",
+      "title": "Importer un rapport de blessures",
+      "reading": "Lecture du rapport…",
+      "none": "Aucune blessure trouvée dans ce rapport.",
+      "hint": "Vérifiez chaque ligne. Touchez un statut pour le changer ; décochez ce qu'il faut exclure.",
+      "include": "Inclure",
+      "onRoster": "Dans l'effectif",
+      "byName": "Par nom",
+      "save": "Enregistrer ({{count}})",
+      "readFailed": "Impossible de lire ce rapport.",
+      "pickTeam": "Choisissez d'abord une équipe en haut de l'Effectif, puis importez son rapport.",
+      "saved": "Enregistrées : {{count}}"
     }
   }
 }

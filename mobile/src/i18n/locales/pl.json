@@ -3097,6 +3097,20 @@
       "out": "NIE GRA",
       "dtd": "CODZIENNIE",
       "questionable": "NIEPEWNY"
+    },
+    "import": {
+      "button": "Importuj raport kontuzji",
+      "title": "Importuj raport kontuzji",
+      "reading": "Czytam raport…",
+      "none": "Nie znaleziono kontuzji w raporcie.",
+      "hint": "Sprawdź każdy wiersz. Dotknij statusu, by go zmienić; odznacz, by pominąć.",
+      "include": "Uwzględnij",
+      "onRoster": "W składzie",
+      "byName": "Po nazwisku",
+      "save": "Zapisz ({{count}})",
+      "readFailed": "Nie udało się odczytać raportu.",
+      "pickTeam": "Najpierw wybierz drużynę u góry Składu, potem zaimportuj jej raport.",
+      "saved": "Zapisano: {{count}}"
     }
   }
 }

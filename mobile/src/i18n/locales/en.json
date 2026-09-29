@@ -3097,6 +3097,20 @@
       "out": "OUT",
       "dtd": "DTD",
       "questionable": "Q"
+    },
+    "import": {
+      "button": "Import injury report",
+      "title": "Import injury report",
+      "reading": "Reading the injury report…",
+      "none": "No injuries found on this report.",
+      "hint": "Check each row. Tap a status to change it; untick anything to leave it out.",
+      "include": "Include",
+      "onRoster": "On roster",
+      "byName": "By name",
+      "save": "Save ({{count}})",
+      "readFailed": "Could not read that report.",
+      "pickTeam": "Pick a team at the top of the Roster first, then import its injury report.",
+      "saved": "Saved: {{count}}"
     }
   }
 }

@@ -3097,6 +3097,20 @@
       "out": "YOK",
       "dtd": "GÜNLÜK",
       "questionable": "ŞÜPHELİ"
+    },
+    "import": {
+      "button": "Sakatlık raporu içe aktar",
+      "title": "Sakatlık raporu içe aktar",
+      "reading": "Rapor okunuyor…",
+      "none": "Bu raporda sakatlık bulunamadı.",
+      "hint": "Her satırı kontrol et. Değiştirmek için duruma dokun; dahil etmek istemediklerinin işaretini kaldır.",
+      "include": "Dahil et",
+      "onRoster": "Kadroda",
+      "byName": "İsimle",
+      "save": "Kaydet ({{count}})",
+      "readFailed": "Rapor okunamadı.",
+      "pickTeam": "Önce Kadro'nun üstünden bir takım seç, sonra raporunu içe aktar.",
+      "saved": "Kaydedildi: {{count}}"
     }
   }
 }

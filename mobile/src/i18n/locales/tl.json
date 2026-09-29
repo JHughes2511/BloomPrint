@@ -3097,6 +3097,20 @@
       "out": "OUT",
       "dtd": "ARAW-ARAW",
       "questionable": "ALANGANIN"
+    },
+    "import": {
+      "button": "Mag-import ng injury report",
+      "title": "Mag-import ng injury report",
+      "reading": "Binabasa ang report…",
+      "none": "Walang injury na nakita sa report.",
+      "hint": "Suriin ang bawat hilera. I-tap ang status para palitan; alisin ang check para hindi isama.",
+      "include": "Isama",
+      "onRoster": "Nasa roster",
+      "byName": "Ayon sa pangalan",
+      "save": "I-save ({{count}})",
+      "readFailed": "Hindi mabasa ang report.",
+      "pickTeam": "Pumili muna ng team sa itaas ng Roster, saka i-import ang report nito.",
+      "saved": "Na-save: {{count}}"
     }
   }
 }

@@ -3097,6 +3097,20 @@
       "out": "BORTA",
       "dtd": "DAG/DAG",
       "questionable": "OSÄKER"
+    },
+    "import": {
+      "button": "Importera skaderapport",
+      "title": "Importera skaderapport",
+      "reading": "Läser rapporten…",
+      "none": "Inga skador hittades i rapporten.",
+      "hint": "Kontrollera varje rad. Tryck på en status för att ändra; avmarkera det som ska utelämnas.",
+      "include": "Ta med",
+      "onRoster": "I truppen",
+      "byName": "Via namn",
+      "save": "Spara ({{count}})",
+      "readFailed": "Kunde inte läsa rapporten.",
+      "pickTeam": "Välj först ett lag högst upp i Truppen och importera sedan rapporten.",
+      "saved": "Sparade: {{count}}"
     }
   }
 }

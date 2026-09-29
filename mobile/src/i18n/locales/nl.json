@@ -3097,6 +3097,20 @@
       "out": "UIT",
       "dtd": "DAG/DAG",
       "questionable": "TWIJFEL"
+    },
+    "import": {
+      "button": "Blessurerapport importeren",
+      "title": "Blessurerapport importeren",
+      "reading": "Rapport wordt gelezen…",
+      "none": "Geen blessures gevonden in dit rapport.",
+      "hint": "Controleer elke rij. Tik op een status om te wijzigen; vink uit wat je wilt weglaten.",
+      "include": "Meenemen",
+      "onRoster": "In selectie",
+      "byName": "Op naam",
+      "save": "Opslaan ({{count}})",
+      "readFailed": "Kon dat rapport niet lezen.",
+      "pickTeam": "Kies eerst bovenaan de Selectie een team en importeer dan het rapport.",
+      "saved": "Opgeslagen: {{count}}"
     }
   }
 }

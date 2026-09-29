@@ -31,6 +31,7 @@ import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
 import PlayCallingSummary, { GamePlayCallingCard } from '../components/PlayCallingSummary';
 import InjuryLog, { InjuryTag, useInjuryTags } from '../components/InjuryLog';
+import InjuryImport from '../components/InjuryImport';
 import PlayCallingPanel from '../components/PlayCallingPanel';
 import PlayCallingImport from '../components/PlayCallingImport';
 import PlayCallingPage from '../components/PlayCallingPage';
@@ -422,6 +423,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     const f = res.assets[0];
     setPcImportGame(game);
     setPcImportFile({ uri: f.uri, name: f.name ?? 'sheet', type: f.mimeType ?? 'application/octet-stream' });
+  };
+  // A scouted team's injury report, read into the injury log.
+  const [injImportFile, setInjImportFile] = useState<{ uri: string; name: string; type: string } | null>(null);
+  const pickScoutInjuryReport = async () => {
+    const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+    if (res.canceled || !res.assets?.[0]) return;
+    const f = res.assets[0];
+    setInjImportFile({ uri: f.uri, name: f.name ?? 'report', type: f.mimeType ?? 'application/octet-stream' });
   };
   // Current injuries, to tag players on the tracker, Lineup and Scout. Read
   // again when the view changes or an injury is logged from here.
@@ -4199,7 +4208,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                                 {/* Their injuries: what the scouting report and
                                     the game plan should know going in. */}
                                 <InjuryLog teamName={scoutOpponent} playerName={p.player_name} t={t} tr={tr}
-                                           style={{ marginTop: 8 }} onChange={() => setInjKey(k => k + 1)} />
+                                           style={{ marginTop: 8 }} onChange={() => setInjKey(k => k + 1)} refreshKey={injKey} />
                               </View>
                             )}
                           </View>
@@ -4265,6 +4274,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         </View>
                       ))}
                   </View>
+
+                  {/* Their injury report, read into the injury log. */}
+                  <TouchableOpacity style={[s.detailAction, { marginHorizontal: 0, marginBottom: 12, alignSelf: 'flex-start', paddingHorizontal: 14 }]}
+                                    onPress={pickScoutInjuryReport}>
+                    <Ionicons name="medkit-outline" size={14} color={t.muted} />
+                    <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600] }}>{tr('injuries.import.button')}</Text>
+                  </TouchableOpacity>
 
                   {/* Play calling across these games: what they run and how it
                       scores against each defense, and what has worked against
@@ -4419,6 +4435,16 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           )}
         </KeyboardAwareScrollView>
       )}
+
+      <InjuryImport
+        file={injImportFile}
+        teamName={scoutOpponent ?? ''}
+        onClose={() => setInjImportFile(null)}
+        onSaved={n => { setInjImportFile(null); setInjKey(k => k + 1);
+                        Alert.alert(tr('injuries.import.title'), tr('injuries.import.saved', { count: n })); }}
+        t={t}
+        tr={tr}
+      />
 
       {pcImportGame && (
         <PlayCallingImport

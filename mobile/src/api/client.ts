@@ -394,6 +394,20 @@ export const injuriesAPI = {
   add: (data: any) => api.post('/injuries', data).then(r => r.data),
   edit: (id: number, data: any) => api.patch(`/injuries/${id}`, data).then(r => r.data),
   remove: (id: number) => api.delete(`/injuries/${id}`).then(r => r.data),
+  /** Read a team's injury report (photo, PDF, sheet) into rows to confirm; nothing is saved. */
+  importRead: async (f: { uri: string; name: string; type: string }, teamName: string) => {
+    const form = new FormData();
+    if (Platform.OS === 'web') {
+      const blob = await (await fetch(f.uri)).blob();
+      (form.append as any)('file', blob, f.name || 'report');
+    } else {
+      form.append('file', f as any);
+    }
+    form.append('team_name', teamName);
+    return api.post('/injuries/import/read', form,
+      { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(r => r.data);
+  },
+  importSave: (data: { team_name: string; injuries: any[] }) => api.post('/injuries/import/save', data).then(r => r.data),
 };
 
 export const playCallingAPI = {

@@ -3097,6 +3097,20 @@
       "out": "IZVAN",
       "dtd": "DAN PO DAN",
       "questionable": "UPITAN"
+    },
+    "import": {
+      "button": "Uvezi izvještaj o ozljedama",
+      "title": "Uvezi izvještaj o ozljedama",
+      "reading": "Čitam izvještaj…",
+      "none": "Nema ozljeda u ovom izvještaju.",
+      "hint": "Provjeri svaki red. Dodirni status da ga promijeniš; odznači ono što izostavljaš.",
+      "include": "Uključi",
+      "onRoster": "U rosteru",
+      "byName": "Po imenu",
+      "save": "Spremi ({{count}})",
+      "readFailed": "Izvještaj nije moguće pročitati.",
+      "pickTeam": "Prvo odaberi tim na vrhu Rostera, zatim uvezi njegov izvještaj.",
+      "saved": "Spremljeno: {{count}}"
     }
   }
 }

@@ -3097,6 +3097,20 @@
       "out": "BAJA",
       "dtd": "DÍA A DÍA",
       "questionable": "DUDA"
+    },
+    "import": {
+      "button": "Importar parte de lesiones",
+      "title": "Importar parte de lesiones",
+      "reading": "Leyendo el parte…",
+      "none": "No se encontraron lesiones en este parte.",
+      "hint": "Revisa cada fila. Toca un estado para cambiarlo; desmarca lo que no quieras incluir.",
+      "include": "Incluir",
+      "onRoster": "En la plantilla",
+      "byName": "Por nombre",
+      "save": "Guardar ({{count}})",
+      "readFailed": "No se pudo leer ese parte.",
+      "pickTeam": "Primero elige un equipo arriba en la Plantilla y luego importa su parte de lesiones.",
+      "saved": "Guardadas: {{count}}"
     }
   }
 }

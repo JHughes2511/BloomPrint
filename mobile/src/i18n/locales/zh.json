@@ -3097,6 +3097,20 @@
       "out": "缺阵",
       "dtd": "每日观察",
       "questionable": "成疑"
+    },
+    "import": {
+      "button": "导入伤病报告",
+      "title": "导入伤病报告",
+      "reading": "正在读取报告…",
+      "none": "报告中未找到伤病。",
+      "hint": "逐行检查。点状态可更改；取消勾选即不导入。",
+      "include": "包含",
+      "onRoster": "在名单中",
+      "byName": "按姓名",
+      "save": "保存（{{count}}）",
+      "readFailed": "无法读取该报告。",
+      "pickTeam": "请先在名单顶部选择球队，再导入其伤病报告。",
+      "saved": "已保存：{{count}}"
     }
   }
 }

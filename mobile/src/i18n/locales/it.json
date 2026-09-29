@@ -3097,6 +3097,20 @@
       "out": "FUORI",
       "dtd": "IN VALUT.",
       "questionable": "DUBBIO"
+    },
+    "import": {
+      "button": "Importa report infortuni",
+      "title": "Importa report infortuni",
+      "reading": "Lettura del report…",
+      "none": "Nessun infortunio trovato nel report.",
+      "hint": "Controlla ogni riga. Tocca uno stato per cambiarlo; togli la spunta per escludere.",
+      "include": "Includi",
+      "onRoster": "In rosa",
+      "byName": "Per nome",
+      "save": "Salva ({{count}})",
+      "readFailed": "Impossibile leggere il report.",
+      "pickTeam": "Scegli prima una squadra in cima alla Rosa, poi importa il suo report.",
+      "saved": "Salvati: {{count}}"
     }
   }
 }

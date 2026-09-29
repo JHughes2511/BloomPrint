@@ -70,6 +70,8 @@ import LearnedPreferences from '../components/LearnedPreferences';
 import { Player, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { InjuryTag, useInjuryTags } from '../components/InjuryLog';
+import InjuryImport from '../components/InjuryImport';
+import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { titleTopPad } from '../responsive/screenPadding';
@@ -195,6 +197,18 @@ export default function RosterScreen() {
     const id = setInterval(load, 10_000);
     return () => clearInterval(id);
   }, []));
+  // Import an injury report for the team being shown.
+  const [injFile, setInjFile] = useState<{ uri: string; name: string; type: string } | null>(null);
+  const pickInjuryReport = async () => {
+    if (currentTeamId == null) {
+      Alert.alert(tr('injuries.import.button'), tr('injuries.import.pickTeam'));
+      return;
+    }
+    const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+    if (res.canceled || !res.assets?.[0]) return;
+    const f = res.assets[0];
+    setInjFile({ uri: f.uri, name: f.name ?? 'report', type: f.mimeType ?? 'application/octet-stream' });
+  };
   // Injury tags beside names; read again each time the roster comes into view.
   const [focusCount, setFocusCount] = useState(0);
   const injuryOf = useInjuryTags(focusCount);
@@ -355,6 +369,11 @@ export default function RosterScreen() {
             })}
           >
             <Ionicons name={searchOpen ? 'search' : 'search-outline'} size={18} color={searchOpen ? t.accent : t.muted} />
+          </TouchableOpacity>
+          {/* A team's injury report, read into the injury log. */}
+          <TouchableOpacity style={styles.searchBtn} onPress={pickInjuryReport}
+                            accessibilityLabel={tr('injuries.import.button')}>
+            <Ionicons name="medkit-outline" size={18} color={t.muted} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
             <Ionicons name="cloud-upload-outline" size={16} color={t.muted} />
@@ -771,6 +790,15 @@ export default function RosterScreen() {
           </View>
         </KeyboardAvoidingView>
       </Sheet>
+
+      <InjuryImport
+        file={injFile}
+        teamName={currentTeamName ?? ''}
+        onClose={() => setInjFile(null)}
+        onSaved={n => { setInjFile(null); setFocusCount(c => c + 1); Alert.alert(tr('injuries.import.title'), tr('injuries.import.saved', { count: n })); }}
+        t={t}
+        tr={tr}
+      />
     </View>
     </PageContainer>
     </ScreenBackground>

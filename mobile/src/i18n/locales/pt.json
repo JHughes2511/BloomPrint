@@ -3097,6 +3097,20 @@
       "out": "FORA",
       "dtd": "DIA A DIA",
       "questionable": "DÚVIDA"
+    },
+    "import": {
+      "button": "Importar relatório de lesões",
+      "title": "Importar relatório de lesões",
+      "reading": "Lendo o relatório…",
+      "none": "Nenhuma lesão encontrada neste relatório.",
+      "hint": "Confira cada linha. Toque no status para mudar; desmarque o que não quiser incluir.",
+      "include": "Incluir",
+      "onRoster": "No elenco",
+      "byName": "Por nome",
+      "save": "Salvar ({{count}})",
+      "readFailed": "Não foi possível ler esse relatório.",
+      "pickTeam": "Escolha primeiro um time no topo do Elenco e depois importe o relatório.",
+      "saved": "Salvas: {{count}}"
     }
   }
 }
