@@ -838,6 +838,18 @@ async def team_report(
                     roster_context += f"- {p.name} ({p.position or 'N/A'}): No evaluations yet.\n"
             team_label = f"{team_label} vs {opp.name}"
 
+    # Play calling across the team's games (and the match-up opponent's): what
+    # they run and what scores against which defense. Only what was recorded.
+    from .game_eval import team_play_calling_text
+    pc_names = [team_obj.name if team_obj else None]
+    if "matchup" in parse_output_types(output_type) and opponent_team_id is not None:
+        pc_names.append(opp.name)
+    for name in dict.fromkeys(n for n in pc_names if n):
+        text = team_play_calling_text(db, coach, name)
+        if text:
+            roster_context += f"\n\n{text}\n(Use this for what the team runs, what works against which "\
+                              "defense, and the recommendations. Quote the counts.)\n"
+
     from ..coach_context import system_profile_block, resolve_level
     system_block = system_profile_block(coach)
     team_level = resolve_level(coach, team=team_obj)

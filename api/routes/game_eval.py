@@ -2855,6 +2855,36 @@ async def upload_excel(
 
 # ── AI Scouting Report ────────────────────────────────────────────────────────
 
+def team_play_calling_text(db: Session, coach: models.Coach, team_name: str | None) -> str:
+    """A team's play calling across every game of theirs the coach can see, as
+    text for a model (empty when none was recorded)."""
+    if not (team_name or "").strip():
+        return ""
+    from .. import play_calling as pc
+    return pc.profile_text(scout_play_calling(db, team_name, _scout_games(db, coach, team_name)), team_name)
+
+
+def play_calling_context(db: Session, coach: models.Coach, game: models.GameSession) -> str:
+    """Play calling for a report on one game: this game's, possession by
+    possession, and the opponent's across every game against them the coach can
+    see (what they run, what has worked against their defense). Empty when none
+    was recorded. The blocks carry their own rule on points: never guessed."""
+    from .. import play_calling as pc
+    out = ""
+    this_game = pc.prompt_block(db, game, pc.side_names(db, game))
+    if this_game:
+        out += f"\n\nTHIS GAME'S {this_game}"
+    if game.opponent_name:
+        prof = scout_play_calling(db, game.opponent_name, _scout_games(db, coach, game.opponent_name))
+        if prof and prof["games"] > 1:
+            out += "\n\n" + pc.profile_text(prof, game.opponent_name)
+    if out:
+        out += ("\n\nUSE THE PLAY CALLING: say which plays and actions scored against which defense, "
+                "for each team, quoting the counts; what to run against their defense and what to take "
+                "away from their offense. 'Unknown' plays are unidentified. Never invent plays or possessions.")
+    return out
+
+
 async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSession,
                         corrections: list[str], on_words=None) -> str:
     """Build + run the scouting report from the box score plus any coach-added
@@ -2903,9 +2933,12 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         f"{score_info}\n\n"
         f"OPPONENT PLAYER GRADES:\n{opp_context}"
         f"{notes_text}"
+        f"{play_calling_context(db, coach, game)}"
         f"{corr_text}\n\n"
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
         f"defensive tendencies, and strategic recommendations for the next game against them."
+        f" Where play calling is recorded, include what they run and how it scores against each "
+        f"defense, and which of our plays and defenses worked against them."
         f"{REPORT_FORMAT}"
         f"{language_directive(coach)}"
     )
@@ -3108,10 +3141,12 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         f"{score_info}\n\n"
         f"OUR TEAM PLAYER GRADES:{_side_context(False)}\n\n"
         f"OPPONENT PLAYER GRADES:{_side_context(True)}"
-        f"{context}\n\n"
+        f"{context}"
+        f"{play_calling_context(db, coach, game)}\n\n"
         "Cover, in this order: 1) OUR TEAM PERFORMANCE — what worked, who stood out, where we broke down, "
         "and adjustments for next time; 2) OPPONENT BREAKDOWN — their tendencies, key players, how to attack "
-        "and defend them going forward; 3) KEY TAKEAWAYS."
+        "and defend them going forward; 3) PLAY CALLING — only if it is recorded above: which calls scored "
+        "against which defense, for both teams, with the counts; 4) KEY TAKEAWAYS."
         f"{REPORT_FORMAT_WITH_TABLES}"
         f"{language_directive(coach)}"
     )
@@ -3764,6 +3799,19 @@ async def scout_insight(
         facts = _lines(section, "per_game")
         ask = (f"{opponent_name} across {games_n} tracked game(s). "
                f"{SCOUT_SUBJECTS[subject].capitalize()}, by the numbers: {facts}.")
+        # What they run and what beats their defense, where play calling was
+        # recorded: the read a stat line cannot give. Scored/trips only.
+        pcp = profile.get("play_calling") or {}
+        side = pcp.get("offense") if subject == "offense" else pcp.get("defense") if subject == "defense" else None
+        if side:
+            def _rows(rows):
+                return "; ".join(f"{r['key']} {r['scored']} of {r['n']} scored" for r in rows[:4])
+            if subject == "offense":
+                ask += (f" Play calling ({pcp['games']} game(s)): plays {_rows(side['by_play'])}; "
+                        f"against defenses {_rows(side['by_defense'])}.")
+            else:
+                ask += (f" Play calling against them ({pcp['games']} game(s)): by the defense they played "
+                        f"{_rows(side['by_defense'])}; opponents' plays {_rows(side['by_play'])}.")
     else:
         who = next((p for p in profile["best_players"]
                     if p["player_name"].strip().lower() == subject.lower()), None)

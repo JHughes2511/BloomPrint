@@ -1544,6 +1544,25 @@ def _packet_prompt(db: Session, gr: models.GameReport, coach: models.Coach) -> s
             break
     if linked:
         sections.append(linked)
+    # Play calling: the linked game's, possession by possession, and each
+    # team's across the games on file — what they run, what scores against
+    # which defense. Only what was recorded; the blocks say points are never
+    # guessed.
+    from .game_eval import team_play_calling_text
+    from .. import play_calling as pc
+    pc_parts = []
+    linked_game = next((db.get(models.GameSession, c.game_id) for c in (gr.clips or []) if c.game_id), None)
+    if linked_game is not None:
+        block = pc.prompt_block(db, linked_game, pc.side_names(db, linked_game))
+        if block:
+            pc_parts.append("THE LINKED GAME'S " + block)
+    for name in dict.fromkeys(n for n in (team_a_name, team_b_name) if n):
+        text = team_play_calling_text(db, coach, name)
+        if text:
+            pc_parts.append(text)
+    if pc_parts:
+        sections.append("\n" + "\n\n".join(pc_parts) + "\n\nUse the play calling: which plays and actions "
+                        "scored against which defense, quoting the counts, and what that means for the game plan.")
     if gr.scouting_notes:
         sections.append(f"\nSCOUTING NOTES:\n{gr.scouting_notes}")
     if remembered:
