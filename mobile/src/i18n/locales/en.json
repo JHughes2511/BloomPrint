@@ -2986,6 +2986,7 @@
       "pickWhose": "Pick whose plays these are",
       "savedTitle": "Play calling imported",
       "savedMsg": "{{n}} possessions saved to this game."
-    }
+    },
+    "quickScored": "{{scored}} of {{n}} scored"
   }
 }

@@ -2986,6 +2986,7 @@
       "pickWhose": "Pasirinkite, kieno deriniai",
       "savedTitle": "Deriniai importuoti",
       "savedMsg": "Išsaugota {{n}} atakų šioms rungtynėms."
-    }
+    },
+    "quickScored": "{{scored}} iš {{n}} sėkmingų"
   }
 }

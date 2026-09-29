@@ -2986,6 +2986,7 @@
       "pickWhose": "Escolha de quem são as jogadas",
       "savedTitle": "Chamada de jogadas importada",
       "savedMsg": "{{n}} posses salvas neste jogo."
-    }
+    },
+    "quickScored": "{{scored}} de {{n}} convertidas"
   }
 }

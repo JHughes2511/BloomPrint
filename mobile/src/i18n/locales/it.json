@@ -2986,6 +2986,7 @@
       "pickWhose": "Scegli di chi sono i giochi",
       "savedTitle": "Chiamate importate",
       "savedMsg": "{{n}} possessi salvati in questa partita."
-    }
+    },
+    "quickScored": "{{scored}} su {{n}} a segno"
   }
 }

@@ -2986,6 +2986,7 @@
       "pickWhose": "Elige de quién son las jugadas",
       "savedTitle": "Llamado de jugadas importado",
       "savedMsg": "{{n}} posesiones guardadas en este partido."
-    }
+    },
+    "quickScored": "{{scored}} de {{n}} anotadas"
   }
 }

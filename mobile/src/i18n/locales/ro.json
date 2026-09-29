@@ -2986,6 +2986,7 @@
       "pickWhose": "Alege ale cui sunt sistemele",
       "savedTitle": "Sisteme importate",
       "savedMsg": "{{n}} posesii salvate la acest meci."
-    }
+    },
+    "quickScored": "{{scored}} din {{n}} reușite"
   }
 }

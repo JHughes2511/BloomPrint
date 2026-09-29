@@ -2986,6 +2986,7 @@
       "pickWhose": "Piliin kung kanino ang mga play",
       "savedTitle": "Na-import ang play calling",
       "savedMsg": "{{n}} possession ang na-save sa larong ito."
-    }
+    },
+    "quickScored": "{{scored}} sa {{n}} naka-score"
   }
 }

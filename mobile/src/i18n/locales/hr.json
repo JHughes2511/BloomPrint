@@ -2986,6 +2986,7 @@
       "pickWhose": "Odaberi čije su akcije",
       "savedTitle": "Akcije uvezene",
       "savedMsg": "Spremljeno {{n}} napada za ovu utakmicu."
-    }
+    },
+    "quickScored": "{{scored}} od {{n}} uspješno"
   }
 }

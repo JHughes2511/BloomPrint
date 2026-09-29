@@ -2986,6 +2986,7 @@
       "pickWhose": "Setlerin kime ait olduğunu seç",
       "savedTitle": "Set seçimi içe aktarıldı",
       "savedMsg": "Bu maça {{n}} hücum kaydedildi."
-    }
+    },
+    "quickScored": "{{n}} hücumda {{scored}} sayı"
   }
 }

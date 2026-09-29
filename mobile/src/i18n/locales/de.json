@@ -2986,6 +2986,7 @@
       "pickWhose": "Wähle, wessen Spielzüge das sind",
       "savedTitle": "Spielzüge importiert",
       "savedMsg": "{{n}} Angriffe für dieses Spiel gespeichert."
-    }
+    },
+    "quickScored": "{{scored}} von {{n}} erfolgreich"
   }
 }

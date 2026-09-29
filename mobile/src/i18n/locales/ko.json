@@ -2986,6 +2986,7 @@
       "pickWhose": "누구의 플레이인지 고르세요",
       "savedTitle": "플레이 콜을 가져왔습니다",
       "savedMsg": "이 경기에 {{n}}포제션을 저장했습니다."
-    }
+    },
+    "quickScored": "{{n}}번 중 {{scored}}번 득점"
   }
 }

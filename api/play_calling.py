@@ -150,60 +150,43 @@ def catalog_for_game(db: Session, game: models.GameSession) -> dict:
 
 # ── The numbers ──────────────────────────────────────────────────────────────
 
-def _estimated_points(calls: list, game: models.GameSession | None, side: str) -> float:
-    """What a score whose points were not written down is worth: the average
-    of the scores whose points were, else the team's real points per score in
-    this game, else 2."""
-    known = [c.points for c in calls if c.result == "score" and c.points is not None]
-    if known:
-        return sum(known) / len(known)
-    scores = sum(1 for c in calls if c.result == "score")
-    if game is not None and scores:
-        pts = game.our_score if side == "our" else game.opponent_score
-        # Only when the possessions cover the game: five imported trips
-        # against a final score of 74 are not worth 25 points a basket.
-        if pts and 1.0 <= pts / scores <= 3.5:
-            return pts / scores
-    return 2.0
-
-
-def _line(calls: list, est: float) -> dict:
+def _line(calls: list) -> dict:
+    """Trips, scores and the rate — always. Points and points per trip only
+    when every score in the line has its points recorded: a score whose points
+    nobody wrote down is a score, not an estimate."""
     n = len(calls)
-    scored = sum(1 for c in calls if c.result == "score")
-    known = sum(c.points for c in calls if c.points is not None)
-    estimated = sum(est for c in calls if c.result == "score" and c.points is None)
-    points = known + estimated
-    return {"n": n, "scored": scored, "pct": round(100 * scored / n) if n else 0,
-            "points": round(points, 1), "ppp": round(points / n, 2) if n else 0.0,
-            "points_estimated": estimated > 0}
+    scored = [c for c in calls if c.result == "score"]
+    complete = bool(n) and all(c.points is not None for c in scored)
+    points = sum(c.points for c in scored) if complete else None
+    return {"n": n, "scored": len(scored), "pct": round(100 * len(scored) / n) if n else 0,
+            "points": points, "ppp": round(points / n, 2) if points is not None and n else None}
 
 
 def summary(calls: list, game: models.GameSession | None = None) -> dict:
     """The efficiency numbers for one or more games' possessions, per side.
 
     Only finished possessions (a result) count. Every line has how many trips,
-    how many scored, the rate, points and points per possession — the last
-    flagged when some scores had no points written down and were estimated.
+    how many scored and the rate; points and points per possession only where
+    every score's points were recorded. Nothing is estimated.
     """
     out = {}
     for side in ("our", "opponent"):
         mine = [c for c in calls if c.side == side and c.result in ("score", "no_score")]
         if not mine:
             continue
-        est = _estimated_points(mine, game, side)
 
         def by(fn):
             groups = defaultdict(list)
             for c in mine:
                 groups[fn(c)].append(c)
-            rows = [{"key": k, **_line(v, est)} for k, v in groups.items()]
+            rows = [{"key": k, **_line(v)} for k, v in groups.items()]
             return sorted(rows, key=lambda r: (-r["n"], str(r["key"])))
         ends = defaultdict(int)
         for c in mine:
             if c.result == "no_score" and c.ended:
                 ends[c.ended] += 1
         out[side] = {
-            "overall": _line(mine, est),
+            "overall": _line(mine),
             "by_play": by(lambda c: c.play),
             "by_type": by(lambda c: c.play_type),
             "by_defense": by(lambda c: c.defense or "Not noted"),
@@ -436,8 +419,8 @@ def finish_possession(db: Session, game: models.GameSession, coach, call: models
         if ended == "ft_miss":
             call.ft_made, call.ft_att = 0, ft_att or 2
     elif call.result != "score":
-        # Scored with no player or no shot given: a score whose points are
-        # estimated, the same as a sheet's bare "+".
+        # Scored with no player or no shot given: a score with no points, the
+        # same as a sheet's bare "+" — never a guessed number.
         call.result, call.points = "score", None
 
 

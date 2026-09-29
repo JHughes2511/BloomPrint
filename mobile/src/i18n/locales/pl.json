@@ -2986,6 +2986,7 @@
       "pickWhose": "Wybierz, czyje to zagrywki",
       "savedTitle": "Zagrywki zaimportowane",
       "savedMsg": "Zapisano {{n}} posiadań w tym meczu."
-    }
+    },
+    "quickScored": "{{scored}} z {{n}} celnych"
   }
 }

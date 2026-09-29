@@ -2986,6 +2986,7 @@
       "pickWhose": "Välj vems spel det är",
       "savedTitle": "Spelval importerade",
       "savedMsg": "{{n}} anfall sparade i matchen."
-    }
+    },
+    "quickScored": "{{scored}} av {{n}} gav poäng"
   }
 }

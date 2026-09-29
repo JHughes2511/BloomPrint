@@ -149,6 +149,9 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
   const orbCount = (sd: Side) => Number(data?.orb?.[sd]?.[String(liveQuarter)] ?? 0);
   const shownScored = shown.filter(p => p.result === 'score').length;
   const shownDone = shown.filter(p => p.result).length;
+  // Points only when every score shown has them: a score nobody gave points
+  // for is a score, not a guess.
+  const shownComplete = shown.filter(p => p.result === 'score').every(p => p.points != null);
   const shownPts = shown.reduce((a, p) => a + (p.points ?? 0), 0);
 
   const offenseEvents = (p: any) => (p.events ?? []).filter((e: any) => e.is_opponent === (p.side === 'opponent'));
@@ -299,7 +302,11 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
         )}
       </View>
       {shownDone > 0 && (
-        <Text style={s.quick}>{tr('playCalling.quick', { scored: shownScored, n: shownDone, points: shownPts })}</Text>
+        <Text style={s.quick}>
+          {shownComplete
+            ? tr('playCalling.quick', { scored: shownScored, n: shownDone, points: shownPts })
+            : tr('playCalling.quickScored', { scored: shownScored, n: shownDone })}
+        </Text>
       )}
       {shown.length === 0 ? (
         <Text style={s.empty}>{tr('playCalling.none')}</Text>

@@ -2986,6 +2986,7 @@
       "pickWhose": "请选择是哪队的战术",
       "savedTitle": "已导入战术调用",
       "savedMsg": "已为本场比赛保存{{n}}个回合。"
-    }
+    },
+    "quickScored": "{{n}}次中{{scored}}次得分"
   }
 }

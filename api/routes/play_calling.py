@@ -37,7 +37,7 @@ def _settle(call: models.PlayCall) -> None:
 
     An ending says both whether it scored and — except free throws, which say
     how many went in — how many points. Points given outright win; a score with
-    no points stays a score whose points are estimated in the numbers.
+    no points stays a score with no points: the numbers never guess them.
     """
     if call.ended == "ft" and call.ft_made is not None:
         call.points = call.ft_made if call.points is None else call.points

@@ -2986,6 +2986,7 @@
       "pickWhose": "Choisissez à qui sont ces systèmes",
       "savedTitle": "Systèmes importés",
       "savedMsg": "{{n}} possessions enregistrées pour ce match."
-    }
+    },
+    "quickScored": "{{scored}} sur {{n}} marqués"
   }
 }

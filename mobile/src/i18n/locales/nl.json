@@ -2986,6 +2986,7 @@
       "pickWhose": "Kies van wie de spelen zijn",
       "savedTitle": "Spelkeuze geïmporteerd",
       "savedMsg": "{{n}} balbezit opgeslagen bij deze wedstrijd."
-    }
+    },
+    "quickScored": "{{scored}} van {{n}} gescoord"
   }
 }
