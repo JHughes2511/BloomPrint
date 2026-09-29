@@ -24,7 +24,7 @@ import ListSearchHeader from '../components/ListSearchHeader';
 import DateRangeFilter, { ALL_TIME, DateField, DateRange, dayKey, inDateRange, isFiltering, rangeParams } from '../components/DateRangeFilter';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
-import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
+import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, overtimeSecondsForLevel, periodLength, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
@@ -350,7 +350,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [editMin, setEditMin] = useState('0');
   const [editSec, setEditSec] = useState('0');
   const gameFmt: GameFormat = activeGame
-    ? { format: activeGame.period_format ?? 'quarters', numPeriods: activeGame.num_periods ?? 4, periodSeconds: activeGame.period_seconds ?? 480 }
+    ? { format: activeGame.period_format ?? 'quarters', numPeriods: activeGame.num_periods ?? 4, periodSeconds: activeGame.period_seconds ?? 480,
+        otSeconds: overtimeSecondsForLevel(activeGame.competition_level) }
     : { format: 'quarters', numPeriods: 4, periodSeconds: 480 };
   const [entryMode, setEntryMode] = useState<'our' | 'opponent'>('our');
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -857,13 +858,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           // Period ended: auto-stop and auto-advance to the next period.
           setClockRunning(false);
           setPeriodIndex(pi => pi + 1);
-          return gameFmt.periodSeconds;
+          // The next period's length: an overtime is shorter than a quarter.
+          return periodLength(gameFmt, periodIndex + 1);
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(iv);
-  }, [clockRunning, gameFmt.periodSeconds]);
+  }, [clockRunning, gameFmt.periodSeconds, gameFmt.otSeconds, periodIndex]);
 
   // The clock drives the weight bucket: whenever the derived bucket changes,
   // update activeQuarter (still tappable as a manual override between crossings).
@@ -893,7 +895,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   const advancePeriod = () => {
     setPeriodIndex(pi => pi + 1);
-    setClockRemaining(gameFmt.periodSeconds);
+    setClockRemaining(periodLength(gameFmt, periodIndex + 1));
     setClockRunning(false);
   };
   const applyClockEdit = () => {

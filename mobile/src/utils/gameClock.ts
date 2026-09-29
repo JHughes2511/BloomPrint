@@ -12,6 +12,7 @@ export interface GameFormat {
   format: PeriodFormat;
   numPeriods: number;      // 4 quarters, or 2 halves
   periodSeconds: number;   // length of one period
+  otSeconds?: number;      // length of one overtime; a full period if unset
 }
 
 const QUARTERS = (mins: number): GameFormat => ({ format: 'quarters', numPeriods: 4, periodSeconds: mins * 60 });
@@ -43,6 +44,39 @@ export function formatForLevel(level?: string | null): GameFormat {
     default:
       return QUARTERS(8);
   }
+}
+
+// Overtime length by level. NBA, G-League, college and FIBA play 5 minutes;
+// high school (NFHS) plays 4. AAU and youth vary by event: 4 and 3 are the
+// defaults, and the clock can be edited on the day.
+export function overtimeSecondsForLevel(level?: string | null): number {
+  switch ((level || '').trim()) {
+    case 'NBA':
+    case 'G-League':
+    case 'D1':
+    case 'D2':
+    case 'D3':
+    case 'JUCO':
+    case 'High Europe':
+    case 'Low Europe':
+    case 'European Pro':
+    case 'International Academy':
+      return 5 * 60;
+    case '17U AAU':
+    case '16U AAU':
+    case '14U/15U AAU':
+      return 4 * 60;
+    case 'Youth (5-13)':
+      return 3 * 60;
+    case 'HS Varsity':
+    default:
+      return 4 * 60;
+  }
+}
+
+// How long a period runs: an overtime runs its own, shorter length.
+export function periodLength(fmt: GameFormat, periodIndex: number): number {
+  return periodIndex > fmt.numPeriods ? (fmt.otSeconds ?? fmt.periodSeconds) : fmt.periodSeconds;
 }
 
 // The display label for a period index (1-based). OT periods are numbered past
@@ -82,7 +116,7 @@ export function weightBucket(fmt: GameFormat, periodIndex: number, remainingSeco
 // under a quarter the coach thought they had left. The row sets the period now,
 // and this is what it sets it to.
 export function periodForBucket(fmt: GameFormat, bucket: number): { periodIndex: number; remaining: number } {
-  if (bucket >= 5) return { periodIndex: fmt.numPeriods + (bucket - 4), remaining: fmt.periodSeconds };
+  if (bucket >= 5) return { periodIndex: fmt.numPeriods + (bucket - 4), remaining: fmt.otSeconds ?? fmt.periodSeconds };
   if (fmt.format === 'quarters') {
     return { periodIndex: Math.min(bucket, fmt.numPeriods), remaining: fmt.periodSeconds };
   }
