@@ -1560,6 +1560,27 @@ def _packet_prompt(db: Session, gr: models.GameReport, coach: models.Coach) -> s
         text = team_play_calling_text(db, coach, name)
         if text:
             pc_parts.append(text)
+    # The players' files in brief — injuries and notes for both teams.
+    from ..player_file import roster_lines, game_players_block
+    pf_parts = []
+    if linked_game is not None:
+        g_block = game_players_block(db, coach, linked_game)
+        if g_block:
+            pf_parts.append(g_block.strip())
+    else:
+        for tm in (gr.my_team, gr.opponent_team):
+            if tm is not None:
+                lines = roster_lines(db, coach, tm.name, players=db.query(models.Player).filter_by(team_id=tm.id).all())
+                if lines:
+                    pf_parts.append(lines)
+        if not gr.opponent_team and opp_name:
+            ops = [o.player_name for o in db.query(models.OpponentPlayer).filter_by(coach_id=coach.id).all()
+                   if (o.opponent_name or "").strip().lower() == opp_name.strip().lower()]
+            lines = roster_lines(db, coach, opp_name, names=ops)
+            if lines:
+                pf_parts.append(lines)
+    if pf_parts:
+        sections.append("\n" + "\n\n".join(pf_parts) + "\n(Use the injuries and notes; never invent an injury.)")
     if pc_parts:
         sections.append("\n" + "\n\n".join(pc_parts) + "\n\nUse the play calling: which plays and actions "
                         "scored against which defense, quoting the counts, and what that means for the game plan.")

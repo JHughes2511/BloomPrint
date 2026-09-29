@@ -267,66 +267,12 @@ def _tokens_to_refs(tokens: str | None, coach_id: int) -> list[str]:
 
 
 def _gather_player_dossier(db, coach, player) -> str:
-    """Everything the app knows about a player — for a MATCH-UP comparison. Pulls
-    the player's own evals (grades, pillars, flags, latest report), training,
-    tracked box-score stats, and any mention of them across the coach's game /
-    team / scouting reports and the reports shared into their inbox."""
-    from .game_eval import player_tracked_stats_block
-    name = player.name
-    lines = [f"=== {name} ==="]
-    lines.append(
-        f"Position: {player.position or 'N/A'} | Height: {player.height or 'N/A'} | "
-        f"Level: {player.competition_level or 'N/A'}"
-        + (f" | Team: {player.program_name}" if getattr(player, 'program_name', None) else "")
-    )
-    own = [e for e in player.evaluations if e.coach_id == coach.id] or list(player.evaluations)
-    own = sorted(own, key=lambda e: e.id or 0, reverse=True)
-    if own:
-        latest = own[0]
-        if latest.overall_grade is not None:
-            lines.append(f"Latest BIM grade: {latest.overall_grade}/10 ({latest.output_type})")
-        try:
-            pg = ", ".join(f"{k}: {v}" for k, v in (latest.pillar_grades or {}).items())
-            if pg:
-                lines.append(f"Pillars: {pg}")
-        except Exception:
-            pass
-        if latest.green_flags:
-            lines.append("Green flags: " + "; ".join(str(x) for x in latest.green_flags[:4]))
-        if latest.watch_flags:
-            lines.append("Watch flags: " + "; ".join(str(x) for x in latest.watch_flags[:4]))
-        lines.append(f"Evaluations on file: {len(own)}")
-        if latest.report_text:
-            lines.append("From latest report:\n" + latest.report_text[:900])
-    else:
-        lines.append("No evaluations on file for this subject.")
-    tr = db.query(models.TrainingSession).filter_by(coach_id=coach.id, player_id=player.id).count()
-    if tr:
-        lines.append(f"Training programs on file: {tr}")
-    game_ids = [g.id for g in db.query(models.GameSession).filter_by(coach_id=coach.id).all()]
-    stats = player_tracked_stats_block(db, coach.id, name, game_ids) if game_ids else ""
-    if stats and "No tracked" not in stats:
-        lines.append(stats[:900])
-    # Mentions across other reports (by name).
-    mentions: list[str] = []
-
-    def _grab(text, src):
-        if text and name and name.lower() in text.lower() and len(mentions) < 6:
-            idx = text.lower().find(name.lower())
-            snippet = text[max(0, idx - 120):idx + 220].strip().replace("\n", " ")
-            mentions.append(f"[{src}] …{snippet}…")
-
-    for gr in db.query(models.GameReport).filter_by(coach_id=coach.id).limit(30).all():
-        _grab(gr.report_text, "game report")
-    for trp in db.query(models.TeamReport).filter_by(coach_id=coach.id).limit(30).all():
-        _grab(trp.report_text, "team report")
-    for gs in db.query(models.GameSession).filter_by(coach_id=coach.id).limit(40).all():
-        _grab(getattr(gs, "ai_scouting_report", None), f"scouting vs {gs.opponent_name}")
-    for sh in db.query(models.StaffSharedReport).filter_by(recipient_id=coach.id).limit(30).all():
-        _grab(sh.frozen_text, "shared with you")
-    if mentions:
-        lines.append("Mentioned in other reports:\n" + "\n".join(mentions))
-    return "\n".join(lines)
+    """Everything the app knows about a player — for a MATCH-UP comparison. The
+    shared player file (api/player_file.py): who they are, notes, injuries,
+    evaluations, training, tracked stats, film tendencies, and mentions of them
+    across the coach's reports."""
+    from ..player_file import player_file
+    return player_file(db, coach, player)
 
 
 @router.post("")
@@ -383,6 +329,12 @@ async def submit_evaluation(
         if gid_list:
             from .game_eval import player_tracked_stats_block
             combined_focus += player_tracked_stats_block(db, coach.id, player.name, gid_list)
+    # The player's file: notes, injuries, what is already known — so the report
+    # knows the hamstring the staff logged, not only what the film shows.
+    from ..player_file import player_file
+    combined_focus += "\n\n" + player_file(db, coach, player, mentions=False, stats=not game_ids) + \
+        "\n(Use the player file for context. Injuries are real limits: say how they bear on what the film shows " \
+        "and on the plan; never invent one.)\n"
     combined_focus += system_profile_block(coach)
 
     # MATCH-UP: aggregate everything the app knows about each subject and hand it
@@ -837,7 +789,16 @@ async def team_report(
                 else:
                     roster_context += f"- {p.name} ({p.position or 'N/A'}): No evaluations yet.\n"
             team_label = f"{team_label} vs {opp.name}"
+        from ..player_file import roster_lines as _rl
+        opp_files = _rl(db, coach, opp.name, players=opp_players)
+        if opp_files:
+            roster_context += f"\n{opp_files}\n"
 
+    # The players' files in brief: injuries and notes for everyone with any.
+    from ..player_file import roster_lines
+    files = roster_lines(db, coach, team_obj.name if team_obj else None, players=players)
+    if files:
+        roster_context += f"\n\n{files}\n"
     # Play calling across the team's games (and the match-up opponent's): what
     # they run and what scores against which defense. Only what was recorded.
     from .game_eval import team_play_calling_text

@@ -531,12 +531,18 @@ async def player_summary(
     from ..coach_context import resolve_level, language_directive
     _team = db.get(models.Team, player.team_id) if player.team_id else None
     _lvl = resolve_level(coach, player, _team)
+    # The player's file (notes, injuries, film) — the summary should know the
+    # injury history, not only the evaluations.
+    from ..player_file import player_file
+    _file = (player_file(db, coach, player, mentions=False, stats=False)
+             + "\n(Account for injuries in the trajectory; never invent one.)")
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
         f"Generate a {describe_output_type(body.output_type)} that SUMMARIZES ALL EVALUATION HISTORY for {player.name}.\n\n"
         f"COMPETITION LEVEL: {_lvl} — calibrate every grade, comparison, and recommendation to this level.\n\n"
         f"EVALUATION HISTORY:\n{eval_context}\n"
         f"{tracked_block}\n\n"
+        f"{_file}\n\n"
         f"{('FOCUS: ' + focus) if focus else ''}\n\n"
         "Synthesize trends, growth over time, consistent strengths, persistent concerns, "
         "and the player's trajectory. Provide an overall composite grade and pillar grades. "

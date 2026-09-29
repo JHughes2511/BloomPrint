@@ -99,6 +99,7 @@ def t_search_players(db, coach, query: str = "") -> dict:
 
 def t_player_detail(db, coach, player: str) -> dict:
     from .players import _composite_bim, _bim_evals
+    from ..injuries import for_player as inj_rows, line as inj_line
     p = _find_player(db, coach, player)
     if not p:
         return {"error": f"No player found matching '{player}'."}
@@ -113,6 +114,9 @@ def t_player_detail(db, coach, player: str) -> dict:
         "bim_grade": grade, "pillars": pillars, "report_count": cnt,
         "green_flags": (latest.green_flags if latest else None),
         "watch_flags": (latest.watch_flags if latest else None),
+        # Injuries and notes: part of the player's file, as in every report.
+        "notes": p.notes,
+        "injuries": [inj_line(i) for i in inj_rows(db, p)],
         "eval_history": [
             {"id": e.id, "type": e.output_type, "grade": e.overall_grade,
              "date": local_day(e.created_at, "%Y-%m-%d") or None}
@@ -377,7 +381,7 @@ def t_get_conversation_messages(db, coach, conversation_id: int = 0, with_name: 
 TOOLS = [
     {"name": "search_players", "description": "List/search the coach's players (name, position, team, level, BIM grade, report count).",
      "input_schema": {"type": "object", "properties": {"query": {"type": "string", "description": "optional name/position/team filter"}}}},
-    {"name": "player_detail", "description": "Full detail for one player: BIM composite grade, pillar grades, green/watch flags, and eval history (with eval ids/dates).",
+    {"name": "player_detail", "description": "Full detail for one player: BIM composite grade, pillar grades, green/watch flags, coach's notes, injuries (current and recent), and eval history (with eval ids/dates).",
      "input_schema": {"type": "object", "properties": {"player": {"type": "string", "description": "player name or id"}}, "required": ["player"]}},
     {"name": "player_game_history", "description": "A player's real tracked box-score stats across games.",
      "input_schema": {"type": "object", "properties": {"player_name": {"type": "string"}}, "required": ["player_name"]}},

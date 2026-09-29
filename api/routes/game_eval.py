@@ -2855,6 +2855,13 @@ async def upload_excel(
 
 # ── AI Scouting Report ────────────────────────────────────────────────────────
 
+def game_players_block(db: Session, coach: models.Coach, game: models.GameSession) -> str:
+    """Both teams' players with something on record — injuries, notes — for a
+    report on this game (api/player_file.py)."""
+    from ..player_file import game_players_block as _gpb
+    return _gpb(db, coach, game)
+
+
 def team_play_calling_text(db: Session, coach: models.Coach, team_name: str | None) -> str:
     """A team's play calling across every game of theirs the coach can see, as
     text for a model (empty when none was recorded)."""
@@ -2933,6 +2940,7 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         f"{score_info}\n\n"
         f"OPPONENT PLAYER GRADES:\n{opp_context}"
         f"{notes_text}"
+        f"{game_players_block(db, coach, game)}"
         f"{play_calling_context(db, coach, game)}"
         f"{corr_text}\n\n"
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
@@ -3142,6 +3150,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         f"OUR TEAM PLAYER GRADES:{_side_context(False)}\n\n"
         f"OPPONENT PLAYER GRADES:{_side_context(True)}"
         f"{context}"
+        f"{game_players_block(db, coach, game)}"
         f"{play_calling_context(db, coach, game)}\n\n"
         "Cover, in this order: 1) OUR TEAM PERFORMANCE — what worked, who stood out, where we broke down, "
         "and adjustments for next time; 2) OPPONENT BREAKDOWN — their tendencies, key players, how to attack "
@@ -3824,6 +3833,10 @@ async def scout_insight(
                  f"3PT {a['THREE_PCT'] if a['THREE_PCT'] is not None else 'n/a'}%; "
                  f"grade {who['avg_grade']} out of 5")
         ask = (f"{subject} of {opponent_name}, across {who['games']} tracked game(s): {facts}.")
+        from .. import injuries as _inj
+        _rows = _inj.for_name(db, coach, opponent_name, subject)
+        if _rows:
+            ask += " Injuries on record: " + " | ".join(_inj.line(i) for i in _rows[:3])
 
     # What has been written about them, not only what was counted. A packet
     # report says why a number happened; the number on its own does not.

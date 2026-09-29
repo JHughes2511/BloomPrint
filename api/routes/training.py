@@ -171,7 +171,8 @@ def _extract_reference(upload: "UploadFile") -> tuple[str, list[dict]]:
         return "", []
 
 
-def build_player_training_prompt(player_name: str, original_text: str, feedback: str | None = None) -> str:
+def build_player_training_prompt(player_name: str, original_text: str, feedback: str | None = None,
+                                 player_context: str = "") -> str:
     """Recreate a coach's training program in the same rich, markdown-formatted
     style the player's own self-generated training programs use."""
     prompt = (
@@ -181,6 +182,9 @@ def build_player_training_prompt(player_name: str, original_text: str, feedback:
     )
     if feedback:
         prompt += f"PLAYER FEEDBACK TO INCORPORATE:\n{feedback}\n\n"
+    if player_context:
+        prompt += (f"{player_context}\n\nKeep the program safe for any current injury above (work around it; "
+                   "do not load the injured area) without quoting the staff's notes.\n\n")
     prompt += (
         "Create a detailed, actionable training program with specific drills and focus areas, preserving the "
         "coach's priorities, intent and structure.\n\n"
@@ -315,6 +319,12 @@ def generate_training(
     )
     if focus:
         prompt += f"\n\nCOACH CONTEXT:\n{focus}"
+    # The player's file: injuries above all — a program has to work around a
+    # hamstring the staff logged — plus notes, tracked stats and film.
+    from ..player_file import player_file
+    prompt += ("\n\n" + player_file(db, coach, player, mentions=False)
+               + "\n(Build around any current injury: no loading the injured area, and say how the program "
+                 "adapts. Never invent an injury.)")
     from ..coach_context import system_profile_block, focus_directive
     prompt += focus_directive(focus_prompt)
     prompt += system_profile_block(coach)
@@ -613,7 +623,11 @@ def refresh_player_program(
     if not session or session.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Training session not found")
     player_name = session.player.name if session.player else "the player"
-    prompt = build_player_training_prompt(player_name, session.program_text or "", body.feedback)
+    ctx = ""
+    if session.player:
+        from ..player_file import player_file
+        ctx = player_file(db, coach, session.player, mentions=False, stats=False)
+    prompt = build_player_training_prompt(player_name, session.program_text or "", body.feedback, ctx)
     try:
         import anthropic
         client = anthropic.Anthropic()
