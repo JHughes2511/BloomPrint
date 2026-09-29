@@ -3025,6 +3025,9 @@
       "turnover": "Ballverlust",
       "ft_miss": "Freiwürfe daneben",
       "other": "Anderes"
-    }
+    },
+    "result": "Wurf / Ergebnis",
+    "pickPlayFirst": "Wähle die Verteidigung, dann den Spielzug, um einen Angriff zu starten.",
+    "deleteNote": "Seine Statistiken bleiben im Boxscore."
   }
 }

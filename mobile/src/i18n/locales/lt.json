@@ -3025,6 +3025,9 @@
       "turnover": "Klaida",
       "ft_miss": "Nepataikytos baudos",
       "other": "Kita"
-    }
+    },
+    "result": "Metimas / rezultatas",
+    "pickPlayFirst": "Pasirinkite gynybą, tada derinį, kad pradėtumėte ataką.",
+    "deleteNote": "Jos statistika lieka protokole."
   }
 }

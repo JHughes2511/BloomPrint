@@ -3025,6 +3025,9 @@
       "turnover": "Izgubljena lopta",
       "ft_miss": "Promašena slobodna bacanja",
       "other": "Drugo"
-    }
+    },
+    "result": "Šut / ishod",
+    "pickPlayFirst": "Izaberi odbranu, pa akciju, da počneš napad.",
+    "deleteNote": "Njegova statistika ostaje u zapisniku."
   }
 }

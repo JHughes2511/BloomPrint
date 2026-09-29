@@ -3025,6 +3025,9 @@
       "turnover": "Pérdida",
       "ft_miss": "Tiros libres fallados",
       "other": "Otro"
-    }
+    },
+    "result": "Tiro / resultado",
+    "pickPlayFirst": "Elige la defensa y luego la jugada para empezar una posesión.",
+    "deleteNote": "Sus estadísticas se quedan en el box score."
   }
 }

@@ -1210,13 +1210,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     const category = OFFENSE_STATS.includes(statName) ? 'offense' : 'defense';
     const count = 1;
     const rawPoints = computeRawPoints(statName, count);
+    // Answer the tap now, not when the server does: flash, toast and the
+    // basket on the scoreboard. The server's reply then settles it (a merge
+    // takes the points back off, since the other coach's tap already had them).
+    const player = selectedPlayer;
+    const opp = entryMode === 'opponent';
+    const made = statName === '3 FG Made' ? 3 : statName === '2 FG Made' ? 2 : statName === 'FT Made' ? 1 : 0;
+    scoreSeq.current += 1;
+    scoreInFlight.current += 1;
+    if (made) (opp ? setOppScore : setOurScore)(prev => prev + made);
+    setFlashStat(statName);
+    setStatToast(tr('teamGrade.statLoggedToast', { player, stat: statLabel(statName) }));
+    const clear = setTimeout(() => { setFlashStat(null); setStatToast(null); }, 1200);
     try {
       // Live: the server counts it once across trackers, attaches it to the
       // possession being played, and moves the score itself.
-      scoreSeq.current += 1;
       const r: any = await gameEvalAPI.logStat(activeGame.id, {
-        player_name: selectedPlayer,
-        is_opponent: entryMode === 'opponent',
+        player_name: player,
+        is_opponent: opp,
         quarter: activeQuarter,
         stat_name: statName,
         stat_category: category,
@@ -1224,17 +1235,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         count,
         live: true,
       });
-      if (r?.our_score != null) setOurScore(r.our_score);
-      if (r?.opponent_score != null) setOppScore(r.opponent_score);
+      scoreInFlight.current -= 1;
+      // The server's score counts everyone's taps; show it once mine are in.
+      if (scoreInFlight.current === 0) {
+        if (r?.our_score != null) setOurScore(r.our_score);
+        if (r?.opponent_score != null) setOppScore(r.opponent_score);
+      }
       setPcKey(k => k + 1);
-      // Flash the button and show toast
-      setFlashStat(statName);
-      setStatToast(r?.merged
-        ? tr('playCalling.mergedToast')
-        : tr('teamGrade.statLoggedToast', { player: selectedPlayer, stat: statLabel(statName) }));
-      // A merge is news the coach should get to read.
-      setTimeout(() => { setFlashStat(null); setStatToast(null); }, r?.merged ? 2500 : 1200);
+      if (r?.merged) {
+        // A merge is news the coach should get to read.
+        clearTimeout(clear);
+        setStatToast(tr('playCalling.mergedToast'));
+        setTimeout(() => { setFlashStat(null); setStatToast(null); }, 2500);
+      }
     } catch (e: any) {
+      scoreInFlight.current -= 1;
+      if (made) (opp ? setOppScore : setOurScore)(prev => Math.max(0, prev - made));
+      clearTimeout(clear);
+      setFlashStat(null); setStatToast(null);
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotLogStat'));
     }
   };
@@ -3343,6 +3361,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 }}
                 refreshKey={pcKey}
                 onScores={(o, p) => { if (o != null) setOurScore(o); if (p != null) setOppScore(p); }}
+                onScoreBump={(sd, pts) => {
+                  scoreSeq.current += 1;
+                  (sd === 'opponent' ? setOppScore : setOurScore)(prev => Math.max(0, prev + pts));
+                }}
                 statLabel={statLabel}
                 t={t}
                 tr={tr}

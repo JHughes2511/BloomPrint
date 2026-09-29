@@ -3025,6 +3025,9 @@
       "turnover": "Balverlies",
       "ft_miss": "Vrije worpen gemist",
       "other": "Anders"
-    }
+    },
+    "result": "Schot / resultaat",
+    "pickPlayFirst": "Kies de verdediging en dan het spel om een balbezit te starten.",
+    "deleteNote": "De statistieken blijven in de boxscore."
   }
 }

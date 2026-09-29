@@ -3025,6 +3025,9 @@
       "turnover": "Top kaybı",
       "ft_miss": "Kaçan serbest atışlar",
       "other": "Diğer"
-    }
+    },
+    "result": "Şut / sonuç",
+    "pickPlayFirst": "Hücumu başlatmak için önce savunmayı, sonra seti seç.",
+    "deleteNote": "İstatistikleri kutu skorda kalır."
   }
 }

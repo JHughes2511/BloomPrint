@@ -3025,6 +3025,9 @@
       "turnover": "Turnover",
       "ft_miss": "Missed free throws",
       "other": "Other"
-    }
+    },
+    "result": "Shot / result",
+    "pickPlayFirst": "Pick the defense, then the play, to start a possession.",
+    "deleteNote": "Its stats stay in the box score."
   }
 }

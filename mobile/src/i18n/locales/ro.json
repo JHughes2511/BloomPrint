@@ -3025,6 +3025,9 @@
       "turnover": "Pierdere",
       "ft_miss": "Aruncări libere ratate",
       "other": "Altceva"
-    }
+    },
+    "result": "Aruncare / rezultat",
+    "pickPlayFirst": "Alege apărarea, apoi sistemul, pentru a începe o posesie.",
+    "deleteNote": "Statisticile ei rămân în foaia de statistici."
   }
 }

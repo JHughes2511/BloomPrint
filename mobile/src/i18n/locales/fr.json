@@ -3025,6 +3025,9 @@
       "turnover": "Perte de balle",
       "ft_miss": "Lancers francs manqués",
       "other": "Autre"
-    }
+    },
+    "result": "Tir / résultat",
+    "pickPlayFirst": "Choisissez la défense, puis le système, pour lancer une possession.",
+    "deleteNote": "Ses stats restent dans la feuille de match."
   }
 }

@@ -3025,6 +3025,9 @@
       "turnover": "Turnover",
       "ft_miss": "Mintis na free throw",
       "other": "Iba"
-    }
+    },
+    "result": "Tira / resulta",
+    "pickPlayFirst": "Piliin ang depensa, tapos ang play, para magsimula ng possession.",
+    "deleteNote": "Mananatili ang stats nito sa box score."
   }
 }

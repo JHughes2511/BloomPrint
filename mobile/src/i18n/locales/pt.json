@@ -3025,6 +3025,9 @@
       "turnover": "Erro de posse",
       "ft_miss": "Lances livres errados",
       "other": "Outro"
-    }
+    },
+    "result": "Arremesso / resultado",
+    "pickPlayFirst": "Escolha a defesa e depois a jogada para começar uma posse.",
+    "deleteNote": "As estatísticas dela continuam no box score."
   }
 }

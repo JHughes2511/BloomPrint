@@ -3025,6 +3025,9 @@
       "turnover": "Bolltapp",
       "ft_miss": "Missade straffar",
       "other": "Annat"
-    }
+    },
+    "result": "Skott / resultat",
+    "pickPlayFirst": "Välj försvaret och sedan spelet för att starta ett anfall.",
+    "deleteNote": "Statistiken ligger kvar i boxscoren."
   }
 }

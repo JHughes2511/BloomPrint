@@ -3025,6 +3025,9 @@
       "turnover": "失误",
       "ft_miss": "罚球不中",
       "other": "其他"
-    }
+    },
+    "result": "投篮 / 结果",
+    "pickPlayFirst": "先选防守，再选战术，开始一次进攻。",
+    "deleteNote": "其数据保留在技术统计中。"
   }
 }
