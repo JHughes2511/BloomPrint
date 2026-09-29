@@ -1311,6 +1311,8 @@ class ShortVersion(Base):
     status = Column(String, nullable=False, default="making")   # making / ready / failed
     data = Column(JSON, nullable=True)
     source_hash = Column(String, nullable=True)
+    # The coach edited or corrected it: kept when the standard text changes.
+    edited = Column(Boolean, default=False)
     error = Column(Text, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

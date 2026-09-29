@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from .. import models
@@ -34,11 +35,40 @@ def get_short(kind: str, ref_id: int, db: Session = Depends(get_db),
               coach: models.Coach = Depends(get_current_coach)):
     """The short version; starts making it when missing or out of date."""
     _check(db, coach, kind, ref_id)
-    return sv.out(sv.ensure(db, kind, ref_id))
+    return sv.out(sv.ensure(db, kind, ref_id), db)
 
 
 @router.post("/{kind}/{ref_id}/remake")
 def remake_short(kind: str, ref_id: int, db: Session = Depends(get_db),
                  coach: models.Coach = Depends(get_current_coach)):
     _check(db, coach, kind, ref_id)
-    return sv.out(sv.ensure(db, kind, ref_id, force=True))
+    return sv.out(sv.ensure(db, kind, ref_id, force=True), db)
+
+
+class EditIn(BaseModel):
+    data: dict
+
+
+@router.put("/{kind}/{ref_id}")
+def edit_short(kind: str, ref_id: int, body: EditIn, db: Session = Depends(get_db),
+               coach: models.Coach = Depends(get_current_coach)):
+    """Save the coach's edits to the page (every field)."""
+    _check(db, coach, kind, ref_id)
+    return sv.out(sv.save_edit(db, kind, ref_id, body.data), db)
+
+
+class CorrectIn(BaseModel):
+    correction: str
+
+
+@router.post("/{kind}/{ref_id}/correct")
+def correct_short(kind: str, ref_id: int, body: CorrectIn, db: Session = Depends(get_db),
+                  coach: models.Coach = Depends(get_current_coach)):
+    """Apply a written correction to the page; comes back in the same format."""
+    _check(db, coach, kind, ref_id)
+    if not body.correction.strip():
+        raise HTTPException(status_code=400, detail="Say what to correct.")
+    row = sv.correct(db, kind, ref_id, body.correction.strip())
+    if row is None:
+        raise HTTPException(status_code=400, detail="Make the short version first.")
+    return sv.out(row, db)

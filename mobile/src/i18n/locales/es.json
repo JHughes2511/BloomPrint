@@ -3141,6 +3141,24 @@
       "zone": "Zona",
       "free_throw": "Tiro libre",
       "cob": "Situaciones especiales"
-    }
+    },
+    "edit": "Editar",
+    "correct": "Corregir",
+    "correctPlaceholder": "¿Qué hay que cambiar? p. ej. Calentamiento 10 min, entrenador BUNA; añade ZIP en saque de banda",
+    "applyCorrection": "Aplicar corrección",
+    "correctFailed": "No se pudo aplicar la corrección; la página sigue igual.",
+    "staleNote": "El informe estándar cambió después de editar esto.",
+    "remake": "Rehacer desde el estándar",
+    "remakeTitle": "¿Rehacer la versión corta?",
+    "remakeMsg": "Tus cambios en la versión corta se sustituirán por una nueva hecha desde el informe estándar.",
+    "remove": "Quitar",
+    "addLine": "Añadir línea",
+    "addDrill": "Añadir ejercicio",
+    "addPractice": "Añadir entrenamiento",
+    "titlePlaceholder": "Título",
+    "practiceLabel": "Entrenamiento (p. ej. ENTRENAMIENTO 1)",
+    "minutes": "Min",
+    "focus": "Enfoque",
+    "checklist": "Lista"
   }
 }

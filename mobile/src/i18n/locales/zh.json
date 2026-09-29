@@ -3141,6 +3141,24 @@
       "zone": "联防",
       "free_throw": "罚球",
       "cob": "特殊情况"
-    }
+    },
+    "edit": "编辑",
+    "correct": "更正",
+    "correctPlaceholder": "需要改什么？例如：热身 10 分钟，教练 BUNA；在边线球里加 ZIP",
+    "applyCorrection": "应用更正",
+    "correctFailed": "无法应用该更正，页面保持原样。",
+    "staleNote": "编辑之后标准版报告有了变化。",
+    "remake": "按标准版重新生成",
+    "remakeTitle": "重新生成简版？",
+    "remakeMsg": "你对简版的修改将被按标准版新生成的版本替换。",
+    "remove": "删除",
+    "addLine": "添加一行",
+    "addDrill": "添加训练项目",
+    "addPractice": "添加训练课",
+    "titlePlaceholder": "标题",
+    "practiceLabel": "训练课（如 训练 1）",
+    "minutes": "分钟",
+    "focus": "重点",
+    "checklist": "清单"
   }
 }

@@ -388,6 +388,9 @@ const UPLOAD_TIMEOUT = 1800000;
 export const shortAPI = {
   get: (kind: string, refId: number) => api.get(`/short/${kind}/${refId}`).then(r => r.data),
   remake: (kind: string, refId: number) => api.post(`/short/${kind}/${refId}/remake`).then(r => r.data),
+  save: (kind: string, refId: number, data: any) => api.put(`/short/${kind}/${refId}`, { data }).then(r => r.data),
+  correct: (kind: string, refId: number, correction: string) =>
+    api.post(`/short/${kind}/${refId}/correct`, { correction }).then(r => r.data),
 };
 
 /** A player's injury log: a roster player by id, or a player known by name (an opponent). */

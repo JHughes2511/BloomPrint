@@ -3141,6 +3141,24 @@
       "zone": "Alan",
       "free_throw": "Serbest atış",
       "cob": "Özel durumlar"
-    }
+    },
+    "edit": "Düzenle",
+    "correct": "Düzelt",
+    "correctPlaceholder": "Ne değişmeli? örn. Isınma 10 dk, koç BUNA; yan çizgiye ZIP ekle",
+    "applyCorrection": "Düzeltmeyi uygula",
+    "correctFailed": "Düzeltme uygulanamadı; sayfa aynı kaldı.",
+    "staleNote": "Standart rapor bu düzenlemeden sonra değişti.",
+    "remake": "Standarttan yeniden oluştur",
+    "remakeTitle": "Kısa sürüm yeniden oluşturulsun mu?",
+    "remakeMsg": "Düzenlemelerin, standart rapordan yapılan yeni bir sürümle değiştirilecek.",
+    "remove": "Kaldır",
+    "addLine": "Satır ekle",
+    "addDrill": "Drill ekle",
+    "addPractice": "Antrenman ekle",
+    "titlePlaceholder": "Başlık",
+    "practiceLabel": "Antrenman (örn. ANTRENMAN 1)",
+    "minutes": "Dk",
+    "focus": "Odak",
+    "checklist": "Liste"
   }
 }

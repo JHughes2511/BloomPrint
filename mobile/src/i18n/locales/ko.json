@@ -3141,6 +3141,24 @@
       "zone": "존",
       "free_throw": "자유투",
       "cob": "특수 상황"
-    }
+    },
+    "edit": "편집",
+    "correct": "수정",
+    "correctPlaceholder": "무엇을 바꿀까요? 예: 워밍업 10분, 코치 BUNA; 사이드 인바운드에 ZIP 추가",
+    "applyCorrection": "수정 적용",
+    "correctFailed": "수정을 적용하지 못했습니다. 페이지는 그대로입니다.",
+    "staleNote": "편집 후 기본 보고서가 바뀌었습니다.",
+    "remake": "기본에서 다시 만들기",
+    "remakeTitle": "요약본을 다시 만들까요?",
+    "remakeMsg": "편집한 내용이 기본 보고서로 새로 만든 요약본으로 바뀝니다.",
+    "remove": "삭제",
+    "addLine": "줄 추가",
+    "addDrill": "드릴 추가",
+    "addPractice": "훈련 추가",
+    "titlePlaceholder": "제목",
+    "practiceLabel": "훈련 (예: 훈련 1)",
+    "minutes": "분",
+    "focus": "중점",
+    "checklist": "체크리스트"
   }
 }

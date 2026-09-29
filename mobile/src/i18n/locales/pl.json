@@ -3141,6 +3141,24 @@
       "zone": "Strefa",
       "free_throw": "Rzut wolny",
       "cob": "Sytuacje specjalne"
-    }
+    },
+    "edit": "Edytuj",
+    "correct": "Popraw",
+    "correctPlaceholder": "Co zmienić? np. Rozgrzewka 10 min, trener BUNA; dodaj ZIP do wznowień z boku",
+    "applyCorrection": "Zastosuj poprawkę",
+    "correctFailed": "Nie udało się zastosować poprawki; strona bez zmian.",
+    "staleNote": "Raport standardowy zmienił się po tej edycji.",
+    "remake": "Utwórz ponownie ze standardu",
+    "remakeTitle": "Utworzyć ponownie wersję skróconą?",
+    "remakeMsg": "Twoje zmiany zostaną zastąpione nową wersją z raportu standardowego.",
+    "remove": "Usuń",
+    "addLine": "Dodaj wiersz",
+    "addDrill": "Dodaj ćwiczenie",
+    "addPractice": "Dodaj trening",
+    "titlePlaceholder": "Tytuł",
+    "practiceLabel": "Trening (np. TRENING 1)",
+    "minutes": "Min",
+    "focus": "Cele",
+    "checklist": "Lista"
   }
 }

@@ -3141,6 +3141,24 @@
       "zone": "Zona",
       "free_throw": "Tiro libero",
       "cob": "Situazioni speciali"
-    }
+    },
+    "edit": "Modifica",
+    "correct": "Correggi",
+    "correctPlaceholder": "Cosa cambiare? es. Riscaldamento 10 min, coach BUNA; aggiungi ZIP in rimessa laterale",
+    "applyCorrection": "Applica correzione",
+    "correctFailed": "Impossibile applicare la correzione; la pagina è com'era.",
+    "staleNote": "Il report standard è cambiato dopo questa modifica.",
+    "remake": "Rifai dallo standard",
+    "remakeTitle": "Rifare la versione breve?",
+    "remakeMsg": "Le tue modifiche saranno sostituite da una nuova versione fatta dal report standard.",
+    "remove": "Rimuovi",
+    "addLine": "Aggiungi riga",
+    "addDrill": "Aggiungi esercizio",
+    "addPractice": "Aggiungi allenamento",
+    "titlePlaceholder": "Titolo",
+    "practiceLabel": "Allenamento (es. ALLENAMENTO 1)",
+    "minutes": "Min",
+    "focus": "Obiettivi",
+    "checklist": "Lista"
   }
 }

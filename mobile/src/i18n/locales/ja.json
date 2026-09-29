@@ -3141,6 +3141,24 @@
       "zone": "ゾーン",
       "free_throw": "フリースロー",
       "cob": "特殊状況"
-    }
+    },
+    "edit": "編集",
+    "correct": "修正",
+    "correctPlaceholder": "何を変えますか？例：ウォームアップ10分、コーチBUNA、サイドアウトにZIPを追加",
+    "applyCorrection": "修正を反映",
+    "correctFailed": "修正を反映できませんでした。ページは元のままです。",
+    "staleNote": "この編集の後で標準版が変更されました。",
+    "remake": "標準版から作り直す",
+    "remakeTitle": "短縮版を作り直しますか？",
+    "remakeMsg": "あなたの編集は標準版から作った新しい短縮版に置き換わります。",
+    "remove": "削除",
+    "addLine": "行を追加",
+    "addDrill": "ドリルを追加",
+    "addPractice": "練習を追加",
+    "titlePlaceholder": "タイトル",
+    "practiceLabel": "練習（例：練習1）",
+    "minutes": "分",
+    "focus": "重点",
+    "checklist": "チェックリスト"
   }
 }

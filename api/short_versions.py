@@ -1,11 +1,11 @@
 """Short versions of reports: the one page a staff prints and hands out.
 
 A short version is made FROM the standard report — the same facts, cut down
-to what can be read at a glance — so the two can never disagree. It is made
-in the background as soon as the standard text exists, and made again
-whenever that text changes (see ShortVersion.source_hash). Asking for one that
-is missing or stale starts it; the screen shows "Making the short version"
-until it is ready.
+to what can be read at a glance. It is made on demand: the first time someone
+opens Short, then kept. When the standard text changes it is made again the
+next time it is opened — unless the coach has edited or corrected it, in which
+case their version stays and the page offers to remake it from the standard
+(ShortVersion.source_hash, .edited).
 
 Every report kind plugs in with two things: where its text lives
 (`source_text`) and what shape its page takes (`LAYOUTS`). Team training is a
@@ -169,88 +169,90 @@ def ensure(db: Session, kind: str, ref_id: int, *, force: bool = False) -> model
         return None
     h = _hash(text)
     row = db.query(models.ShortVersion).filter_by(kind=kind, ref_id=ref_id).first()
-    if row is not None and row.source_hash == h and row.status in ("ready", "making") and not force:
-        return row
+    if row is not None and not force:
+        if row.source_hash == h and row.status in ("ready", "making"):
+            return row
+        # The coach's own version outlives a change to the standard; the page
+        # says it is out of date and offers the remake.
+        if row.edited and row.data and row.status != "making":
+            return row
     if row is None:
         row = models.ShortVersion(kind=kind, ref_id=ref_id, coach_id=coach_id)
         db.add(row)
-    row.source_hash, row.status, row.error = h, "making", None
+    row.source_hash, row.status, row.error, row.edited = h, "making", None, False
     db.commit()
     db.refresh(row)
     threading.Thread(target=_make, args=(kind, ref_id, text, h), daemon=True).start()
     return row
 
 
-def kick(db: Session, kind: str, ref_id: int) -> None:
-    """Start the short version for a report just written. Never raises: a
-    report must not fail because its one-pager could not start."""
-    try:
-        ensure(db, kind, ref_id)
-    except Exception:
-        pass
-
-
-def out(row: models.ShortVersion | None) -> dict:
+def out(row: models.ShortVersion | None, db: Session | None = None) -> dict:
     if row is None:
         return {"status": "none", "data": None}
-    return {"status": row.status, "data": row.data, "error": row.error,
-            "updated_at": row.updated_at.isoformat() + "Z" if row.updated_at else None}
+    stale = False
+    if db is not None:
+        text, _ = source_text(db, row.kind, row.ref_id)
+        stale = bool(text) and _hash(text) != row.source_hash
+    return {"status": row.status, "data": row.data, "error": row.error, "edited": bool(row.edited),
+            "stale": stale, "updated_at": row.updated_at.isoformat() + "Z" if row.updated_at else None}
 
 
-# ── Made automatically: whenever a report's text is saved ────────────────────
-# Hooked on the database session rather than on each endpoint that writes a
-# report (there are many, and the next one added would be missed): when a
-# training program's, a team training report's or a packet's team-training
-# text is written, its short version starts right after the commit.
-
-from sqlalchemy import event, inspect as _inspect
-from sqlalchemy.orm import Session as _Session
-
-
-def _changed(obj, attr: str) -> bool:
-    try:
-        return _inspect(obj).attrs[attr].history.has_changes()
-    except Exception:
-        return False
+def save_edit(db: Session, kind: str, ref_id: int, data: dict) -> models.ShortVersion:
+    """The coach's own version of the page: kept to the page's shape."""
+    row = db.query(models.ShortVersion).filter_by(kind=kind, ref_id=ref_id).first()
+    if row is None:
+        text, coach_id = source_text(db, kind, ref_id)
+        row = models.ShortVersion(kind=kind, ref_id=ref_id, coach_id=coach_id, source_hash=_hash(text or ""))
+        db.add(row)
+    row.data, row.status, row.error, row.edited = _clean(KIND_LAYOUT[kind], data or {}), "ready", None, True
+    db.commit()
+    db.refresh(row)
+    return row
 
 
-def _is_team_training(output_type: str | None) -> bool:
-    try:
-        from video_vision.bim import parse_output_types
-        return "team_training" in parse_output_types(output_type or "")
-    except Exception:
-        return "team_training" in (output_type or "")
-
-
-@event.listens_for(_Session, "after_flush")
-def _note_written(session, flush_context):
-    pending = session.info.setdefault("short_pending", set())
-    for obj in list(session.new) + list(session.dirty):
-        if isinstance(obj, models.TrainingSession) and _changed(obj, "program_text") and obj.program_text:
-            pending.add(("training", obj.id))
-        elif isinstance(obj, models.TeamReport) and _changed(obj, "report_text") and obj.report_text \
-                and _is_team_training(obj.output_type):
-            pending.add(("team_report", obj.id))
-        elif isinstance(obj, models.GameReportVersion) and obj.output_type == "team_training" \
-                and _changed(obj, "report_text") and obj.report_text:
-            pending.add(("packet_training", obj.game_report_id))
-
-
-@event.listens_for(_Session, "after_commit")
-def _start_written(session):
-    pending = session.info.pop("short_pending", None)
-    if not pending:
-        return
+def _correct(kind: str, ref_id: int, current: dict, text: str, correction: str) -> None:
+    """Apply a coach's correction to the page, in the same shape (a thread)."""
+    import asyncio
+    from .ai_models import long_text
     from .database import SessionLocal
+    layout = KIND_LAYOUT[kind]
+    prompt = (f"{LAYOUTS[layout]}\n\nThis is the CURRENT PAGE (JSON). Apply the coach's correction to it and return "
+              "the whole page as JSON in the same shape. Change only what the correction asks; keep everything "
+              "else exactly as it is. The coach's correction is the authority, even where it differs from the "
+              "program. Write in the same language as the page.\n\n"
+              f"CURRENT PAGE:\n{json.dumps(current, ensure_ascii=False)}\n\n"
+              f"COACH'S CORRECTION:\n{correction[:2000]}\n\n"
+              f"THE PROGRAM (for reference):\n{text[:16000]}")
+    data, err = None, None
+    try:
+        got = _parse(asyncio.run(long_text(prompt, max_tokens=4000)))
+        data = _clean(layout, got) if got else None
+        if data is None:
+            err = "The correction came back unreadable."
+    except Exception as e:  # noqa: BLE001
+        err = str(e)[:500]
     db = SessionLocal()
     try:
-        for kind, ref_id in pending:
-            if ref_id:
-                kick(db, kind, ref_id)
+        row = db.query(models.ShortVersion).filter_by(kind=kind, ref_id=ref_id).first()
+        if row is None:
+            return
+        if data:
+            row.data, row.status, row.error, row.edited = data, "ready", None, True
+        else:
+            row.status, row.error = "ready", err     # the page as it was, with why
+        db.commit()
     finally:
         db.close()
 
 
-@event.listens_for(_Session, "after_rollback")
-def _drop_written(session):
-    session.info.pop("short_pending", None)
+def correct(db: Session, kind: str, ref_id: int, correction: str) -> models.ShortVersion | None:
+    row = db.query(models.ShortVersion).filter_by(kind=kind, ref_id=ref_id).first()
+    if row is None or not row.data:
+        return None
+    text, _ = source_text(db, kind, ref_id)
+    current = row.data
+    row.status, row.error = "making", None
+    db.commit()
+    db.refresh(row)
+    threading.Thread(target=_correct, args=(kind, ref_id, current, text or "", correction), daemon=True).start()
+    return row

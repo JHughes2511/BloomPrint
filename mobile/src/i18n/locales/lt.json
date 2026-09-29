@@ -3141,6 +3141,24 @@
       "zone": "Zona",
       "free_throw": "Baudos metimas",
       "cob": "Ypatingos situacijos"
-    }
+    },
+    "edit": "Redaguoti",
+    "correct": "Taisyti",
+    "correctPlaceholder": "Ką pakeisti? pvz. Apšilimas 10 min, treneris BUNA; pridėk ZIP prie įmetimų iš šono",
+    "applyCorrection": "Pritaikyti pataisą",
+    "correctFailed": "Pataisos pritaikyti nepavyko; puslapis nepakito.",
+    "staleNote": "Standartinė ataskaita pasikeitė po šio redagavimo.",
+    "remake": "Sukurti iš naujo pagal standartinę",
+    "remakeTitle": "Sukurti trumpą versiją iš naujo?",
+    "remakeMsg": "Jūsų pakeitimus pakeis nauja versija iš standartinės ataskaitos.",
+    "remove": "Pašalinti",
+    "addLine": "Pridėti eilutę",
+    "addDrill": "Pridėti pratimą",
+    "addPractice": "Pridėti treniruotę",
+    "titlePlaceholder": "Pavadinimas",
+    "practiceLabel": "Treniruotė (pvz. TRENIRUOTĖ 1)",
+    "minutes": "Min",
+    "focus": "Tikslai",
+    "checklist": "Sąrašas"
   }
 }

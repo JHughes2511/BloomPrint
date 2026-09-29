@@ -3141,6 +3141,24 @@
       "zone": "Zon",
       "free_throw": "Straffkast",
       "cob": "Specialsituationer"
-    }
+    },
+    "edit": "Redigera",
+    "correct": "Korrigera",
+    "correctPlaceholder": "Vad ska ändras? t.ex. Uppvärmning 10 min, tränare BUNA; lägg till ZIP under inkast sida",
+    "applyCorrection": "Tillämpa korrigering",
+    "correctFailed": "Korrigeringen kunde inte tillämpas; sidan är oförändrad.",
+    "staleNote": "Standardrapporten ändrades efter redigeringen.",
+    "remake": "Gör om från standard",
+    "remakeTitle": "Göra om kortversionen?",
+    "remakeMsg": "Dina ändringar ersätts av en ny version gjord från standardrapporten.",
+    "remove": "Ta bort",
+    "addLine": "Lägg till rad",
+    "addDrill": "Lägg till övning",
+    "addPractice": "Lägg till träning",
+    "titlePlaceholder": "Titel",
+    "practiceLabel": "Träning (t.ex. TRÄNING 1)",
+    "minutes": "Min",
+    "focus": "Fokus",
+    "checklist": "Checklista"
   }
 }

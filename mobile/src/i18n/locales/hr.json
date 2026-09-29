@@ -3141,6 +3141,24 @@
       "zone": "Zona",
       "free_throw": "Slobodno bacanje",
       "cob": "Posebne situacije"
-    }
+    },
+    "edit": "Uredi",
+    "correct": "Ispravi",
+    "correctPlaceholder": "Što promijeniti? npr. Zagrijavanje 10 min, trener BUNA; dodaj ZIP u ubacivanje sa strane",
+    "applyCorrection": "Primijeni ispravak",
+    "correctFailed": "Ispravak nije primijenjen; stranica je ista.",
+    "staleNote": "Standardni izvještaj promijenio se nakon ove izmjene.",
+    "remake": "Izradi ponovno iz standardnog",
+    "remakeTitle": "Ponovno izraditi kratku verziju?",
+    "remakeMsg": "Tvoje izmjene zamijenit će nova verzija iz standardnog izvještaja.",
+    "remove": "Ukloni",
+    "addLine": "Dodaj red",
+    "addDrill": "Dodaj vježbu",
+    "addPractice": "Dodaj trening",
+    "titlePlaceholder": "Naslov",
+    "practiceLabel": "Trening (npr. TRENING 1)",
+    "minutes": "Min",
+    "focus": "Fokus",
+    "checklist": "Popis"
   }
 }

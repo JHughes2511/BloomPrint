@@ -3141,6 +3141,24 @@
       "zone": "Zone",
       "free_throw": "Free throw",
       "cob": "COB"
-    }
+    },
+    "edit": "Edit",
+    "correct": "Correct",
+    "correctPlaceholder": "What should change? e.g. Make warm up 10 min, coach BUNA; add ZIP under SOB",
+    "applyCorrection": "Apply correction",
+    "correctFailed": "That correction could not be applied; the page is as it was.",
+    "staleNote": "The standard report changed after this was edited.",
+    "remake": "Remake from standard",
+    "remakeTitle": "Remake the short version?",
+    "remakeMsg": "Your edits to the short version will be replaced by a new one made from the standard report.",
+    "remove": "Remove",
+    "addLine": "Add line",
+    "addDrill": "Add drill",
+    "addPractice": "Add practice",
+    "titlePlaceholder": "Title",
+    "practiceLabel": "Practice (e.g. PRACTICE 1)",
+    "minutes": "Min",
+    "focus": "Focus",
+    "checklist": "Checklist"
   }
 }

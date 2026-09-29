@@ -3141,6 +3141,24 @@
       "zone": "Zone",
       "free_throw": "Freiwurf",
       "cob": "Sondersituationen"
-    }
+    },
+    "edit": "Bearbeiten",
+    "correct": "Korrigieren",
+    "correctPlaceholder": "Was soll sich ändern? z. B. Aufwärmen 10 Min., Coach BUNA; ZIP unter Einwurf Seite",
+    "applyCorrection": "Korrektur anwenden",
+    "correctFailed": "Die Korrektur konnte nicht angewendet werden; die Seite ist unverändert.",
+    "staleNote": "Der Standardbericht hat sich nach dieser Bearbeitung geändert.",
+    "remake": "Aus dem Standard neu erstellen",
+    "remakeTitle": "Kurzfassung neu erstellen?",
+    "remakeMsg": "Deine Änderungen werden durch eine neue Fassung aus dem Standardbericht ersetzt.",
+    "remove": "Entfernen",
+    "addLine": "Zeile hinzufügen",
+    "addDrill": "Übung hinzufügen",
+    "addPractice": "Training hinzufügen",
+    "titlePlaceholder": "Titel",
+    "practiceLabel": "Training (z. B. TRAINING 1)",
+    "minutes": "Min.",
+    "focus": "Schwerpunkte",
+    "checklist": "Checkliste"
   }
 }

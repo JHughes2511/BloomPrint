@@ -3141,6 +3141,24 @@
       "zone": "Zone",
       "free_throw": "Free throw",
       "cob": "Espesyal na sitwasyon"
-    }
+    },
+    "edit": "I-edit",
+    "correct": "Iwasto",
+    "correctPlaceholder": "Ano ang babaguhin? hal. Warm up 10 min, coach BUNA; idagdag ang ZIP sa SOB",
+    "applyCorrection": "Ilapat ang pagwawasto",
+    "correctFailed": "Hindi nailapat ang pagwawasto; walang binago sa pahina.",
+    "staleNote": "Nagbago ang karaniwang report matapos itong i-edit.",
+    "remake": "Gawin ulit mula sa karaniwan",
+    "remakeTitle": "Gawin ulit ang maikling bersyon?",
+    "remakeMsg": "Papalitan ang iyong mga edit ng bagong bersyon mula sa karaniwang report.",
+    "remove": "Alisin",
+    "addLine": "Magdagdag ng linya",
+    "addDrill": "Magdagdag ng drill",
+    "addPractice": "Magdagdag ng practice",
+    "titlePlaceholder": "Pamagat",
+    "practiceLabel": "Practice (hal. PRACTICE 1)",
+    "minutes": "Min",
+    "focus": "Pokus",
+    "checklist": "Checklist"
   }
 }

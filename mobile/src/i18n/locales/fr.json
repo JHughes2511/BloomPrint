@@ -3141,6 +3141,24 @@
       "zone": "Zone",
       "free_throw": "Lancer franc",
       "cob": "Situations spéciales"
-    }
+    },
+    "edit": "Modifier",
+    "correct": "Corriger",
+    "correctPlaceholder": "Que faut-il changer ? ex. Échauffement 10 min, coach BUNA ; ajouter ZIP en remise côté",
+    "applyCorrection": "Appliquer la correction",
+    "correctFailed": "La correction n'a pas pu être appliquée ; la page est inchangée.",
+    "staleNote": "Le rapport standard a changé depuis cette modification.",
+    "remake": "Refaire depuis le standard",
+    "remakeTitle": "Refaire la version courte ?",
+    "remakeMsg": "Vos modifications seront remplacées par une nouvelle version faite depuis le rapport standard.",
+    "remove": "Retirer",
+    "addLine": "Ajouter une ligne",
+    "addDrill": "Ajouter un exercice",
+    "addPractice": "Ajouter un entraînement",
+    "titlePlaceholder": "Titre",
+    "practiceLabel": "Entraînement (ex. ENTRAÎNEMENT 1)",
+    "minutes": "Min",
+    "focus": "Axes",
+    "checklist": "Liste"
   }
 }

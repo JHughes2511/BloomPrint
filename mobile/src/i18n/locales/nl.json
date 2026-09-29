@@ -3141,6 +3141,24 @@
       "zone": "Zone",
       "free_throw": "Vrije worp",
       "cob": "Speciale situaties"
-    }
+    },
+    "edit": "Bewerken",
+    "correct": "Corrigeren",
+    "correctPlaceholder": "Wat moet er anders? bijv. Warming-up 10 min, coach BUNA; ZIP bij inworp zijlijn",
+    "applyCorrection": "Correctie toepassen",
+    "correctFailed": "De correctie kon niet worden toegepast; de pagina is ongewijzigd.",
+    "staleNote": "Het standaardrapport is gewijzigd na deze bewerking.",
+    "remake": "Opnieuw maken uit standaard",
+    "remakeTitle": "Korte versie opnieuw maken?",
+    "remakeMsg": "Je bewerkingen worden vervangen door een nieuwe versie uit het standaardrapport.",
+    "remove": "Verwijderen",
+    "addLine": "Regel toevoegen",
+    "addDrill": "Oefening toevoegen",
+    "addPractice": "Training toevoegen",
+    "titlePlaceholder": "Titel",
+    "practiceLabel": "Training (bijv. TRAINING 1)",
+    "minutes": "Min",
+    "focus": "Focus",
+    "checklist": "Checklist"
   }
 }

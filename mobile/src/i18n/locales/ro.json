@@ -3141,6 +3141,24 @@
       "zone": "Zonă",
       "free_throw": "Aruncare liberă",
       "cob": "Situații speciale"
-    }
+    },
+    "edit": "Editează",
+    "correct": "Corectează",
+    "correctPlaceholder": "Ce trebuie schimbat? ex. Încălzire 10 min, antrenor BUNA; adaugă ZIP la aut lateral",
+    "applyCorrection": "Aplică corectura",
+    "correctFailed": "Corectura nu a putut fi aplicată; pagina a rămas la fel.",
+    "staleNote": "Raportul standard s-a schimbat după această editare.",
+    "remake": "Refă din standard",
+    "remakeTitle": "Refaci versiunea scurtă?",
+    "remakeMsg": "Modificările tale vor fi înlocuite de o versiune nouă din raportul standard.",
+    "remove": "Elimină",
+    "addLine": "Adaugă rând",
+    "addDrill": "Adaugă exercițiu",
+    "addPractice": "Adaugă antrenament",
+    "titlePlaceholder": "Titlu",
+    "practiceLabel": "Antrenament (ex. ANTRENAMENT 1)",
+    "minutes": "Min",
+    "focus": "Focus",
+    "checklist": "Listă"
   }
 }
