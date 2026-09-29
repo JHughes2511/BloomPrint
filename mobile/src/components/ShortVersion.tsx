@@ -16,6 +16,7 @@ import { View, Text, TouchableOpacity, ActivityIndicator, TextInput, Alert } fro
 import { Ionicons } from '@expo/vector-icons';
 import { shortAPI } from '../api/client';
 import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
+import { wrapPrintDocument } from '../utils/mdToHtml';
 import { useTheme } from '../theme/ThemeProvider';
 import { useTranslation } from 'react-i18next';
 import { ThemeTokens } from '../theme/tokens';
@@ -352,74 +353,64 @@ function PlayerEdit({ d, set, t, tr }: { d: any; set: (v: any) => void; t: Theme
 const PLAY_GROUPS = ['trans', 'half_court', 'sob', 'bob', 'zone', 'free_throw', 'cob'];
 
 // ── One printed page ─────────────────────────────────────────────────────────
-// Laid out like the sheets a staff already hands out: the practice plan in a
-// table under a red header, the emphasis list, the play sheet in columns with
-// coloured heads (yellow transition, green half court, red out of bounds).
+// The same print document as every BloomPrint report (wrapPrintDocument: the
+// title block, the footer) with the same tables, so a short version prints as
+// one of ours rather than a different product. Tables only: the server's PDF
+// renderer has no flexbox.
 
 const esc = (x: any) => String(x ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const GROUP_COLOUR: Record<string, string> = {
-  trans: '#F2D43D', half_court: '#2E8B57', sob: '#D7263D', bob: '#D7263D', zone: '#E8E8E8', free_throw: '#C9D6E8', cob: '#E8E8E8',
-};
-const GROUP_INK: Record<string, string> = { half_court: '#fff', sob: '#fff', bob: '#fff' };
+const TABLE = 'width:100%;border-collapse:collapse;margin:6px 0 4px;border:0.5px solid #cbd5e1';
+const TH = 'padding:6px 8px;background:#eef2f7;font-weight:bold;color:#0f172a;font-size:10px;letter-spacing:1px;text-transform:uppercase;border:0.5px solid #cbd5e1';
+const TD = 'padding:6px 8px;color:#1f2937;border:0.5px solid #cbd5e1;vertical-align:top';
+const H3 = 'font-size:14px;font-weight:800;color:#0f172a;margin:18px 0 6px;border-bottom:1.5px solid #cbd5e1;padding-bottom:3px';
 
 export function shortHtml(kind: ShortKind, d: any, tr: (k: string, o?: any) => string): string {
-  // Tables only, and plain CSS: the server's PDF renderer (xhtml2pdf) has no
-  // flexbox and no nth-child, and the browser's print dialog is happy with both.
-  const head = `<html><head><title>${esc(d.title)}</title><style>
-    @page { size: letter portrait; margin: 12mm; }
-    body { font-family: Helvetica, Arial, sans-serif; color: #111; font-size: 11px; }
-    h1 { font-size: 18px; margin: 0 0 8px 0; }
-    h2 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin: 12px 0 5px 0; color: #333; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background-color: #D7263D; color: #ffffff; text-transform: uppercase; font-size: 10px; padding: 5px; border: 1px solid #111111; }
-    td { border: 1px solid #111111; padding: 5px 7px; vertical-align: top; }
-    td.z { background-color: #EEF2F6; }
-    td.drill { font-weight: bold; text-transform: uppercase; }
-    td.c { text-align: center; }
-    td.e { border: 0; border-bottom: 1px solid #bbbbbb; font-weight: bold; padding: 4px 0; }
-    td.ph { font-weight: bold; text-align: center; font-size: 10px; text-transform: uppercase; }
-    td.p { text-align: center; font-weight: bold; }
-    td.n { border: 0; padding: 2px 0; }
-    td.f { border: 1px solid #1F6F9B; color: #1F6F9B; font-weight: bold; text-align: center; }
-  </style></head><body>`;
-  const zebra = (i: number) => (i % 2 ? ' z' : '');
-  let body = `<h1>${esc(d.title)}</h1>`;
+  const h3 = (x: string) => `<h3 style="${H3}">${esc(x)}</h3>`;
+  const lines = (xs: string[]) => `<ul style="margin:4px 0;padding-left:18px">${xs.map(x =>
+    `<li style="font-size:12px;line-height:1.6;margin:2px 0;color:#1f2937">${esc(x)}</li>`).join('')}</ul>`;
+  let body = '';
   if (kind === 'training') {
-    if ((d.focus ?? []).length) {
-      body += `<table><tr>${d.focus.map((f: string) => `<td class="f">${esc(f)}</td>`).join('')}</tr></table><br/>`;
-    }
-    body += `<table><tr><th width="6%"></th><th width="38%">${esc(tr('shortVersion.drill'))}</th><th width="18%">${esc(tr('shortVersion.amount'))}</th><th width="38%">${esc(tr('shortVersion.cue'))}</th></tr>`
-      + (d.checklist ?? []).map((c: any, i: number) => `<tr><td class="c${zebra(i)}">[&nbsp;&nbsp;]</td><td class="drill${zebra(i)}">${esc(c.drill)}</td><td class="c${zebra(i)}">${esc(c.amount ?? '')}</td><td class="${zebra(i).trim()}">${esc(c.cue ?? '')}</td></tr>`).join('')
+    if ((d.focus ?? []).length) body += `<p style="font-size:12px;color:#1f2937;margin:4px 0"><b>${esc(tr('shortVersion.focus'))}:</b> ${d.focus.map(esc).join(' · ')}</p>`;
+    body += h3(tr('shortVersion.checklist'))
+      + `<table style="${TABLE}"><tr><td width="6%" style="${TH}"></td><td width="38%" style="${TH}">${esc(tr('shortVersion.drill'))}</td>`
+      + `<td width="18%" style="${TH}">${esc(tr('shortVersion.amount'))}</td><td width="38%" style="${TH}">${esc(tr('shortVersion.cue'))}</td></tr>`
+      + (d.checklist ?? []).map((c: any) => `<tr><td style="${TD};text-align:center;color:#94a3b8">&#9744;</td>`
+        + `<td style="${TD};font-weight:bold">${esc(c.drill)}</td><td style="${TD};text-align:center">${esc(c.amount ?? '')}</td>`
+        + `<td style="${TD}">${esc(c.cue ?? '')}</td></tr>`).join('')
       + `</table>`;
-    if ((d.cues ?? []).length) {
-      body += `<h2>${esc(tr('shortVersion.keyCues'))}</h2><table>${d.cues.map((c: string) => `<tr><td class="e">${esc(c)}</td></tr>`).join('')}</table>`;
-    }
+    if ((d.cues ?? []).length) body += h3(tr('shortVersion.keyCues')) + lines(d.cues);
   } else {
     for (const sess of d.sessions ?? []) {
       const total = sess.drills.reduce((a: number, x: any) => a + (x.minutes ?? 0), 0);
-      if (sess.label) body += `<h2>${esc(sess.label)}</h2>`;
-      body += `<table><tr><th width="64%">${esc(tr('shortVersion.drills'))}</th><th width="18%">${esc(tr('shortVersion.time'))}</th><th width="18%">${esc(tr('shortVersion.coach'))}</th></tr>`
-        + sess.drills.map((x: any, i: number) => `<tr><td class="drill${zebra(i)}">${esc(x.drill)}</td><td class="c${zebra(i)}">${x.minutes != null ? esc(tr('shortVersion.min', { n: x.minutes })) : ''}</td><td class="c${zebra(i)}">${esc(x.coach ?? '')}</td></tr>`).join('')
-        + (total ? `<tr><td style="text-align:right">${esc(tr('shortVersion.total'))}</td><td class="c"><b>${esc(tr('shortVersion.min', { n: total }))}</b></td><td></td></tr>` : '')
+      body += h3(sess.label || tr('shortVersion.drills'))
+        + `<table style="${TABLE}"><tr><td width="64%" style="${TH}">${esc(tr('shortVersion.drills'))}</td>`
+        + `<td width="18%" style="${TH};text-align:center">${esc(tr('shortVersion.time'))}</td><td width="18%" style="${TH};text-align:center">${esc(tr('shortVersion.coach'))}</td></tr>`
+        + sess.drills.map((x: any) => `<tr><td style="${TD};font-weight:bold">${esc(x.drill)}</td>`
+          + `<td style="${TD};text-align:center">${x.minutes != null ? esc(tr('shortVersion.min', { n: x.minutes })) : ''}</td>`
+          + `<td style="${TD};text-align:center">${esc(x.coach ?? '')}</td></tr>`).join('')
+        + (total ? `<tr><td style="${TD};text-align:right;color:#64748b">${esc(tr('shortVersion.total'))}</td>`
+          + `<td style="${TD};text-align:center;font-weight:bold">${esc(tr('shortVersion.min', { n: total }))}</td><td style="${TD}"></td></tr>` : '')
         + `</table>`;
     }
-    if ((d.emphasis ?? []).length) {
-      body += `<h2>${esc(tr('shortVersion.emphasis'))}</h2><table>${d.emphasis.map((e: string) => `<tr><td class="e">${esc(e)}</td></tr>`).join('')}</table>`;
-    }
+    if ((d.emphasis ?? []).length) body += h3(tr('shortVersion.emphasis')) + lines(d.emphasis);
     const groups = PLAY_GROUPS.filter(g => (d.plays?.[g] ?? []).length);
     if (groups.length) {
       const rows = Math.max(...groups.map(g => d.plays[g].length));
       const w = Math.floor(100 / groups.length);
-      body += `<h2>${esc(tr('shortVersion.plays'))}</h2><table><tr>`
-        + groups.map(g => `<td class="ph" width="${w}%" style="background-color:${GROUP_COLOUR[g]};color:${GROUP_INK[g] ?? '#111111'}">${esc(tr(`shortVersion.groups.${g}`))}</td>`).join('')
-        + `</tr>` + Array.from({ length: rows }, (_, r) => `<tr>${groups.map(g => `<td class="p">${esc(d.plays[g][r] ?? '')}</td>`).join('')}</tr>`).join('')
+      body += h3(tr('shortVersion.plays')) + `<table style="${TABLE}"><tr>`
+        + groups.map(g => `<td width="${w}%" style="${TH};text-align:center">${esc(tr(`shortVersion.groups.${g}`))}</td>`).join('')
+        + `</tr>` + Array.from({ length: rows }, (_, r) => `<tr>${groups.map(g =>
+          `<td style="${TD};text-align:center;font-weight:bold">${esc(d.plays[g][r] ?? '')}</td>`).join('')}</tr>`).join('')
         + `</table>`;
     }
-    if ((d.notes ?? []).length) {
-      body += `<h2>${esc(tr('shortVersion.notes'))}</h2><table>${d.notes.map((n: string) => `<tr><td class="n">&bull; ${esc(n)}</td></tr>`).join('')}</table>`;
-    }
+    if ((d.notes ?? []).length) body += h3(tr('shortVersion.notes')) + lines(d.notes);
   }
-  return head + body + '</body></html>';
+  return wrapPrintDocument({
+    title: d.title || tr(kind === 'training' ? 'reportTypes.training_program' : 'reportTypes.team_training'),
+    subtitle: `${tr(kind === 'training' ? 'reportTypes.training_program' : 'reportTypes.team_training')} · ${tr('shortVersion.short')}`,
+    date: new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
+    bodyHtml: body,
+  });
 }
 
 /** Print (and, for coaches, PDF) buttons for a short page. */
@@ -570,22 +561,22 @@ const makeStyles = (t: ThemeTokens) => ({
   switchText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] },
   switchTextOn: { color: t.ctaText },
   page: { backgroundColor: t.card, borderRadius: 14, borderWidth: 1, borderColor: t.cardBorder, padding: 16 } as const,
-  title: { color: t.ink, fontSize: 18, fontFamily: fonts[900], letterSpacing: 0.5 },
+  title: { color: t.ink, fontSize: 18, fontFamily: fonts[900] },
   section: { color: t.label, fontSize: 11.5, fontFamily: fonts[800], letterSpacing: 2, textTransform: 'uppercase' as const, marginBottom: 6 },
   table: { borderWidth: 1, borderColor: t.line, borderRadius: 8, overflow: 'hidden' as const },
   tr: { flexDirection: 'row' as const, alignItems: 'center' as const, borderBottomWidth: 1, borderBottomColor: t.divider,
         paddingVertical: 8, paddingHorizontal: 10, gap: 8 },
-  thRow: { backgroundColor: t.negative },
-  th: { color: '#FFFFFF', fontSize: 11.5, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase' as const },
-  zebra: { backgroundColor: t.chip },
+  thRow: { backgroundColor: t.chip },
+  th: { color: t.label, fontSize: 10.5, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase' as const },
+  zebra: {},
   td: { color: t.ink, fontSize: 13.5 },
   timeCol: { width: 72, textAlign: 'center' as const },
   coachCol: { width: 70, textAlign: 'center' as const },
   emph: { color: t.ink, fontSize: 14, fontFamily: fonts[700], paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: t.divider },
   playGrid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 8 },
   playCol: { flexBasis: 140, flexGrow: 1, borderWidth: 1, borderColor: t.line, borderRadius: 8, overflow: 'hidden' as const },
-  playHead: { backgroundColor: t.chip, color: t.ink, fontSize: 11.5, fontFamily: fonts[800], textAlign: 'center' as const,
-              paddingVertical: 6, textTransform: 'uppercase' as const },
+  playHead: { backgroundColor: t.chip, color: t.label, fontSize: 10.5, fontFamily: fonts[800], textAlign: 'center' as const,
+              paddingVertical: 6, textTransform: 'uppercase' as const, letterSpacing: 1 },
   play: { color: t.ink, fontSize: 13, fontFamily: fonts[700], textAlign: 'center' as const, paddingVertical: 5,
           borderTopWidth: 1, borderTopColor: t.divider },
   note: { color: t.inkSoft, fontSize: 13, marginBottom: 3 },
