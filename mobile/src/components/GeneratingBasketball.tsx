@@ -80,7 +80,8 @@ export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: 
   if (label === 'job:colours') return tr('jobProgress.colours');
   if (label === 'job:waitColours') return tr('jobProgress.waitColours');
   if (label === 'job:identifying') return tr('jobProgress.identifying');
-  if (/^job:confirmClips/.test(label)) return tr('jobProgress.confirmClips');
+  if (/^job:confirmClips/.test(label) || /^job:confirmTeams/.test(label)) return tr('jobProgress.confirmClips');
+  if (label === 'job:teams') return tr('jobProgress.teams');
   if (label === 'job:identified') return tr('jobProgress.identified');
   if (label === 'job:synthesizing') return tr('jobProgress.synthesizing');
   // Same phase, same words as before it started reporting itself — with the

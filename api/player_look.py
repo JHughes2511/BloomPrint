@@ -177,3 +177,85 @@ def clip_checker(job_id: int, coach_id: int, player_id: int):
         finally:
             db.close()
     return run
+
+
+# ── Teams on a film cut from several games (Game Report film, scouting) ─────
+
+def packet_teams(db: Session, gr: models.GameReport, coach: models.Coach) -> list[dict]:
+    """The two teams a packet is about, each with its roster numbers and the
+    colours it has been seen in before."""
+    mode_vs = gr.mode == "opp_vs_opp"
+    a = gr.my_team.name if gr.my_team else ((gr.opponent_a_name or "Opponent A") if mode_vs else coach.program_name)
+    b = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or ("Opponent B" if mode_vs else "Opponent"))
+    out = []
+    for name, team_id in ((a, gr.my_team_id), (b, gr.opponent_team_id)):
+        if not name:
+            continue
+        nums: list[str] = []
+        if team_id:
+            nums += [p.jersey_number for p in db.query(models.Player).filter_by(team_id=team_id).all() if p.jersey_number]
+        nums += [o.jersey_number for o in db.query(models.OpponentPlayer).filter_by(coach_id=coach.id).all()
+                 if o.jersey_number and (o.opponent_name or "").strip().lower() == name.strip().lower()]
+        tl = db.query(models.TeamLook).filter_by(coach_id=coach.id, team_name=name).first()
+        colours = [c for c, _ in Counter(tl.colours or {}).most_common(6)] if tl else []
+        out.append({"name": name, "numbers": list(dict.fromkeys(str(n) for n in nums)), "colours": colours})
+    return out
+
+
+def learn_team_colours(db: Session, coach_id: int, clips: list[dict]) -> None:
+    counts: dict[str, Counter] = {}
+    for c in clips:
+        for colour, team in (c.get("final") or {}).items():
+            if team and team != "neither":
+                counts.setdefault(team, Counter())[colour] += 1
+    for team, cnt in counts.items():
+        tl = db.query(models.TeamLook).filter_by(coach_id=coach_id, team_name=team).first()
+        if tl is None:
+            tl = models.TeamLook(coach_id=coach_id, team_name=team, colours={})
+            db.add(tl)
+        merged = Counter(tl.colours or {})
+        merged.update(cnt)
+        tl.colours = dict(merged.most_common(12))
+    db.commit()
+
+
+def segment_checker(clip_id: int, job_id: int, coach_id: int):
+    """Save each clip's colours, ask the coach about the unsure ones, wait a
+    while, learn, and return the clips with `final` colour maps."""
+    from video_vision.identify import thumbnail
+    from .database import SessionLocal
+
+    def run(clips: list[dict]) -> list[dict]:
+        db = SessionLocal()
+        try:
+            db.query(models.FilmSegment).filter_by(clip_id=clip_id).delete()
+            for c in clips:
+                thumb = None
+                if not c["sure"]:
+                    data = thumbnail(c.get("frame"), None)
+                    thumb = _save(data, f"segments/{clip_id}/{c['clip']}.jpg") if data else None
+                db.add(models.FilmSegment(clip_id=clip_id, idx=c["clip"], start=c["start"], end=c["end"],
+                                          seen=c.get("seen"), colours=c.get("colours") if c["sure"] else None,
+                                          sure=c["sure"], thumb_ref=thumb))
+            unsure = [c for c in clips if not c["sure"]]
+            if unsure:
+                job = db.get(models.GenerationJob, job_id)
+                if job:
+                    job.progress = f"job:confirmTeams:{len(unsure)}"
+            db.commit()
+            deadline = time.time() + (CLIP_WAIT_SECONDS if unsure else 0)
+            while True:
+                db.expire_all()
+                rows = {r.idx: r for r in db.query(models.FilmSegment).filter_by(clip_id=clip_id).all()}
+                if all(rows.get(c["clip"]) is not None and rows[c["clip"]].answer for c in unsure) \
+                        or time.time() >= deadline:
+                    break
+                time.sleep(2)
+            for c in clips:
+                r = rows.get(c["clip"])
+                c["final"] = (r.colours or {}) if r is not None and (r.sure or r.answer == "answered") else {}
+            learn_team_colours(db, coach_id, clips)
+            return clips
+        finally:
+            db.close()
+    return run

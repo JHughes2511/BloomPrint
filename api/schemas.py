@@ -540,6 +540,10 @@ class GameReportClipOut(BaseModel):
     player_events: bool | None = None
     uniforms: dict | None = None
     uniforms_seen: list[str] = []
+    # A film cut from several games: colours are per clip, and how many clips
+    # still need the coach to say who is who.
+    segmented: bool | None = False
+    segments_pending: int = 0
     colours_detected: list[str] | None = None
     created_at: datetime
     model_config = {"from_attributes": True}

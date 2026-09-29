@@ -2530,7 +2530,8 @@
     "waitColours": "Forma renkleri bekleniyor",
     "identifying": "Her klipte oyuncu aranıyor…",
     "confirmClips": "Birkaç klibi onaylamanız bekleniyor…",
-    "identified": "Oyuncu kliplerde bulundu…"
+    "identified": "Oyuncu kliplerde bulundu…",
+    "teams": "Her klipte takımlar aranıyor…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Hayır",
     "done": "Bitti",
     "doneLeaveOut": "Bitti ({{count}} dışarıda)"
+  },
+  "teamClips": {
+    "title": "Bu kliplerde kim kim?",
+    "hint": "Bu video birkaç maçtan kesilmiş, renkler değişiyor. Her renk için takımı seç. Yanıtlanmayan hiçbir takıma atanmaz; istediğin zaman dönebilirsin.",
+    "whoWore": "{{colour}} kimdeydi?",
+    "neither": "Hiçbiri",
+    "pending": "{{count}} klip seni bekliyor: kim kim?",
+    "doneLeave": "Bitti ({{count}} açık)"
   }
 }

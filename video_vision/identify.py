@@ -255,3 +255,98 @@ def identity_note(name: str, clips: list[dict]) -> str:
         parts.append(f"{s//60:02d}:{s%60:02d}–{e//60:02d}:{e%60:02d} in {wear}")
     return (f" This is a highlight tape: {name} is the player to follow, in these clips only: "
             + "; ".join(parts) + ". Anyone else is context, not the subject.")
+
+
+# ── Teams, clip by clip (Game Report and scouting film) ─────────────────────
+# A team's highlight tape changes the team's colour from clip to clip, so the
+# one {colour: team} a game film has is not enough: each clip gets its own.
+
+TEAMS_PROMPT = """This film is cut together from several games, so each team's uniform colour can
+change from clip to clip. The teams that matter:
+
+{teams}
+
+For each clip below you get two frames. List the uniform colours on the floor (one or two plain
+words each, e.g. "white", "navy") and say which team wears each: exactly one of the team names
+above, or "neither" for a team that is not one of them.
+
+Reply with JSON only:
+{{"clips": [{{"clip": <number>, "colours": {{"<colour>": "<team name or neither>"}}, "sure": true | false}}]}}
+Rules:
+- "sure": true only when a roster number is readable on that colour, or the colour is one the team
+  is known to wear and nothing contradicts it. Otherwise false. Never guess."""
+
+
+def _teams_text(teams: list[dict]) -> str:
+    out = []
+    for t in teams:
+        bits = [f'"{t["name"]}"']
+        if t.get("numbers"):
+            bits.append("roster numbers " + ", ".join(f"#{n}" for n in t["numbers"][:20]))
+        if t.get("colours"):
+            bits.append("has worn " + ", ".join(t["colours"][:6]))
+        out.append("- " + "; ".join(bits))
+    return "\n".join(out)
+
+
+def teams_per_clip(video_path: str, clips: list[tuple[float, float]], teams: list[dict], client, model: str) -> list[dict]:
+    """One map per clip: {clip, start, end, colours: {colour: team|"neither"}, sure, frame}."""
+    from api.ai_models import text_of
+    names = {t["name"].lower(): t["name"] for t in teams}
+    cap = cv2.VideoCapture(video_path)
+    out: list[dict] = []
+    try:
+        for b in range(0, len(clips), BATCH):
+            batch = clips[b:b + BATCH]
+            content: list[dict] = [{"type": "text", "text": TEAMS_PROMPT.format(teams=_teams_text(teams))}]
+            mids: dict[int, bytes] = {}
+            for k, (s, e) in enumerate(batch, start=b + 1):
+                span = e - s
+                f1, f2 = _grab(cap, s + span * 0.3), _grab(cap, s + span * 0.6)
+                content.append({"type": "text", "text": f"CLIP {k} ({int(s)//60:02d}:{int(s)%60:02d}–{int(e)//60:02d}:{int(e)%60:02d})"})
+                for f in (f1, f2):
+                    if f is not None:
+                        content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": _b64(_jpeg(f))}})
+                if f2 is not None:
+                    mids[k] = _jpeg(f2, max_edge=640, quality=80)
+            got: dict = {}
+            try:
+                r = client.messages.create(model=model, max_tokens=3000, messages=[{"role": "user", "content": content}])
+                got = _parse(text_of(r)) or {}
+            except Exception:
+                got = {}
+            by_clip = {int(c.get("clip")): c for c in (got.get("clips") or []) if isinstance(c, dict) and str(c.get("clip", "")).isdigit()}
+            for k, (s, e) in enumerate(batch, start=b + 1):
+                c = by_clip.get(k) or {}
+                colours = {}
+                for col, who in (c.get("colours") or {}).items() if isinstance(c.get("colours"), dict) else []:
+                    col = " ".join(str(col).lower().split())[:30]
+                    w = str(who or "").strip()
+                    # Any team that is not one of the two is "neither" — the
+                    # plays of a third team are not filed under either.
+                    colours[col] = names.get(w.lower(), "neither") if w else None
+                sure = bool(c.get("sure")) and bool(colours) and all(v is not None for v in colours.values()) \
+                    and any(v != "neither" for v in colours.values())
+                out.append({"clip": k, "start": s, "end": e, "colours": {k2: v for k2, v in colours.items() if v},
+                            "seen": list(colours.keys()), "sure": sure, "frame": mids.get(k)})
+    finally:
+        cap.release()
+    return out
+
+
+def teams_note(clips: list[dict]) -> str:
+    """For the analysis: which team wears what in each clip, so its notes put
+    every play under the right team."""
+    parts = []
+    for c in clips[:60]:
+        m = c.get("final") or {}
+        if not m:
+            continue
+        s, e = int(c["start"]), int(c["end"])
+        who = ", ".join(f"{t} in {col}" for col, t in m.items() if t and t != "neither")
+        if who:
+            parts.append(f"{s//60:02d}:{s%60:02d}–{e//60:02d}:{e%60:02d}: {who}")
+    if not parts:
+        return ""
+    return ("This film is cut from several games and the uniforms change from clip to clip. Who wears what: "
+            + "; ".join(parts) + ". Clips not listed could not be identified; do not attribute their plays to a team.")

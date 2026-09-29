@@ -2530,7 +2530,8 @@
     "waitColours": "Wachten op shirtkleuren",
     "identifying": "Speler zoeken in elke clip…",
     "confirmClips": "Wacht op je bevestiging van een paar clips…",
-    "identified": "Speler gevonden in de clips…"
+    "identified": "Speler gevonden in de clips…",
+    "teams": "Teams zoeken in elke clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Nee",
     "done": "Klaar",
     "doneLeaveOut": "Klaar ({{count}} weglaten)"
+  },
+  "teamClips": {
+    "title": "Wie is wie in deze clips?",
+    "hint": "Deze video is uit meerdere wedstrijden geknipt, de kleuren wisselen. Tik per kleur op het team. Wat je niet beantwoordt, wordt aan geen team toegewezen; je kunt altijd terugkomen.",
+    "whoWore": "Wie droeg {{colour}}?",
+    "neither": "Geen van beide",
+    "pending": "{{count}} clip(s) wachten op je: wie is wie?",
+    "doneLeave": "Klaar ({{count}} open)"
   }
 }

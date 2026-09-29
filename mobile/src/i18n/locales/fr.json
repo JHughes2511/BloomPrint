@@ -2530,7 +2530,8 @@
     "waitColours": "En attente des couleurs de maillot",
     "identifying": "Recherche du joueur dans chaque extrait…",
     "confirmClips": "En attente de ta confirmation sur quelques extraits…",
-    "identified": "Joueur trouvé dans les extraits…"
+    "identified": "Joueur trouvé dans les extraits…",
+    "teams": "Recherche des équipes dans chaque extrait…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Non",
     "done": "Terminé",
     "doneLeaveOut": "Terminé (écarter {{count}})"
+  },
+  "teamClips": {
+    "title": "Qui est qui dans ces extraits ?",
+    "hint": "Cette vidéo mélange plusieurs matchs, les couleurs changent. Touche l'équipe de chaque couleur. Sans réponse, rien n'est attribué ; tu peux revenir quand tu veux.",
+    "whoWore": "Qui portait {{colour}} ?",
+    "neither": "Aucune",
+    "pending": "{{count}} extrait(s) t'attendent : qui est qui ?",
+    "doneLeave": "Terminé ({{count}} en attente)"
   }
 }

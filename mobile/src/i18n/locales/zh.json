@@ -2530,7 +2530,8 @@
     "waitColours": "等待球衣颜色",
     "identifying": "正在每个片段中查找球员…",
     "confirmClips": "等待你确认几个片段…",
-    "identified": "已在片段中找到球员…"
+    "identified": "已在片段中找到球员…",
+    "teams": "正在每个片段中识别球队…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "否",
     "done": "完成",
     "doneLeaveOut": "完成（排除 {{count}} 个）"
+  },
+  "teamClips": {
+    "title": "这些片段里谁是谁？",
+    "hint": "这段影片由多场比赛剪辑而成，球衣颜色会变。请为每种颜色点选球队。未回答的不会归入任何球队，可随时回来补答。",
+    "whoWore": "谁穿{{colour}}？",
+    "neither": "都不是",
+    "pending": "{{count}} 个片段需要你：谁是谁？",
+    "doneLeave": "完成（{{count}} 个待定）"
   }
 }

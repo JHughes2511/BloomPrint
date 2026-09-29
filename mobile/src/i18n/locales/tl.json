@@ -2530,7 +2530,8 @@
     "waitColours": "Hinihintay ang kulay ng jersey",
     "identifying": "Hinahanap ang player sa bawat clip…",
     "confirmClips": "Naghihintay na kumpirmahin mo ang ilang clip…",
-    "identified": "Nahanap ang player sa mga clip…"
+    "identified": "Nahanap ang player sa mga clip…",
+    "teams": "Hinahanap ang mga team sa bawat clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Hindi",
     "done": "Tapos",
     "doneLeaveOut": "Tapos (alisin ang {{count}})"
+  },
+  "teamClips": {
+    "title": "Sino ang sino sa mga clip na ito?",
+    "hint": "Pinagsama-sama ang video mula sa ilang laro kaya nagbabago ang kulay. I-tap ang team para sa bawat kulay. Ang hindi sinagot ay hindi ilalagay sa team; puwede kang bumalik kahit kailan.",
+    "whoWore": "Sino ang nakasuot ng {{colour}}?",
+    "neither": "Wala",
+    "pending": "{{count}} clip ang naghihintay: sino ang sino?",
+    "doneLeave": "Tapos ({{count}} bukas)"
   }
 }

@@ -2530,7 +2530,8 @@
     "waitColours": "Warte auf die Trikotfarben",
     "identifying": "Suche den Spieler in jedem Clip…",
     "confirmClips": "Warte auf deine Bestätigung einiger Clips…",
-    "identified": "Spieler in den Clips gefunden…"
+    "identified": "Spieler in den Clips gefunden…",
+    "teams": "Suche die Teams in jedem Clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Nein",
     "done": "Fertig",
     "doneLeaveOut": "Fertig ({{count}} weglassen)"
+  },
+  "teamClips": {
+    "title": "Wer ist wer in diesen Clips?",
+    "hint": "Dieses Video ist aus mehreren Spielen geschnitten, die Farben wechseln. Tippe für jede Farbe auf das Team. Unbeantwortetes wird keinem Team zugeordnet; du kannst jederzeit zurückkommen.",
+    "whoWore": "Wer trug {{colour}}?",
+    "neither": "Keines",
+    "pending": "{{count}} Clip(s) brauchen dich: Wer ist wer?",
+    "doneLeave": "Fertig ({{count}} offen)"
   }
 }

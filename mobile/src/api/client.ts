@@ -1109,6 +1109,11 @@ export const gameReportsAPI = {
     return api.post(`/game-reports/${id}/clips`, form).then(r => r.data);
   },
   /** Which team wore which colour, for a film read without being told. */
+  /** A film cut from several games: its clips that need who-is-who, and the answers. */
+  clipSegments: (id: number, clipId: number) => api.get(`/game-reports/${id}/clips/${clipId}/segments`).then(r => r.data),
+  answerSegment: (id: number, clipId: number, segId: number, colours: Record<string, string>) =>
+    api.put(`/game-reports/${id}/clips/${clipId}/segments/${segId}`, { colours }).then(r => r.data),
+  segmentsDone: (id: number, clipId: number) => api.post(`/game-reports/${id}/clips/${clipId}/segments/done`).then(r => r.data),
   setClipUniforms: (id: number, clipId: number, uniforms: Record<string, string>) =>
     api.put(`/game-reports/${id}/clips/${clipId}/uniforms`, { uniforms }).then(r => r.data),
   // Default keeps the breakdown and only frees the film — deleting a video

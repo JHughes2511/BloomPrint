@@ -2530,7 +2530,8 @@
     "waitColours": "Waiting for jersey colours",
     "identifying": "Finding the player in each clip…",
     "confirmClips": "Waiting for you to confirm a few clips…",
-    "identified": "Found the player in the clips…"
+    "identified": "Found the player in the clips…",
+    "teams": "Finding the teams in each clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "No",
     "done": "Done",
     "doneLeaveOut": "Done (leave {{count}} out)"
+  },
+  "teamClips": {
+    "title": "Who's who in these clips?",
+    "hint": "This film is cut from several games, so the colours change. Tap the team for each colour. Anything you don't answer isn't filed under a team; you can come back to it any time.",
+    "whoWore": "Who wore {{colour}}?",
+    "neither": "Neither",
+    "pending": "{{count}} clip(s) need you: who's who?",
+    "doneLeave": "Done (leave {{count}} open)"
   }
 }

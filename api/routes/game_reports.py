@@ -157,7 +157,18 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
         from ..storage import ensure_local
         local_path = ensure_local(video_path)
         colour_words = None
+        # A film cut from several games (a team's highlight tape) changes the
+        # teams' colours clip by clip: each clip gets its own {colour: team}
+        # (_teams_by_clip). A continuous game keeps the one colour question.
+        segmented, teams_note = False, ""
         if player_events:
+            segmented, teams_note = _teams_by_clip(clip_id, job_id, local_path, _prog,
+                                                   done_profiles, _save_profile, resumed=bool(done_segments))
+        if segmented:
+            uniforms = None
+            report_segment_note = (report_segment_note + " " + teams_note).strip()
+            report_context = (report_context or "") + ("\n\n" + teams_note if teams_note else "")
+        elif player_events:
             uniforms, colour_words = _colours_for_film(clip_id, local_path, _prog,
                                                        uniforms, resumed=bool(done_segments))
         result = asyncio.run(_handle_analyze_basketball_video({
@@ -244,6 +255,71 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             release_local(video_path)
         except Exception:
             pass
+
+
+# A tape is short; a film longer than this is a game, and is not pre-scanned
+# for cuts before the colour question (that scan is what the analysis does).
+TAPE_MAX_SECONDS = 20 * 60
+
+
+def _teams_by_clip(clip_id: int, job_id: int, local_path: str, _prog, done_profiles: dict,
+                   _save_profile, resumed: bool = False) -> tuple[bool, str]:
+    """For a film cut from several games: which team wears what in each clip.
+
+    Returns (segmented, note for the analysis). Not a tape -> (False, "").
+    The motion pre-scan it needs is kept as the analysis's own (profile 0),
+    so the film is scanned once either way.
+    """
+    import cv2
+    from video_vision.identify import clip_bounds, is_highlight_tape, teams_per_clip, teams_note
+    from video_vision.server import _motion_profile, _client
+    from ..ai_models import OPUS
+    from .. import player_look
+    sdb = SessionLocal()
+    try:
+        clip = sdb.get(models.GameReportClip, clip_id)
+        if clip is None:
+            return False, ""
+        if resumed and clip.segmented:
+            # A restarted job: the clips were settled before; rebuild the note.
+            segs = sdb.query(models.FilmSegment).filter_by(clip_id=clip_id).order_by(models.FilmSegment.idx).all()
+            return True, teams_note([{"start": g.start, "end": g.end,
+                                      "final": (g.colours or {}) if (g.sure or g.answer == "answered") else {}} for g in segs])
+        gr = clip.game_report
+        coach = sdb.get(models.Coach, gr.coach_id) if gr else None
+        teams = player_look.packet_teams(sdb, gr, coach) if gr and coach else []
+    finally:
+        sdb.close()
+    prof = done_profiles.get("0") or done_profiles.get(0)
+    if not prof:
+        cap = cv2.VideoCapture(local_path)
+        fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+        dur = (cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0) / fps
+        cap.release()
+        if dur <= 0 or dur > TAPE_MAX_SECONDS:
+            return False, ""
+        _prog(0, 1, "job:scanning")
+        d, sc = _motion_profile(local_path, on_progress=lambda pct: _prog(0, 1, f"job:scanning:{pct}"))
+        prof = {"duration": d, "scores": [[t, v] for t, v in sc]}
+        _save_profile(0, prof)
+        done_profiles["0"] = prof
+    dur = float(prof.get("duration") or 0.0)
+    clips = clip_bounds(dur, [(float(t), float(v)) for t, v in prof.get("scores") or []])
+    if len(teams) < 2 or not is_highlight_tape(dur, clips):
+        return False, ""
+    # Settled as a tape: no single colour question for this film.
+    udb = SessionLocal()
+    try:
+        c = udb.get(models.GameReportClip, clip_id)
+        c.segmented, c.uniforms_answered = True, True
+        udb.commit()
+        coach_id = c.game_report.coach_id
+    finally:
+        udb.close()
+    _prog(0, 1, "job:teams")
+    segs = teams_per_clip(local_path, clips, teams, _client(), OPUS)
+    segs = player_look.segment_checker(clip_id, job_id, coach_id)(segs)
+    return True, teams_note(segs)
 
 
 def _film_team_id(db: Session, gr: models.GameReport, clip: models.GameReportClip,
@@ -559,7 +635,10 @@ def _build_out(gr: models.GameReport, db: Session | None = None) -> schemas.Game
             if c.game_id:
                 game = db.get(models.GameSession, c.game_id)
                 c.game_label = _game_label(db, game) if game else None
-            if c.player_events and c.analysis_text:
+            if c.segmented:
+                c.segments_pending = (db.query(models.FilmSegment)
+                                      .filter_by(clip_id=c.id, sure=False, answer=None).count())
+            elif c.player_events and c.analysis_text:
                 # Colours the film logged that no team has been put to yet —
                 # all of them if the coach skipped, or one they typed
                 # differently from what the film saw.
@@ -2037,3 +2116,71 @@ async def regenerate_game_report(
     db.commit()
     db.refresh(gr)
     return _build_out(gr, db)
+
+
+# ── A film cut from several games: who is who, clip by clip ─────────────────
+
+def _segment_out(g: models.FilmSegment) -> dict:
+    thumb = None
+    if g.thumb_ref:
+        try:
+            from ..storage import ensure_local
+            import base64 as _b64
+            with open(ensure_local(g.thumb_ref), "rb") as f:
+                thumb = "data:image/jpeg;base64," + _b64.b64encode(f.read()).decode()
+        except Exception:
+            thumb = None
+    return {"id": g.id, "idx": g.idx, "start": g.start, "end": g.end, "seen": g.seen or [],
+            "colours": g.colours or {}, "sure": bool(g.sure), "answer": g.answer, "thumb": thumb}
+
+
+def _own_clip(db: Session, coach: models.Coach, report_id: int, clip_id: int) -> models.GameReportClip:
+    gr = db.get(models.GameReport, report_id)
+    clip = db.get(models.GameReportClip, clip_id)
+    if not gr or gr.coach_id != coach.id or not clip or clip.game_report_id != gr.id:
+        raise HTTPException(status_code=404, detail="Film not found")
+    return clip
+
+
+@router.get("/{report_id}/clips/{clip_id}/segments")
+def clip_segments(report_id: int, clip_id: int, db: Session = Depends(get_db),
+                  coach: models.Coach = Depends(get_current_coach)):
+    """The clips the analysis could not settle, and the teams to choose from."""
+    clip = _own_clip(db, coach, report_id, clip_id)
+    from .. import player_look
+    teams = [t["name"] for t in player_look.packet_teams(db, clip.game_report, coach)]
+    rows = (db.query(models.FilmSegment).filter_by(clip_id=clip_id, sure=False)
+            .order_by(models.FilmSegment.idx).all())
+    return {"teams": teams, "segments": [_segment_out(g) for g in rows]}
+
+
+class SegmentAnswer(BaseModel):
+    colours: dict[str, str]      # {colour: team name | "neither"}
+
+
+@router.put("/{report_id}/clips/{clip_id}/segments/{segment_id}")
+def answer_segment(report_id: int, clip_id: int, segment_id: int, body: SegmentAnswer,
+                   db: Session = Depends(get_db), coach: models.Coach = Depends(get_current_coach)):
+    clip = _own_clip(db, coach, report_id, clip_id)
+    g = db.get(models.FilmSegment, segment_id)
+    if not g or g.clip_id != clip.id:
+        raise HTTPException(status_code=404, detail="Clip not found")
+    from .. import player_look
+    names = {t["name"] for t in player_look.packet_teams(db, clip.game_report, coach)} | {"neither"}
+    g.colours = {" ".join(str(k).lower().split())[:30]: v for k, v in body.colours.items() if v in names}
+    g.answer = "answered"
+    db.commit()
+    # Learned now as well: a late answer still teaches the team's colours.
+    player_look.learn_team_colours(db, coach.id, [{"final": g.colours}])
+    return _segment_out(g)
+
+
+@router.post("/{report_id}/clips/{clip_id}/segments/done")
+def finish_segments(report_id: int, clip_id: int, db: Session = Depends(get_db),
+                    coach: models.Coach = Depends(get_current_coach)):
+    """Done answering: the rest stay unassigned (their plays are not filed under a team)."""
+    clip = _own_clip(db, coach, report_id, clip_id)
+    (db.query(models.FilmSegment).filter_by(clip_id=clip.id, sure=False, answer=None)
+     .update({"answer": "skip"}))
+    db.commit()
+    return {"ok": True}

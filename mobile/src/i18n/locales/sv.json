@@ -2530,7 +2530,8 @@
     "waitColours": "Väntar på tröjfärgerna",
     "identifying": "Letar efter spelaren i varje klipp…",
     "confirmClips": "Väntar på att du bekräftar några klipp…",
-    "identified": "Spelaren hittad i klippen…"
+    "identified": "Spelaren hittad i klippen…",
+    "teams": "Letar efter lagen i varje klipp…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Nej",
     "done": "Klar",
     "doneLeaveOut": "Klar (utesluta {{count}})"
+  },
+  "teamClips": {
+    "title": "Vem är vem i klippen?",
+    "hint": "Filmen är klippt från flera matcher, färgerna skiftar. Tryck på laget för varje färg. Det du inte svarar på tilldelas inget lag; du kan komma tillbaka när som helst.",
+    "whoWore": "Vem bar {{colour}}?",
+    "neither": "Inget",
+    "pending": "{{count}} klipp behöver dig: vem är vem?",
+    "doneLeave": "Klar ({{count}} öppna)"
   }
 }

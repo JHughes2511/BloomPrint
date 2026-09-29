@@ -2530,7 +2530,8 @@
     "waitColours": "Se așteaptă culorile echipamentelor",
     "identifying": "Caut jucătorul în fiecare clip…",
     "confirmClips": "Aștept să confirmi câteva clipuri…",
-    "identified": "Jucător găsit în clipuri…"
+    "identified": "Jucător găsit în clipuri…",
+    "teams": "Caut echipele în fiecare clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Nu",
     "done": "Gata",
     "doneLeaveOut": "Gata (exclude {{count}})"
+  },
+  "teamClips": {
+    "title": "Cine e cine în aceste clipuri?",
+    "hint": "Filmul e montat din mai multe meciuri, culorile se schimbă. Atinge echipa pentru fiecare culoare. Ce nu răspunzi nu e atribuit; poți reveni oricând.",
+    "whoWore": "Cine purta {{colour}}?",
+    "neither": "Niciuna",
+    "pending": "{{count}} clip(uri) te așteaptă: cine e cine?",
+    "doneLeave": "Gata ({{count}} deschise)"
   }
 }

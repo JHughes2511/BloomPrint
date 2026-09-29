@@ -806,6 +806,8 @@ class GameReportClip(Base):
     # The film was watched with a player-by-player log (films from before that
     # have none, and are not asked about uniforms).
     player_events  = Column(Boolean, nullable=True)
+    # Cut from several games: team colours are per clip (FilmSegment).
+    segmented = Column(Boolean, default=False)
     # The tracked game this film is OF, once the coach has confirmed it.
     #
     # A film and a box score of the same night are two readings of one game,
@@ -1315,6 +1317,37 @@ class PlayerLook(Base):
     traits = Column(JSON, default=dict)          # {"white headband": 3, ...}
     refs = Column(JSON, default=list)            # storage refs of reference crops, newest last
     confirmed = Column(Integer, default=0)       # clips it has learned from
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class FilmSegment(Base):
+    """One clip of a Game Report film that is cut from several games, with
+    which team wore which colour in it. `colours` is what was decided — by
+    the analysis when `sure`, else by the coach (`answer`). Events in the clip
+    are filed under teams through it when they are read (api/tendencies.py),
+    so an answer given after the analysis still counts.
+    """
+    __tablename__ = "film_segments"
+    id = Column(Integer, primary_key=True, index=True)
+    clip_id = Column(Integer, ForeignKey("game_report_clips.id"), nullable=False, index=True)
+    idx = Column(Integer, nullable=False)
+    start = Column(Float, nullable=False)
+    end = Column(Float, nullable=False)
+    seen = Column(JSON, nullable=True)          # colours on the floor
+    colours = Column(JSON, nullable=True)       # {colour: team name | "neither"}
+    sure = Column(Boolean, default=False)
+    answer = Column(String, nullable=True)      # answered / skip
+    thumb_ref = Column(String, nullable=True)
+
+
+class TeamLook(Base):
+    """The colours a team has been seen in, and how often — learned from clips
+    that were sure or that the coach answered, read by the next tape."""
+    __tablename__ = "team_looks"
+    id = Column(Integer, primary_key=True, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    team_name = Column(String, nullable=False)
+    colours = Column(JSON, default=dict)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 

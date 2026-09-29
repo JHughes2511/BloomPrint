@@ -2530,7 +2530,8 @@
     "waitColours": "Čeka se boja dresova",
     "identifying": "Tražim igrača u svakom klipu…",
     "confirmClips": "Čekam da potvrdiš nekoliko klipova…",
-    "identified": "Igrač pronađen u klipovima…"
+    "identified": "Igrač pronađen u klipovima…",
+    "teams": "Tražim timove u svakom klipu…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Ne",
     "done": "Gotovo",
     "doneLeaveOut": "Gotovo (izostavi {{count}})"
+  },
+  "teamClips": {
+    "title": "Ko je ko u ovim klipovima?",
+    "hint": "Snimak je sastavljen iz više utakmica, boje se menjaju. Dodirni tim za svaku boju. Neodgovoreno se ne dodeljuje timu; možeš se vratiti bilo kad.",
+    "whoWore": "Ko je nosio {{colour}}?",
+    "neither": "Nijedan",
+    "pending": "{{count}} klip(ova) čeka: ko je ko?",
+    "doneLeave": "Gotovo ({{count}} otvoreno)"
   }
 }

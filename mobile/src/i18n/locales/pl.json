@@ -2530,7 +2530,8 @@
     "waitColours": "Oczekiwanie na kolory strojów",
     "identifying": "Szukam zawodnika w każdym klipie…",
     "confirmClips": "Czekam na potwierdzenie kilku klipów…",
-    "identified": "Zawodnik znaleziony w klipach…"
+    "identified": "Zawodnik znaleziony w klipach…",
+    "teams": "Szukam drużyn w każdym klipie…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Nie",
     "done": "Gotowe",
     "doneLeaveOut": "Gotowe (pomiń {{count}})"
+  },
+  "teamClips": {
+    "title": "Kto jest kim w tych klipach?",
+    "hint": "Ten film łączy kilka meczów, więc kolory się zmieniają. Dotknij drużyny dla każdego koloru. Bez odpowiedzi nic nie jest przypisane; możesz wrócić w każdej chwili.",
+    "whoWore": "Kto nosił {{colour}}?",
+    "neither": "Żadna",
+    "pending": "{{count}} klip(y) czekają: kto jest kim?",
+    "doneLeave": "Gotowe ({{count}} otwarte)"
   }
 }

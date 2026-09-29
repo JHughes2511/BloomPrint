@@ -44,15 +44,32 @@ def _team_for(uniforms: dict | None, uniform: str) -> str | None:
 
 def clip_events(db: Session, clips: list) -> list[dict]:
     """Every logged action on these clips whose team is known."""
-    clips = [c for c in clips if c is not None and c.player_events and c.uniforms]
+    clips = [c for c in clips if c is not None and c.player_events
+             and (c.uniforms or getattr(c, "segmented", False))]
     if not clips:
         return []
     by_id = {c.id: c for c in clips}
+    # A film cut from several games: each clip of it has its own colours
+    # (FilmSegment), settled by the analysis or the coach. Read here, so an
+    # answer given after the analysis files its plays too.
+    segs: dict[int, list] = {}
+    seg_ids = [c.id for c in clips if getattr(c, "segmented", False)]
+    if seg_ids:
+        for g in db.query(models.FilmSegment).filter(models.FilmSegment.clip_id.in_(seg_ids)).all():
+            if g.sure or g.answer == "answered":
+                segs.setdefault(g.clip_id, []).append(g)
     out = []
     for e in (db.query(models.FilmPlayerEvent)
               .filter(models.FilmPlayerEvent.clip_id.in_(list(by_id)))
               .order_by(models.FilmPlayerEvent.clip_id, models.FilmPlayerEvent.t_sec).all()):
-        team = _team_for(by_id[e.clip_id].uniforms, e.uniform)
+        if getattr(by_id[e.clip_id], "segmented", False):
+            g = next((g for g in segs.get(e.clip_id, [])
+                      if e.t_sec is not None and g.start - 0.5 <= e.t_sec <= g.end + 0.5), None)
+            team = _team_for(g.colours, e.uniform) if g else None
+            if team == "neither":
+                team = None
+        else:
+            team = _team_for(by_id[e.clip_id].uniforms, e.uniform)
         if not team:
             continue
         out.append({"team": team, "no": e.jersey, "ev": e.ev, "t": e.t_sec,

@@ -2530,7 +2530,8 @@
     "waitColours": "Laukiama aprangos spalvų",
     "identifying": "Ieškoma žaidėjo kiekviename klipe…",
     "confirmClips": "Laukiama, kol patvirtinsite kelis klipus…",
-    "identified": "Žaidėjas rastas klipuose…"
+    "identified": "Žaidėjas rastas klipuose…",
+    "teams": "Ieškoma komandų kiekviename klipe…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "Ne",
     "done": "Baigta",
     "doneLeaveOut": "Baigta (praleisti {{count}})"
+  },
+  "teamClips": {
+    "title": "Kas yra kas šiuose klipuose?",
+    "hint": "Įrašas sudarytas iš kelių rungtynių, spalvos keičiasi. Kiekvienai spalvai paspauskite komandą. Neatsakyti nepriskiriami; galite grįžti bet kada.",
+    "whoWore": "Kas vilkėjo {{colour}}?",
+    "neither": "Nė viena",
+    "pending": "{{count}} klipas(-ai) laukia: kas yra kas?",
+    "doneLeave": "Baigta ({{count}} atvira)"
   }
 }

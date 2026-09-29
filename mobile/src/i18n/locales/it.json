@@ -2530,7 +2530,8 @@
     "waitColours": "In attesa dei colori delle maglie",
     "identifying": "Cerco il giocatore in ogni clip…",
     "confirmClips": "In attesa della tua conferma su alcune clip…",
-    "identified": "Giocatore trovato nelle clip…"
+    "identified": "Giocatore trovato nelle clip…",
+    "teams": "Cerco le squadre in ogni clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "No",
     "done": "Fatto",
     "doneLeaveOut": "Fatto (escludi {{count}})"
+  },
+  "teamClips": {
+    "title": "Chi è chi in queste clip?",
+    "hint": "Questo video unisce più partite, quindi i colori cambiano. Tocca la squadra per ogni colore. Ciò a cui non rispondi non viene assegnato; puoi tornarci quando vuoi.",
+    "whoWore": "Chi indossava {{colour}}?",
+    "neither": "Nessuna",
+    "pending": "{{count}} clip ti aspettano: chi è chi?",
+    "doneLeave": "Fatto ({{count}} in sospeso)"
   }
 }

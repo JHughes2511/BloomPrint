@@ -2530,7 +2530,8 @@
     "waitColours": "유니폼 색 답변 대기 중",
     "identifying": "각 클립에서 선수를 찾는 중…",
     "confirmClips": "몇몇 클립 확인을 기다리는 중…",
-    "identified": "클립에서 선수를 찾았습니다…"
+    "identified": "클립에서 선수를 찾았습니다…",
+    "teams": "각 클립에서 팀을 찾는 중…"
   },
   "notifs": {
     "seasonNew": {
@@ -3183,5 +3184,13 @@
     "no": "아니요",
     "done": "완료",
     "doneLeaveOut": "완료 ({{count}}개 제외)"
+  },
+  "teamClips": {
+    "title": "이 클립들에서 누가 누구인가요?",
+    "hint": "여러 경기를 이어 붙인 영상이라 색이 바뀝니다. 색마다 팀을 눌러 주세요. 답하지 않은 것은 팀에 넣지 않으며 언제든 돌아올 수 있습니다.",
+    "whoWore": "{{colour}}를 입은 팀은?",
+    "neither": "둘 다 아님",
+    "pending": "{{count}}개 클립이 기다려요: 누가 누구?",
+    "doneLeave": "완료 ({{count}}개 보류)"
   }
 }

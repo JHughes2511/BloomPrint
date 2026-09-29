@@ -8,6 +8,7 @@ import {
   findNodeHandle, RefreshControl,
 } from 'react-native';
 import Sheet from '../components/Sheet';
+import TeamClipSheet from '../components/TeamClipSheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
@@ -523,6 +524,8 @@ export default function GameReportBuilderScreen() {
    * wrong. The read waits briefly for the answer; skipped, the film is read
    * anyway and the question comes back under the film afterwards.
    */
+  const [teamClipFor, setTeamClipFor] = useState<number | null>(null);
+
   const openColourAsk = (clipId: number, label: string, teamName: string) => {
     const sides = filmSides().map(sd => sd.name);
     const first = label === 'both' ? sides[0] : teamName;
@@ -624,7 +627,13 @@ export default function GameReportBuilderScreen() {
       if (created?.clip_id) openColourAsk(created.clip_id, label, teamName);
       if (created?.job_id) {
         setClipProgress(tr('gameBuilder.analyzingFilm'));
-        await evalsAPI.awaitJob(created.job_id, setClipProgress);
+        // A film cut from several games may stop to ask who is who in a few
+        // clips; the sheet opens once, when the job says so.
+        let asked = false;
+        await evalsAPI.awaitJob(created.job_id, (label: string) => {
+          setClipProgress(label);
+          if (!asked && /^job:confirmTeams/.test(label || '') && created?.clip_id) { asked = true; setTeamClipFor(created.clip_id); }
+        });
       }
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
@@ -1207,6 +1216,14 @@ export default function GameReportBuilderScreen() {
             </TouchableOpacity>
           )).flatMap((card: any, i: number) => {
             const clip = clips[i];
+            // Cut from several games: clips still waiting for who-is-who.
+            if (clip.segmented && clip.segments_pending > 0) {
+              return [card, (
+                <TouchableOpacity key={`seg-${clip.id}`} style={styles.woreBox} onPress={() => setTeamClipFor(clip.id)}>
+                  <Text style={styles.woreHint}>{tr('teamClips.pending', { count: clip.segments_pending })}</Text>
+                </TouchableOpacity>
+              )];
+            }
             const seen: string[] = clip.uniforms_seen ?? [];
             if (!seen.length) return [card];
             const teamsHere = filmSides().map(s => s.name).slice(0, 3);
@@ -1850,6 +1867,10 @@ export default function GameReportBuilderScreen() {
       reportText={report?.report_text ?? ''}
       onClose={() => setShowExport(false)}
     />
+    {!!reportId && (
+      <TeamClipSheet reportId={reportId} clipId={teamClipFor}
+                     onClose={() => { setTeamClipFor(null); gameReportsAPI.get(reportId).then(setReport).catch(() => {}); }} />
+    )}
     </PageContainer>
     </ScreenBackground>
   );
