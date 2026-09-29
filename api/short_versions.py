@@ -8,10 +8,11 @@ case their version stays and the page offers to remake it from the standard
 (ShortVersion.source_hash, .edited).
 
 Every report kind plugs in with two things: where its text lives
-(`source_text`) and what shape its page takes (`LAYOUTS`). Team training is a
-practice sheet (practice plan, emphasis list, play sheet, notes); a player's
-training program is a checklist (focus, drills with amounts and cues, key
-cues). Other report kinds can be added the same way.
+(`source_text`) and what page it gets (`layout_for`). Team training is a
+practice sheet and a player's training program a checklist (their own
+layouts, `LAYOUTS`); every other report — scouting, game report, player
+eval, match-up, play calling, team, film — has its page described once in
+`SCHEMAS`, which the prompt, the cleaning and the app all read.
 """
 from __future__ import annotations
 
@@ -58,6 +59,148 @@ Rules:
 
 KIND_LAYOUT = {"training": "training", "team_report": "team_training", "packet_training": "team_training"}
 
+# Every other report's page, described once: the prompt, the cleaning, and the
+# app's page, edit form and print all read this, so a report type is added
+# here and nowhere else. Field types: text (one value), lines (a short list),
+# rows (a small table; `cols` are its columns).
+SCHEMAS: dict[str, dict] = {
+    "scouting": {"guide": "a ONE-PAGE SCOUTING SHEET a staff hands out before playing this team",
+                 "fields": [
+                     {"key": "title", "type": "text", "max": 80},
+                     {"key": "overview", "type": "text", "max": 260, "hint": "who they are in two sentences"},
+                     {"key": "players", "type": "rows", "max": 6, "cols": ["player", "role", "threat", "guard"],
+                      "hint": "their key players: '#23 Name', role, what they hurt you with, how to guard them"},
+                     {"key": "offense", "type": "lines", "max": 5, "hint": "what they run on offense"},
+                     {"key": "defense", "type": "lines", "max": 5, "hint": "how they defend"},
+                     {"key": "keys", "type": "lines", "max": 5, "hint": "our keys to win"}]},
+    "game_report": {"guide": "a ONE-PAGE GAME SUMMARY for staff and players",
+                    "fields": [
+                        {"key": "title", "type": "text", "max": 80},
+                        {"key": "result", "type": "text", "max": 140, "hint": "the result and the one thing that decided it"},
+                        {"key": "worked", "type": "lines", "max": 3},
+                        {"key": "didnt", "type": "lines", "max": 3},
+                        {"key": "standouts", "type": "rows", "max": 5, "cols": ["player", "note"]},
+                        {"key": "next", "type": "lines", "max": 4, "hint": "adjustments for next time"}]},
+    "player_eval": {"guide": "a ONE-PAGE PLAYER CARD a player and staff read at a glance",
+                    "fields": [
+                        {"key": "title", "type": "text", "max": 80},
+                        {"key": "grade", "type": "text", "max": 24, "hint": "the overall grade as the report gives it"},
+                        {"key": "pillars", "type": "rows", "max": 6, "cols": ["pillar", "grade"]},
+                        {"key": "strengths", "type": "lines", "max": 3},
+                        {"key": "watch", "type": "lines", "max": 3, "hint": "watch flags / what to fix"},
+                        {"key": "focus", "type": "text", "max": 220, "hint": "the one focus from here"},
+                        {"key": "cues", "type": "lines", "max": 3, "hint": "short coaching cues"}]},
+    "matchup": {"guide": "a ONE-PAGE MATCH-UP comparison",
+                "fields": [
+                    {"key": "title", "type": "text", "max": 80},
+                    {"key": "sides", "type": "lines", "max": 2, "hint": "the two sides compared, in order"},
+                    {"key": "compare", "type": "rows", "max": 8, "cols": ["area", "first", "second", "edge"],
+                     "hint": "area, first side, second side, who has the edge (a name or 'even')"},
+                    {"key": "verdict", "type": "text", "max": 260}]},
+    "play_calling": {"guide": "a ONE-PAGE PLAY CALLING SHEET",
+                     "fields": [
+                         {"key": "title", "type": "text", "max": 80},
+                         {"key": "summary", "type": "text", "max": 240},
+                         {"key": "best", "type": "rows", "max": 5, "cols": ["play", "defense", "result"],
+                          "hint": "the calls that worked, with the counts the report gives"},
+                         {"key": "worst", "type": "rows", "max": 4, "cols": ["play", "defense", "result"]},
+                         {"key": "keep", "type": "lines", "max": 4, "hint": "keep calling"},
+                         {"key": "change", "type": "lines", "max": 4, "hint": "change or drop"}]},
+    "team": {"guide": "a ONE-PAGE TEAM SUMMARY",
+             "fields": [
+                 {"key": "title", "type": "text", "max": 80},
+                 {"key": "grade", "type": "text", "max": 24},
+                 {"key": "summary", "type": "text", "max": 240},
+                 {"key": "strengths", "type": "lines", "max": 4},
+                 {"key": "needs", "type": "lines", "max": 4},
+                 {"key": "priorities", "type": "lines", "max": 4}]},
+    "film": {"guide": "a ONE-PAGE FILM SUMMARY",
+             "fields": [
+                 {"key": "title", "type": "text", "max": 80},
+                 {"key": "summary", "type": "text", "max": 240},
+                 {"key": "moments", "type": "lines", "max": 6, "hint": "what the film showed, with timestamps where the report gives them"},
+                 {"key": "takeaways", "type": "lines", "max": 4}]},
+}
+
+# The kinds a short version can be asked for, by where the report lives.
+KINDS = {"training", "team_report", "packet_training", "eval", "scouting", "game_full", "play_calling",
+         "film", "packet_version"}
+
+
+def _types(output_type: str | None) -> set[str]:
+    return {t.strip() for t in (output_type or "").split(",") if t.strip()}
+
+
+def layout_for(db: Session, kind: str, ref_id: int) -> str:
+    """What page a report gets: fixed for some kinds, by report type for others."""
+    if kind in ("training", "packet_training"):
+        return KIND_LAYOUT[kind]
+    if kind == "scouting":
+        return "scouting"
+    if kind == "game_full":
+        return "game_report"
+    if kind == "play_calling":
+        return "play_calling"
+    if kind == "film":
+        return "film"
+    if kind == "eval":
+        e = db.get(models.Evaluation, ref_id)
+        return "matchup" if e and "matchup" in _types(e.output_type) else "player_eval"
+    if kind == "team_report":
+        r = db.get(models.TeamReport, ref_id)
+        types = _types(r.output_type if r else "")
+        return "matchup" if "matchup" in types else "team_training" if "team_training" in types else "team"
+    if kind == "packet_version":
+        v = db.get(models.GameReportVersion, ref_id)
+        types = _types(v.output_type if v else "")
+        if "matchup" in types:
+            return "matchup"
+        if "team_training" in types:
+            return "team_training"
+        if "scouting_report" in types:
+            return "scouting"
+        if types & {"game_report", "game_analysis"}:
+            return "game_report"
+        return "team"
+    return "team"
+
+
+def schema_prompt(layout: str) -> str:
+    sch = SCHEMAS[layout]
+    shape = []
+    for f in sch["fields"]:
+        hint = f" — {f['hint']}" if f.get("hint") else ""
+        if f["type"] == "text":
+            shape.append(f'"{f["key"]}": "<text, at most {f["max"]} characters{hint}>"')
+        elif f["type"] == "lines":
+            shape.append(f'"{f["key"]}": ["<at most {f["max"]} short lines{hint}>"]')
+        else:
+            cols = ", ".join(f'"{c}": "<short>"' for c in f["cols"])
+            shape.append(f'"{f["key"]}": [{{{cols}}}]  (at most {f["max"]} rows{hint})')
+    return (f"Condense the REPORT below into {sch['guide']}. Return JSON only:\n{{" + ",\n ".join(shape) + "}\n"
+            "Rules:\n- Only what the report says. Never add a player, number, grade, count or claim it does not "
+            "contain; leave a field empty rather than guess.\n- Short, scannable lines: the way a coach writes "
+            "on a sheet, not sentences copied from the report.")
+
+
+def _clean_schema(layout: str, d: dict) -> dict:
+    out: dict = {}
+    for f in SCHEMAS[layout]["fields"]:
+        v = d.get(f["key"])
+        if f["type"] == "text":
+            out[f["key"]] = str(v or "").strip()[:f["max"]]
+        elif f["type"] == "lines":
+            out[f["key"]] = [str(x).strip()[:160] for x in (v or []) if str(x or "").strip()][:f["max"]]
+        else:
+            rows = []
+            for r in (v or []):
+                if isinstance(r, dict):
+                    row = {c: str(r.get(c) or "").strip()[:120] for c in f["cols"]}
+                    if any(row.values()):
+                        rows.append(row)
+            out[f["key"]] = rows[:f["max"]]
+    return out
+
 
 def _hash(text: str) -> str:
     return hashlib.sha1((text or "").encode("utf-8")).hexdigest()
@@ -75,6 +218,26 @@ def source_text(db: Session, kind: str, ref_id: int) -> tuple[str | None, int | 
         v = (db.query(models.GameReportVersion)
              .filter_by(game_report_id=ref_id, output_type="team_training").first())
         gr = db.get(models.GameReport, ref_id)
+        return (v.report_text if v else None), (gr.coach_id if gr else None)
+    if kind == "eval":
+        e = db.get(models.Evaluation, ref_id)
+        return (e.report_text if e else None), (e.coach_id if e else None)
+    if kind == "scouting":
+        r = db.get(models.GameScoutingReport, ref_id)
+        return (r.report_text if r else None), (r.coach_id if r else None)
+    if kind == "game_full":
+        r = db.get(models.GameFullReport, ref_id)
+        return (r.report_text if r else None), (r.coach_id if r else None)
+    if kind == "play_calling":
+        r = db.get(models.PlayCallingReport, ref_id)
+        return (r.report_text if r else None), (r.coach_id if r else None)
+    if kind == "film":
+        c = db.get(models.GameReportClip, ref_id)
+        gr = c.game_report if c else None
+        return (c.analysis_text if c else None), (gr.coach_id if gr else None)
+    if kind == "packet_version":
+        v = db.get(models.GameReportVersion, ref_id)
+        gr = db.get(models.GameReport, v.game_report_id) if v else None
         return (v.report_text if v else None), (gr.coach_id if gr else None)
     return None, None
 
@@ -190,6 +353,8 @@ def _parse(raw: str) -> dict | None:
 
 def _clean(layout: str, d: dict) -> dict:
     """Keep the page to its shape: no stray keys, lists capped, types right."""
+    if layout in SCHEMAS:
+        return _clean_schema(layout, d)
     def strs(xs, n, width=120):
         return [str(x).strip()[:width] for x in (xs or []) if str(x or "").strip()][:n]
     if layout == "team_training":
@@ -223,12 +388,12 @@ def _clean(layout: str, d: dict) -> dict:
 
 
 def _make(kind: str, ref_id: int, text: str, text_hash: str, staff: list | None = None,
-          groups: dict | None = None) -> None:
+          groups: dict | None = None, layout: str = "") -> None:
     """Write the short version (its own session; runs in a thread)."""
     import asyncio
     from .ai_models import long_text
     from .database import SessionLocal
-    layout = KIND_LAYOUT[kind]
+    layout = layout or KIND_LAYOUT[kind]
     staff_block = ""
     if staff:
         def who(p):
@@ -239,8 +404,9 @@ def _make(kind: str, ref_id: int, text: str, text_hash: str, staff: list | None 
                        + ". Use the coach the program names for a drill if it names one. Otherwise: the head coach "
                          "runs team segments (walk-throughs, script, scrimmage, situations); spread skill and "
                          "position work across the others by their titles.")
-    prompt = (f"{LAYOUTS[layout]}{staff_block}\n\nWrite every text value in the same language as the program.\n\n"
-              f"THE PROGRAM:\n{text[:24000]}")
+    guide = LAYOUTS[layout] if layout in LAYOUTS else schema_prompt(layout)
+    prompt = (f"{guide}{staff_block}\n\nWrite every text value in the same language as the report.\n\n"
+              f"THE REPORT:\n{text[:24000]}")
     data, err = None, None
     try:
         raw = asyncio.run(long_text(prompt, max_tokens=4000))
@@ -289,11 +455,12 @@ def ensure(db: Session, kind: str, ref_id: int, *, force: bool = False) -> model
     db.commit()
     db.refresh(row)
     staff, groups = None, None
-    if KIND_LAYOUT[kind] == "team_training":
+    layout = layout_for(db, kind, ref_id)
+    if layout == "team_training":
         team = team_for(db, kind, ref_id)
         staff = [{k: v for k, v in p.items() if k != "id"} for p in staff_for(db, team)]
         groups = catalog_groups(db, team)
-    threading.Thread(target=_make, args=(kind, ref_id, text, h, staff, groups), daemon=True).start()
+    threading.Thread(target=_make, args=(kind, ref_id, text, h, staff, groups, layout), daemon=True).start()
     return row
 
 
@@ -304,8 +471,10 @@ def out(row: models.ShortVersion | None, db: Session | None = None) -> dict:
     if db is not None:
         text, _ = source_text(db, row.kind, row.ref_id)
         stale = bool(text) and _hash(text) != row.source_hash
+    layout = layout_for(db, row.kind, row.ref_id) if db is not None else KIND_LAYOUT.get(row.kind, "team")
     return {"status": row.status, "data": row.data, "error": row.error, "edited": bool(row.edited),
-            "stale": stale, "updated_at": row.updated_at.isoformat() + "Z" if row.updated_at else None}
+            "stale": stale, "layout": layout, "schema": SCHEMAS.get(layout, {}).get("fields"),
+            "updated_at": row.updated_at.isoformat() + "Z" if row.updated_at else None}
 
 
 def save_edit(db: Session, kind: str, ref_id: int, data: dict) -> models.ShortVersion:
@@ -315,27 +484,29 @@ def save_edit(db: Session, kind: str, ref_id: int, data: dict) -> models.ShortVe
         text, coach_id = source_text(db, kind, ref_id)
         row = models.ShortVersion(kind=kind, ref_id=ref_id, coach_id=coach_id, source_hash=_hash(text or ""))
         db.add(row)
-    row.data, row.status, row.error, row.edited = _clean(KIND_LAYOUT[kind], data or {}), "ready", None, True
-    if KIND_LAYOUT[kind] == "team_training":
+    layout = layout_for(db, kind, ref_id)
+    row.data, row.status, row.error, row.edited = _clean(layout, data or {}), "ready", None, True
+    if layout == "team_training":
         learn_play_types(db, team_for(db, kind, ref_id), row.data)
     db.commit()
     db.refresh(row)
     return row
 
 
-def _correct(kind: str, ref_id: int, current: dict, text: str, correction: str) -> None:
+def _correct(kind: str, ref_id: int, current: dict, text: str, correction: str, layout: str = "") -> None:
     """Apply a coach's correction to the page, in the same shape (a thread)."""
     import asyncio
     from .ai_models import long_text
     from .database import SessionLocal
-    layout = KIND_LAYOUT[kind]
-    prompt = (f"{LAYOUTS[layout]}\n\nThis is the CURRENT PAGE (JSON). Apply the coach's correction to it and return "
+    layout = layout or KIND_LAYOUT[kind]
+    guide = LAYOUTS[layout] if layout in LAYOUTS else schema_prompt(layout)
+    prompt = (f"{guide}\n\nThis is the CURRENT PAGE (JSON). Apply the coach's correction to it and return "
               "the whole page as JSON in the same shape. Change only what the correction asks; keep everything "
               "else exactly as it is. The coach's correction is the authority, even where it differs from the "
               "program. Write in the same language as the page.\n\n"
               f"CURRENT PAGE:\n{json.dumps(current, ensure_ascii=False)}\n\n"
               f"COACH'S CORRECTION:\n{correction[:2000]}\n\n"
-              f"THE PROGRAM (for reference):\n{text[:16000]}")
+              f"THE REPORT (for reference):\n{text[:16000]}")
     data, err = None, None
     try:
         got = _parse(asyncio.run(long_text(prompt, max_tokens=4000)))
@@ -367,5 +538,6 @@ def correct(db: Session, kind: str, ref_id: int, correction: str) -> models.Shor
     row.status, row.error = "making", None
     db.commit()
     db.refresh(row)
-    threading.Thread(target=_correct, args=(kind, ref_id, current, text or "", correction), daemon=True).start()
+    threading.Thread(target=_correct, args=(kind, ref_id, current, text or "", correction,
+                                            layout_for(db, kind, ref_id)), daemon=True).start()
     return row

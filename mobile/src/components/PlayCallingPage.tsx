@@ -15,6 +15,7 @@ import { renderReport } from '../utils/renderReport';
 import { jobProgressLabel } from './GeneratingBasketball';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
+import { WithShortVersion } from './ShortVersion';
 
 type Side = 'our' | 'opponent';
 
@@ -156,7 +157,11 @@ export default function PlayCallingPage({ game, sideNames, qLabel, statLabel, on
           {report ? (
             <View style={s.card}>
               <Text style={s.cardLabel}>{tr('playCalling.page.reportTitle')}</Text>
-              <View style={{ marginTop: 8 }}>{renderReport(report, { heading: t.ink, body: t.inkSoft })}</View>
+              <View style={{ marginTop: 8 }}>
+                <WithShortVersion kind="play_calling" refId={game.id}>
+                  {renderReport(report, { heading: t.ink, body: t.inkSoft })}
+                </WithShortVersion>
+              </View>
             </View>
           ) : null}
 

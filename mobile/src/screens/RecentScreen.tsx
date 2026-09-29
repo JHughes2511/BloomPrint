@@ -1240,7 +1240,11 @@ export default function RecentScreen() {
                 <KeyboardAwareScrollView ref={findGame.scrollRef} contentContainerStyle={{ paddingBottom: 16 }}>
                   <ReportSearchBar ctl={findGame} />
                   {gameReportModal?.text
-                    ? renderReport(gameReportModal.text, { heading: t.ink, body: t.inkSoft }, findGame.search)
+                    ? <WithShortVersion
+                        kind={gameReportModal.reportType === 'game_session' ? 'scouting' : gameReportModal.reportType === 'game_report' ? 'game_full' : 'film'}
+                        refId={['game_session', 'game_report', 'film'].includes(gameReportModal.reportType ?? '') ? gameReportModal.reportId : null}>
+                        {renderReport(gameReportModal.text, { heading: t.ink, body: t.inkSoft }, findGame.search)}
+                      </WithShortVersion>
                     : <Text style={{ color: t.muted2 }}>{tr('recent.noReportContentAvailable')}</Text>
                   }
                 </KeyboardAwareScrollView>
@@ -1468,10 +1472,8 @@ export default function RecentScreen() {
                           showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
                         />
                         <WithShortVersion
-                          kind={activeModal.kind === 'training' ? 'training' : 'team_report'}
-                          refId={activeModal.kind === 'training'
-                            || (activeModal.kind === 'team' && parseOutputTypes(activeModal.outputType).includes('team_training'))
-                            ? activeModal.id : null}>
+                          kind={activeModal.kind === 'training' ? 'training' : activeModal.kind === 'eval' ? 'eval' : 'team_report'}
+                          refId={activeModal.id}>
                           {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
                         </WithShortVersion>
                       </>

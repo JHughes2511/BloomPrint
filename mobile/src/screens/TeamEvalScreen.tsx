@@ -56,6 +56,7 @@ import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_
 import { useGridColumns } from '../responsive/useGridColumns';
 import { useBackStep } from '../navigation/useBackStep';
 import { abandonSheetHistory } from '../web/sheetHistory';
+import { WithShortVersion } from '../components/ShortVersion';
 
 // Highest competition level → lowest.
 const COMPETITION_LEVELS = [
@@ -4034,7 +4035,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </View>
               <View style={{ marginTop: 8 }}>
                 <ReportSearchBar ctl={findScouting} />
-                {renderReport(detailGame.ai_scouting_report ?? '', { heading: t.ink, body: t.inkSoft }, findScouting.search)}
+                <WithShortVersion kind="scouting" refId={detailGame.ai_scouting_report ? detailGame.id : null}>
+                  {renderReport(detailGame.ai_scouting_report ?? '', { heading: t.ink, body: t.inkSoft }, findScouting.search)}
+                </WithShortVersion>
               </View>
             </View>
           )}
@@ -4605,7 +4608,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         </View>
                         <View style={{ marginTop: 8 }}>
                           <ReportSearchBar ctl={findGameReport} />
-                          {renderReport(gameReportGame.ai_game_report, { heading: t.ink, body: t.inkSoft }, findGameReport.search)}
+                          <WithShortVersion kind="game_full" refId={gameReportGame.id}>
+                            {renderReport(gameReportGame.ai_game_report, { heading: t.ink, body: t.inkSoft }, findGameReport.search)}
+                          </WithShortVersion>
                         </View>
                       </View>
 

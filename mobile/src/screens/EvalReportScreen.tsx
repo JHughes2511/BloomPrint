@@ -33,6 +33,7 @@ import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { useSheetScrollHeight, sheetCap, desktopOnly } from '../responsive/modalSizes';
+import { WithShortVersion } from '../components/ShortVersion';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -565,7 +566,9 @@ export default function EvalReportScreen() {
                 canToggle={rt.canToggle} isTranslated={rt.isTranslated}
                 showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
               />
-              {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+              <WithShortVersion kind="eval" refId={evalId}>
+                {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+              </WithShortVersion>
             </View>
           )}
         </View>
@@ -782,7 +785,9 @@ export default function EvalReportScreen() {
               canToggle={rt.canToggle} isTranslated={rt.isTranslated}
               showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
             />
-            {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+            <WithShortVersion kind="eval" refId={evalId}>
+                {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
+              </WithShortVersion>
           </View>
         </View>
       )}

@@ -22,7 +22,17 @@ import { useTranslation } from 'react-i18next';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 
-export type ShortKind = 'training' | 'team_report' | 'packet_training';
+export type ShortKind = 'training' | 'team_report' | 'packet_training' | 'eval' | 'scouting' | 'game_full'
+  | 'play_calling' | 'film' | 'packet' | 'packet_version';
+
+/** A report type's page, as the server describes it (api/short_versions.py SCHEMAS). */
+type Field = { key: string; type: 'text' | 'lines' | 'rows'; max: number; cols?: string[]; hint?: string };
+
+const LAYOUT_TITLE: Record<string, string> = {
+  scouting: 'reportTypes.scouting_report', game_report: 'reportTypes.game_report', player_eval: 'reportTypes.player_eval',
+  matchup: 'reportTypes.matchup', play_calling: 'playCalling.page.reportTitle', team: 'reportTypes.team_report',
+  film: 'reportTypes.film_breakdown', team_training: 'reportTypes.team_training', training: 'reportTypes.training_program',
+};
 
 /** The segmented control. */
 export function VersionSwitch({ value, onChange, style }: { value: 'standard' | 'short'; onChange: (v: 'standard' | 'short') => void; style?: any }) {
@@ -151,7 +161,8 @@ export function ShortVersionView({ kind, refId, fetcher, readOnly, ticks }: {
   if (draft) {
     return (
       <View style={s.page}>
-        {kind === 'training' ? <PlayerEdit d={draft} set={setDraft} t={t} tr={tr} /> : <TeamEdit d={draft} set={setDraft} t={t} tr={tr} />}
+        {got.schema ? <GenericEdit schema={got.schema} d={draft} set={setDraft} t={t} tr={tr} />
+          : kind === 'training' ? <PlayerEdit d={draft} set={setDraft} t={t} tr={tr} /> : <TeamEdit d={draft} set={setDraft} t={t} tr={tr} />}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
           <TouchableOpacity style={[s.btn, { flex: 1, borderWidth: 1, borderColor: t.line }]} onPress={() => setDraft(null)}>
             <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
@@ -169,9 +180,10 @@ export function ShortVersionView({ kind, refId, fetcher, readOnly, ticks }: {
     return (
       <View>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
-          <PrintRow kind={kind} d={got.data} pdf={false} t={t} tr={tr} />
+          <PrintRow kind={kind} d={got.data} layout={got.layout} schema={got.schema} pdf={false} t={t} tr={tr} />
         </View>
-        {kind === 'training' ? <PlayerSheet d={got.data} t={t} tr={tr} ticks={ticks} /> : <TeamSheet d={got.data} t={t} tr={tr} />}
+        {got.schema ? <GenericSheet schema={got.schema} d={got.data} t={t} tr={tr} />
+          : kind === 'training' ? <PlayerSheet d={got.data} t={t} tr={tr} ticks={ticks} /> : <TeamSheet d={got.data} t={t} tr={tr} />}
       </View>
     );
   }
@@ -188,7 +200,7 @@ export function ShortVersionView({ kind, refId, fetcher, readOnly, ticks }: {
           <Ionicons name="chatbox-ellipses-outline" size={14} color={t.inkSoft} />
           <Text style={s.toolText}>{tr('shortVersion.correct')}</Text>
         </TouchableOpacity>
-        <PrintRow kind={kind} d={got.data} pdf t={t} tr={tr} />
+        <PrintRow kind={kind} d={got.data} layout={got.layout} schema={got.schema} pdf t={t} tr={tr} />
       </View>
       {got.stale && got.edited && (
         <View style={s.stale}>
@@ -208,7 +220,8 @@ export function ShortVersionView({ kind, refId, fetcher, readOnly, ticks }: {
           </TouchableOpacity>
         </View>
       )}
-      {kind === 'training' ? <PlayerSheet d={got.data} t={t} tr={tr} /> : <TeamSheet d={got.data} t={t} tr={tr} />}
+      {got.schema ? <GenericSheet schema={got.schema} d={got.data} t={t} tr={tr} />
+        : kind === 'training' ? <PlayerSheet d={got.data} t={t} tr={tr} /> : <TeamSheet d={got.data} t={t} tr={tr} />}
     </View>
   );
 }
@@ -364,7 +377,9 @@ const TH = 'padding:6px 8px;background:#eef2f7;font-weight:bold;color:#0f172a;fo
 const TD = 'padding:6px 8px;color:#1f2937;border:0.5px solid #cbd5e1;vertical-align:top';
 const H3 = 'font-size:14px;font-weight:800;color:#0f172a;margin:18px 0 6px;border-bottom:1.5px solid #cbd5e1;padding-bottom:3px';
 
-export function shortHtml(kind: ShortKind, d: any, tr: (k: string, o?: any) => string): string {
+export function shortHtml(kind: ShortKind, d: any, tr: (k: string, o?: any) => string,
+                          layout?: string, schema?: Field[] | null): string {
+  if (schema) return genericHtml(layout ?? '', schema, d, tr);
   const h3 = (x: string) => `<h3 style="${H3}">${esc(x)}</h3>`;
   const lines = (xs: string[]) => `<ul style="margin:4px 0;padding-left:18px">${xs.map(x =>
     `<li style="font-size:12px;line-height:1.6;margin:2px 0;color:#1f2937">${esc(x)}</li>`).join('')}</ul>`;
@@ -414,13 +429,14 @@ export function shortHtml(kind: ShortKind, d: any, tr: (k: string, o?: any) => s
 }
 
 /** Print (and, for coaches, PDF) buttons for a short page. */
-function PrintRow({ kind, d, pdf, t, tr }: { kind: ShortKind; d: any; pdf: boolean; t: ThemeTokens; tr: (k: string, o?: any) => string }) {
+function PrintRow({ kind, d, layout, schema, pdf, t, tr }: { kind: ShortKind; d: any; layout?: string; schema?: Field[] | null;
+  pdf: boolean; t: ThemeTokens; tr: (k: string, o?: any) => string }) {
   const s = makeStyles(t);
   const [busy, setBusy] = useState(false);
   const run = async (what: 'print' | 'pdf') => {
     setBusy(true);
     try {
-      const html = shortHtml(kind, d, tr);
+      const html = shortHtml(kind, d, tr, layout, schema);
       if (what === 'print') await printRawHtml(html);
       else await exportHtmlPdf(html, d.title || tr('shortVersion.short'));
     } catch (e: any) {
@@ -553,6 +569,147 @@ function PlayerSheet({ d, t, tr, ticks }: { d: any; t: ThemeTokens; tr: (k: stri
   );
 }
 
+// ── Every other report: its page, edit form and print, from its schema ──────
+
+const fieldLabel = (tr: (k: string, o?: any) => string, key: string) => tr(`shortVersion.f.${key}`, { defaultValue: key });
+/** Column headings; a match-up names its two sides instead of "first"/"second". */
+const colLabel = (tr: (k: string, o?: any) => string, col: string, d: any) =>
+  col === 'first' && d?.sides?.[0] ? d.sides[0] : col === 'second' && d?.sides?.[1] ? d.sides[1]
+    : tr(`shortVersion.c.${col}`, { defaultValue: col });
+
+function GenericSheet({ schema, d, t, tr }: { schema: Field[]; d: any; t: ThemeTokens; tr: (k: string, o?: any) => string }) {
+  const s = makeStyles(t);
+  return (
+    <View style={s.page}>
+      {!!d.title && <Text style={s.title}>{d.title}</Text>}
+      {schema.filter(f => f.key !== 'title' && f.key !== 'sides').map(f => {
+        const v = d[f.key];
+        if (f.type === 'text') {
+          if (!v) return null;
+          return (
+            <View key={f.key} style={{ marginTop: 14 }}>
+              <Text style={s.section}>{fieldLabel(tr, f.key)}</Text>
+              <Text style={f.key === 'grade' ? s.grade : s.para}>{v}</Text>
+            </View>
+          );
+        }
+        if (f.type === 'lines') {
+          if (!(v ?? []).length) return null;
+          return (
+            <View key={f.key} style={{ marginTop: 14 }}>
+              <Text style={s.section}>{fieldLabel(tr, f.key)}</Text>
+              {v.map((x: string, i: number) => <Text key={i} style={s.emph}>{x}</Text>)}
+            </View>
+          );
+        }
+        if (!(v ?? []).length) return null;
+        const cols = f.cols ?? [];
+        return (
+          <View key={f.key} style={{ marginTop: 14 }}>
+            <Text style={s.section}>{fieldLabel(tr, f.key)}</Text>
+            <View style={s.table}>
+              <View style={[s.tr, s.thRow]}>
+                {cols.map((c, j) => <Text key={c} style={[s.th, { flex: j === 0 ? 1.2 : 1 }]}>{colLabel(tr, c, d)}</Text>)}
+              </View>
+              {v.map((row: any, i: number) => (
+                <View key={i} style={s.tr}>
+                  {cols.map((c, j) => (
+                    <Text key={c} style={[s.td, { flex: j === 0 ? 1.2 : 1 }, j === 0 && { fontFamily: fonts[800] }]}>{row[c] ?? ''}</Text>
+                  ))}
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function GenericEdit({ schema, d, set, t, tr }: { schema: Field[]; d: any; set: (v: any) => void; t: ThemeTokens; tr: (k: string, o?: any) => string }) {
+  const s = makeStyles(t);
+  const up = (patch: any) => set({ ...d, ...patch });
+  return (
+    <View>
+      {schema.map(f => {
+        if (f.key === 'title') {
+          return <TextInput key="title" style={[s.input, s.titleInput]} value={d.title ?? ''} placeholder={tr('shortVersion.titlePlaceholder')}
+                            placeholderTextColor={t.muted2} onChangeText={v => up({ title: v })} />;
+        }
+        if (f.type === 'text') {
+          return (
+            <Field key={f.key} label={fieldLabel(tr, f.key)} t={t}>
+              <TextInput style={[s.input, { minHeight: f.max > 60 ? 56 : undefined }]} multiline={f.max > 60} textAlignVertical="top"
+                         value={d[f.key] ?? ''} maxLength={f.max} onChangeText={v => up({ [f.key]: v })} />
+            </Field>
+          );
+        }
+        if (f.type === 'lines') {
+          return (
+            <Field key={f.key} label={fieldLabel(tr, f.key)} t={t}>
+              <Lines items={d[f.key] ?? []} onChange={v => up({ [f.key]: v })} t={t} tr={tr} />
+            </Field>
+          );
+        }
+        const cols = f.cols ?? [];
+        const rows: any[] = d[f.key] ?? [];
+        const setRow = (i: number, patch: any) => up({ [f.key]: rows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
+        return (
+          <Field key={f.key} label={fieldLabel(tr, f.key)} t={t}>
+            <View style={{ gap: 6 }}>
+              {rows.map((r, i) => (
+                <View key={i} style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {cols.map((c, j) => (
+                    <TextInput key={c} style={[s.input, { flexGrow: j === 0 ? 2 : 1, flexBasis: j === 0 ? 150 : 100 }]} value={r[c] ?? ''}
+                               placeholder={colLabel(tr, c, d)} placeholderTextColor={t.muted2} onChangeText={v => setRow(i, { [c]: v })} />
+                  ))}
+                  <TouchableOpacity onPress={() => up({ [f.key]: rows.filter((_, j) => j !== i) })} hitSlop={8} accessibilityLabel={tr('shortVersion.remove')}>
+                    <Ionicons name="close-circle-outline" size={18} color={t.muted} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+              {rows.length < f.max && (
+                <TouchableOpacity onPress={() => up({ [f.key]: [...rows, Object.fromEntries(cols.map(c => [c, '']))] })}>
+                  <Text style={s.link}>+ {tr('shortVersion.addRow')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Field>
+        );
+      })}
+    </View>
+  );
+}
+
+function genericHtml(layout: string, schema: Field[], d: any, tr: (k: string, o?: any) => string): string {
+  const h3 = (x: string) => `<h3 style="${H3}">${esc(x)}</h3>`;
+  let body = '';
+  for (const f of schema) {
+    if (f.key === 'title' || f.key === 'sides') continue;
+    const v = d[f.key];
+    if (f.type === 'text') {
+      if (v) body += h3(fieldLabel(tr, f.key)) + `<p style="font-size:${f.key === 'grade' ? 16 : 12}px;${f.key === 'grade' ? 'font-weight:bold;' : ''}color:#1f2937;margin:4px 0">${esc(v)}</p>`;
+    } else if (f.type === 'lines') {
+      if ((v ?? []).length) body += h3(fieldLabel(tr, f.key)) + `<ul style="margin:4px 0;padding-left:18px">${v.map((x: string) =>
+        `<li style="font-size:12px;line-height:1.6;margin:2px 0;color:#1f2937">${esc(x)}</li>`).join('')}</ul>`;
+    } else if ((v ?? []).length) {
+      const cols = f.cols ?? [];
+      const w = Math.floor(100 / Math.max(cols.length, 1));
+      body += h3(fieldLabel(tr, f.key)) + `<table style="${TABLE}"><tr>${cols.map(c =>
+        `<td width="${w}%" style="${TH}">${esc(colLabel(tr, c, d))}</td>`).join('')}</tr>`
+        + v.map((row: any) => `<tr>${cols.map((c, j) => `<td style="${TD}${j === 0 ? ';font-weight:bold' : ''}">${esc(row[c] ?? '')}</td>`).join('')}</tr>`).join('')
+        + `</table>`;
+    }
+  }
+  const type = tr(LAYOUT_TITLE[layout] ?? 'shortVersion.short');
+  return wrapPrintDocument({
+    title: d.title || type,
+    subtitle: `${type} · ${tr('shortVersion.short')}`,
+    date: new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
+    bodyHtml: body,
+  });
+}
+
 const makeStyles = (t: ThemeTokens) => ({
   switch: { flexDirection: 'row' as const, alignSelf: 'flex-start' as const, borderWidth: 1, borderColor: t.line,
             borderRadius: 999, padding: 3, marginBottom: 12, backgroundColor: t.card },
@@ -583,6 +740,8 @@ const makeStyles = (t: ThemeTokens) => ({
   focus: { borderWidth: 1, borderColor: t.accent, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   focusText: { color: t.accent, fontSize: 12.5, fontFamily: fonts[800] },
   muted: { color: t.muted, fontSize: 13 },
+  para: { color: t.ink, fontSize: 14, lineHeight: 20 },
+  grade: { color: t.accent, fontSize: 22, fontFamily: fonts[900] },
   tool: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 5, borderWidth: 1, borderColor: t.line,
           borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: t.card },
   toolText: { color: t.inkSoft, fontSize: 12.5, fontFamily: fonts[700] },

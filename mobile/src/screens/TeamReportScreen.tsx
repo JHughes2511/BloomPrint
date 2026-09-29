@@ -750,7 +750,7 @@ export default function TeamReportScreen() {
             </View>
             <ReportSearchBar ctl={find} />
             <WithShortVersion kind="team_report"
-                              refId={parseOutputTypes(outputType).includes('team_training') ? savedTeamReportId : null}>
+                              refId={savedTeamReportId}>
             <View style={styles.reportBox}>
               {renderReport(reportText, { heading: t.ink, body: t.inkSoft }, find.search)}
             </View>
@@ -956,7 +956,7 @@ export default function TeamReportScreen() {
             <KeyboardAwareScrollView ref={findPrev.scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {selectedPrevReport?.report_text ? (
                 <WithShortVersion kind="team_report"
-                                  refId={parseOutputTypes(selectedPrevReport.output_type).includes('team_training') ? selectedPrevReport.id : null}>
+                                  refId={selectedPrevReport.id}>
                   {renderReport(selectedPrevReport.report_text, { heading: t.ink, body: t.inkSoft }, findPrev.search)}
                 </WithShortVersion>
               ) : (
