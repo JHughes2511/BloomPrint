@@ -7,6 +7,7 @@ import {
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import Sheet from '../components/Sheet';
+import ClipCheckSheet from '../components/ClipCheckSheet';
 import { sheetCap } from '../responsive/modalSizes';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
@@ -41,7 +42,11 @@ export default function NewEvalScreen() {
   const navigation = useNavigation<any>();
   // Back means up a level — see navigation/goUp.ts.
   const goUp = useGoUp();
-  const { playerId, playerName } = route.params;
+  const { playerId, playerName: nameParam } = route.params;
+  // Opened from a link the name is not in the route; the player is loaded
+  // below anyway (for their number), so the name comes from there.
+  const [loadedName, setLoadedName] = useState('');
+  const playerName: string = nameParam || loadedName;
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const styles = makeStyles(t);
@@ -64,23 +69,34 @@ export default function NewEvalScreen() {
   const [findAsk, setFindAsk] = useState<{ colours: string[] | null; jersey: string; colour: string;
                                            other: boolean; resolve: (a: { jersey: string; colour: string } | null) => void } | null>(null);
   const [rosterJersey, setRosterJersey] = useState('');
+  const [clipJob, setClipJob] = useState<number | null>(null);
   useEffect(() => {
-    playersAPI.get(playerId).then((p: any) => setRosterJersey(String(p?.jersey_number ?? '').replace(/[^0-9]/g, '')))
+    playersAPI.get(playerId).then((p: any) => {
+      setRosterJersey(String(p?.jersey_number ?? '').replace(/[^0-9]/g, ''));
+      if (p?.name) setLoadedName(p.name);
+    })
       .catch(() => {});
   }, [playerId]);
 
   /** Ask where the player is in the film; resolves with the answer, or null if skipped. */
-  const findPlayer = (token: string) => new Promise<{ jersey: string; colour: string } | null>(resolve => {
-    setFindAsk({ colours: null, jersey: rosterJersey, colour: '', other: false, resolve });
-    evalsAPI.detectColours(token)
-      .then((colours: string[]) => setFindAsk(prev => prev && ({ ...prev, colours, other: colours.length === 0 })))
-      .catch(() => setFindAsk(prev => prev && ({ ...prev, colours: [], other: true })));
-  });
+  //
+  // A highlight tape shows more than two uniforms, so there is no one colour to
+  // pick: nothing is asked, and the analysis finds the player clip by clip from
+  // every number on record and how they look (video_vision/identify.py), asking
+  // only about the clips it is unsure of.
+  const findPlayer = async (token: string) => {
+    const colours: string[] = await evalsAPI.detectColours(token).catch(() => []);
+    if (colours.length !== 2) return rosterJersey ? { jersey: rosterJersey, colour: '' } : null;
+    return new Promise<{ jersey: string; colour: string } | null>(resolve => {
+      setFindAsk({ colours, jersey: rosterJersey, colour: '', other: false, resolve });
+    });
+  };
   const answerFind = (save: boolean) => {
     const ask = findAsk;
     if (!ask) return;
     setFindAsk(null);
-    ask.resolve(save && ask.jersey.trim() && ask.colour.trim() ? { jersey: ask.jersey.trim(), colour: ask.colour.trim() } : null);
+    // The colour is optional: without it the film is read clip by clip.
+    ask.resolve(save && ask.jersey.trim() ? { jersey: ask.jersey.trim(), colour: ask.colour.trim() } : null);
   };
 
   // Box-score tracked games (loaded when Box Score is selected)
@@ -202,7 +218,10 @@ export default function NewEvalScreen() {
       if (tokens.length && outputType.split(',').some(k => TENDENCY_TYPES.includes(k))) {
         setProgress('');
         const found = await findPlayer(tokens[0]);
-        if (found) { fields.player_jersey = found.jersey; fields.player_uniform = found.colour; }
+        if (found) {
+          fields.player_jersey = found.jersey;
+          if (found.colour) fields.player_uniform = found.colour;
+        }
       }
       setProgress(videos.length ? tr('newEval.analyzingFilm') : '');
 
@@ -210,7 +229,14 @@ export default function NewEvalScreen() {
       Object.entries(fields).forEach(([k, v]) => form.append(k, v));
       const res: any = await evalsAPI.submit(form);
       // Video jobs return a job id; poll for it.
-      const ev = res?.job_id ? await evalsAPI.awaitJob(res.job_id, setProgress) : res;
+      // A highlight tape may stop to ask "Is this him?" about clips it is
+      // unsure of; the sheet opens once, when the job says so.
+      let asked = false;
+      const ev = res?.job_id ? await evalsAPI.awaitJob(res.job_id, (label: string) => {
+        setProgress(label);
+        if (!asked && /^job:confirmClips/.test(label || '')) { asked = true; setClipJob(res.job_id); }
+      }) : res;
+      setClipJob(null);
       if (!ev?.id) throw new Error('No evaluation returned');
       navigation.replace('EvalReport', { evalId: ev.id });
     } catch (e: any) {
@@ -477,6 +503,8 @@ export default function NewEvalScreen() {
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
 
+    <ClipCheckSheet jobId={clipJob} playerName={playerName} onClose={() => setClipJob(null)} />
+
     {/* Find the player in the film: jersey number and colour. */}
     <Sheet visible={!!findAsk} animationType="slide" transparent onRequestClose={() => answerFind(false)}>
       <View style={styles.findOverlay}>
@@ -498,6 +526,7 @@ export default function NewEvalScreen() {
             onChangeText={v => setFindAsk(prev => prev && ({ ...prev, jersey: v.replace(/[^0-9]/g, '') }))}
           />
           <Text style={styles.findLabel}>{tr('newEval.jerseyColour')}</Text>
+          <Text style={[styles.findHint, { marginTop: -2 }]}>{tr('newEval.colourOptional')}</Text>
           {findAsk?.colours === null ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8 }}>
               <ActivityIndicator color={t.accent} size="small" />
@@ -537,8 +566,8 @@ export default function NewEvalScreen() {
               <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('gameBuilder.skipColours')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.findBtn, { backgroundColor: t.ctaBg }, !(findAsk?.jersey && findAsk?.colour.trim()) && { opacity: 0.5 }]}
-              disabled={!(findAsk?.jersey && findAsk?.colour.trim())}
+              style={[styles.findBtn, { backgroundColor: t.ctaBg }, !findAsk?.jersey && { opacity: 0.5 }]}
+              disabled={!findAsk?.jersey}
               onPress={() => answerFind(true)}>
               <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('newEval.continueBtn')}</Text>
             </TouchableOpacity>

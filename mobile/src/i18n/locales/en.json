@@ -338,7 +338,8 @@
     "findPlayerHint": "Their jersey number and colour let the film log what they do, so the report can say how often. Skip and the report is written without counted tendencies.",
     "jerseyNumber": "Jersey #",
     "jerseyColour": "Jersey colour",
-    "continueBtn": "Continue"
+    "continueBtn": "Continue",
+    "colourOptional": "Optional. Leave it blank for a highlight tape; each clip is checked."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Uploading film {{i}} of {{n}} — {{pct}}% ({{sent}} of {{total}})",
     "working": "Working…",
     "colours": "Checking jersey colours",
-    "waitColours": "Waiting for jersey colours"
+    "waitColours": "Waiting for jersey colours",
+    "identifying": "Finding the player in each clip…",
+    "confirmClips": "Waiting for you to confirm a few clips…",
+    "identified": "Found the player in the clips…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Checklist",
     "print": "Print",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Is this {{name}}?",
+    "hint": "These clips weren't clear. Yes counts the clip, No leaves it out, and anything you don't answer is left out. Each answer teaches BloomPrint how they look, so the next tape asks less.",
+    "frame": "Frame from the clip",
+    "clip": "Clip {{n}}",
+    "counted": "Counted",
+    "leftOut": "Left out",
+    "yes": "Yes",
+    "no": "No",
+    "done": "Done",
+    "doneLeaveOut": "Done (leave {{count}} out)"
   }
 }

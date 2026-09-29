@@ -338,7 +338,8 @@
     "findPlayerHint": "Numărul și culoarea tricoului permit filmului să noteze ce face jucătorul, ca raportul să spună cât de des. Dacă sari, raportul se scrie fără tendințe numărate.",
     "jerseyNumber": "Număr",
     "jerseyColour": "Culoarea tricoului",
-    "continueBtn": "Continuă"
+    "continueBtn": "Continuă",
+    "colourOptional": "Opțional. Lasă gol pentru un video cu faze; fiecare clip e verificat."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Se încarcă filmarea {{i}} din {{n}} — {{pct}}% ({{sent}} din {{total}})",
     "working": "Se lucrează…",
     "colours": "Se verifică culorile echipamentelor",
-    "waitColours": "Se așteaptă culorile echipamentelor"
+    "waitColours": "Se așteaptă culorile echipamentelor",
+    "identifying": "Caut jucătorul în fiecare clip…",
+    "confirmClips": "Aștept să confirmi câteva clipuri…",
+    "identified": "Jucător găsit în clipuri…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Listă",
     "print": "Tipărește",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Este {{name}}?",
+    "hint": "Aceste clipuri nu au fost clare. Da numără clipul, Nu îl exclude, iar ce nu răspunzi e exclus. Fiecare răspuns învață BloomPrint cum arată jucătorul.",
+    "frame": "Cadru din clip",
+    "clip": "Clip {{n}}",
+    "counted": "Numărat",
+    "leftOut": "Exclus",
+    "yes": "Da",
+    "no": "Nu",
+    "done": "Gata",
+    "doneLeaveOut": "Gata (exclude {{count}})"
   }
 }

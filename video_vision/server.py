@@ -1115,6 +1115,8 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     on_profile = args.get("_on_profile")
 
     frames = []
+    film_frames: list[list] = []
+    profiles: dict[int, dict] = {}
     for i, p in enumerate(video_paths):
         # A long film spends minutes here before the first segment. Reporting
         # the scan's own percentage is what tells the coach it is working, and
@@ -1127,17 +1129,92 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                     pass
 
         def _save_profile(prof, _i=i):
+            profiles[_i] = prof
             if on_profile:
                 try:
                     on_profile(_i, prof)
                 except Exception:
                     pass
 
-        frames += _extract_frames_adaptive(
+        kept_profile = resume_profiles.get(i) or resume_profiles.get(str(i))
+        if kept_profile:
+            profiles[i] = kept_profile
+        got = _extract_frames_adaptive(
             p, budget_cap=per_cap, on_progress=_scan_progress,
-            profile=resume_profiles.get(i) or resume_profiles.get(str(i)),
-            on_profile=_save_profile,
+            profile=kept_profile, on_profile=_save_profile,
         )
+        film_frames.append(got)
+        frames += got
+
+    # ── A highlight tape: who is the player in each clip ──
+    # Asked for by a player report (`identify`: what is known about the player).
+    # Only a tape cut together from many clips is read this way; a continuous
+    # game keeps the one colour + number the coach gave (`focus`).
+    who = args.get("identify") or None
+    on_clips = args.get("_on_clips")
+    id_clips: list[dict] = []
+    identity_mode = False
+    if who:
+        from .identify import clip_bounds, is_highlight_tape, identify as _identify
+        per_film = []
+        for i, p in enumerate(video_paths):
+            prof = profiles.get(i)
+            if not prof:
+                try:
+                    d, sc = _motion_profile(p)
+                    prof = {"duration": d, "scores": [[t, v] for t, v in sc]}
+                except Exception:
+                    prof = {"duration": 0.0, "scores": []}
+            dur = float(prof.get("duration") or 0.0)
+            per_film.append((dur, clip_bounds(dur, [(float(t), float(v)) for t, v in prof.get("scores") or []])))
+        identity_mode = any(is_highlight_tape(d, c) for d, c in per_film)
+        if identity_mode and focus:
+            # The coach's number is a hint here, not the rule: on a tape the
+            # colour changes from clip to clip.
+            nums = list(who.get("numbers") or [])
+            if focus.get("no") and focus["no"] not in nums:
+                who = {**who, "numbers": [focus["no"]] + nums}
+            focus = None
+        if identity_mode:
+            # Several films are read as one tape played back to back, so every
+            # moment has one time: clip k of film 2 does not collide with film 1.
+            offsets, acc = [], 0.0
+            for d, _c in per_film:
+                offsets.append(acc)
+                acc += float(int(d) + 1)
+            if len(video_paths) > 1:
+                frames = [(ts + offsets[i], fr) for i, ff in enumerate(film_frames) for ts, fr in ff]
+                if len(frames) > TOTAL_CAP:
+                    step = len(frames) / TOTAL_CAP
+                    frames = [frames[int(i * step)] for i in range(TOTAL_CAP)]
+            for i, p in enumerate(video_paths):
+                if progress:
+                    try:
+                        progress(0, 1, "job:identifying")
+                    except Exception:
+                        pass
+                for c in _identify(p, per_film[i][1], who, _client(), OPUS):
+                    c["start"] += offsets[i]
+                    c["end"] += offsets[i]
+                    c["film"] = i
+                    id_clips.append(c)
+            for n, c in enumerate(id_clips, start=1):
+                c["clip"] = n
+                c["final"] = c["present"] if c["present"] != "unsure" else None
+            if on_clips:
+                # Saves the clips, shows the unsure ones to the coach and waits
+                # a while for answers; returns them with "final" settled.
+                try:
+                    id_clips = on_clips(id_clips) or id_clips
+                except Exception:
+                    pass
+            for c in id_clips:
+                if c.get("final") not in ("yes", "no"):
+                    c["final"] = "left_out"
+            want_events = True
+            # Counted from the clips that are the player; the report is told
+            # how many were used and how many were left out, and says so.
+            tendencies_block = args.get("_tendencies_block_identified") or tendencies_block
     if len(frames) > TOTAL_CAP:
         # Thin evenly rather than slice. `frames[:TOTAL_CAP]` kept the earliest
         # ones, and with several films concatenated that meant the last films
@@ -1181,6 +1258,18 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             c.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": _frame_to_base64(frame)}})
         return c
 
+    _identity_note = ""
+    if identity_mode:
+        from .identify import identity_note as _id_note
+        _identity_note = _id_note(player_name or "the player", id_clips) + " "
+        used = sum(1 for c in id_clips if c.get("final") == "yes")
+        left = sum(1 for c in id_clips if c.get("final") == "left_out")
+        bim_prompt += ("\n\n" + _identity_note.strip()
+                       + f"\nHIGHLIGHT TAPE: {len(id_clips)} clips; {player_name or 'the player'} was identified in {used}. "
+                       + (f"{left} clip(s) could not be confirmed as them and were left out — say so in one line near the top. "
+                          if left else "")
+                       + "Write only about what the player does in their clips.")
+
     # ── Single pass (short clips) ──
     if len(frames) <= CHUNK:
         if want_events:
@@ -1196,6 +1285,9 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 player_events = _split_events(text_of(r))[1]
             except Exception:
                 player_events = []
+        if identity_mode:
+            from .identify import keep_events as _keep
+            player_events = _keep(player_events, id_clips)
         prompt = bim_prompt + (tendencies_block(player_events) if want_events and tendencies_block else "")
         content: list[dict] = [{"type": "text", "text": prompt}]
         if transcript_text:
@@ -1228,7 +1320,8 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 # synthesis only reads their notes. Telling it at the end that
                 # both teams mattered cannot recover observations no segment
                 # ever took, so who the film is of has to be said here too.
-                + (f"{segment_note} " if segment_note else "") +
+                + (f"{segment_note} " if segment_note else "")
+                + (_identity_note if identity_mode else "") +
                 "Cite specific moments by their film timestamp [MM:SS] (e.g. (12:34)), never frame numbers or raw seconds. "
                 "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
                 + (_events_directive(uniforms, colour_words, focus) if want_events else "")
@@ -1309,6 +1402,9 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 cleaned.append(body)
                 player_events += evs
             seg_notes = cleaned
+        if identity_mode:
+            from .identify import keep_events as _keep
+            player_events = _keep(player_events, id_clips)
         synth = bim_prompt
         if want_events and tendencies_block:
             synth += tendencies_block(player_events)
@@ -1326,11 +1422,17 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     if want_events:
         import json as _json
         out.append(types.TextContent(type="text", text=EVENTS_PREFIX + _json.dumps(player_events)))
+    if identity_mode:
+        import json as _json
+        out.append(types.TextContent(type="text", text=CLIPS_PREFIX + _json.dumps(
+            [{k: v for k, v in c.items() if k != "frame"} for c in id_clips])))
     return out
 
 
 # The second text a game-film analysis returns: its player-by-player log.
 EVENTS_PREFIX = "PLAYER_EVENTS_JSON:"
+# And, for a highlight tape, who was in which clip (video_vision/identify.py).
+CLIPS_PREFIX = "IDENTITY_CLIPS_JSON:"
 
 
 

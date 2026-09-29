@@ -338,7 +338,8 @@
     "findPlayerHint": "背番号とユニフォームの色で、映像がこの選手のプレーを記録し、レポートで回数を示せます。スキップすると、回数付きの傾向なしでレポートを作成します。",
     "jerseyNumber": "背番号",
     "jerseyColour": "ユニフォームの色",
-    "continueBtn": "続ける"
+    "continueBtn": "続ける",
+    "colourOptional": "任意。ハイライト映像なら空欄に。各クリップを確認します。"
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "映像 {{i}} / {{n}} をアップロード中 — {{pct}}%（{{total}} 中 {{sent}}）",
     "working": "処理中…",
     "colours": "ユニフォームの色を確認中",
-    "waitColours": "ユニフォームの色の回答待ち"
+    "waitColours": "ユニフォームの色の回答待ち",
+    "identifying": "各クリップで選手を探しています…",
+    "confirmClips": "いくつかのクリップの確認を待っています…",
+    "identified": "クリップで選手が見つかりました…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "チェックリスト",
     "print": "印刷",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "これは{{name}}ですか？",
+    "hint": "はっきりしないクリップです。「はい」で数え、「いいえ」で除外し、未回答は除外します。回答するたびにBloomPrintが選手の見た目を覚えます。",
+    "frame": "クリップのフレーム",
+    "clip": "クリップ{{n}}",
+    "counted": "カウント済み",
+    "leftOut": "除外",
+    "yes": "はい",
+    "no": "いいえ",
+    "done": "完了",
+    "doneLeaveOut": "完了（{{count}}件を除外）"
   }
 }

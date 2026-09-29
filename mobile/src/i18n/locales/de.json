@@ -338,7 +338,8 @@
     "findPlayerHint": "Trikotnummer und -farbe lassen das Video festhalten, was der Spieler macht, damit der Bericht sagen kann, wie oft. Überspringst du das, wird der Bericht ohne gezählte Tendenzen geschrieben.",
     "jerseyNumber": "Trikotnummer",
     "jerseyColour": "Trikotfarbe",
-    "continueBtn": "Weiter"
+    "continueBtn": "Weiter",
+    "colourOptional": "Optional. Bei einem Highlight-Video leer lassen; jeder Clip wird geprüft."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Video {{i}} von {{n}} wird hochgeladen – {{pct}} % ({{sent}} von {{total}})",
     "working": "Wird verarbeitet…",
     "colours": "Trikotfarben werden geprüft",
-    "waitColours": "Warte auf die Trikotfarben"
+    "waitColours": "Warte auf die Trikotfarben",
+    "identifying": "Suche den Spieler in jedem Clip…",
+    "confirmClips": "Warte auf deine Bestätigung einiger Clips…",
+    "identified": "Spieler in den Clips gefunden…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Checkliste",
     "print": "Drucken",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Ist das {{name}}?",
+    "hint": "Diese Clips waren nicht eindeutig. Ja zählt den Clip, Nein lässt ihn weg, und Unbeantwortetes wird weggelassen. Jede Antwort bringt BloomPrint bei, wie der Spieler aussieht.",
+    "frame": "Bild aus dem Clip",
+    "clip": "Clip {{n}}",
+    "counted": "Gezählt",
+    "leftOut": "Weggelassen",
+    "yes": "Ja",
+    "no": "Nein",
+    "done": "Fertig",
+    "doneLeaveOut": "Fertig ({{count}} weglassen)"
   }
 }

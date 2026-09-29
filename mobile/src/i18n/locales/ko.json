@@ -338,7 +338,8 @@
     "findPlayerHint": "등번호와 유니폼 색으로 영상이 이 선수의 동작을 기록해 리포트에 빈도를 담을 수 있습니다. 건너뛰면 집계된 성향 없이 리포트가 작성됩니다.",
     "jerseyNumber": "등번호",
     "jerseyColour": "유니폼 색",
-    "continueBtn": "계속"
+    "continueBtn": "계속",
+    "colourOptional": "선택 사항. 하이라이트 영상이면 비워 두세요. 클립마다 확인합니다."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "{{n}}개 중 {{i}}번째 영상 업로드 중 — {{pct}}%({{total}} 중 {{sent}})",
     "working": "처리 중…",
     "colours": "유니폼 색 확인 중",
-    "waitColours": "유니폼 색 답변 대기 중"
+    "waitColours": "유니폼 색 답변 대기 중",
+    "identifying": "각 클립에서 선수를 찾는 중…",
+    "confirmClips": "몇몇 클립 확인을 기다리는 중…",
+    "identified": "클립에서 선수를 찾았습니다…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "체크리스트",
     "print": "인쇄",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "이 선수가 {{name}}인가요?",
+    "hint": "확실하지 않은 클립입니다. 예는 포함, 아니요는 제외, 답하지 않은 클립은 제외됩니다. 답할수록 BloomPrint가 선수의 모습을 학습합니다.",
+    "frame": "클립 프레임",
+    "clip": "클립 {{n}}",
+    "counted": "포함됨",
+    "leftOut": "제외됨",
+    "yes": "예",
+    "no": "아니요",
+    "done": "완료",
+    "doneLeaveOut": "완료 ({{count}}개 제외)"
   }
 }

@@ -461,6 +461,10 @@ export const playCallingAPI = {
 
 export const evalsAPI = {
   /** The two uniform colours in an uploaded film, as choices. */
+  /** A highlight tape's clips the analysis was unsure were the player; answer each, or finish. */
+  clipChecks: (jobId: number) => api.get(`/evaluations/jobs/${jobId}/clip-checks`).then(r => r.data),
+  answerClip: (checkId: number, answer: 'yes' | 'no') => api.post(`/evaluations/clip-checks/${checkId}`, { answer }).then(r => r.data),
+  clipChecksDone: (jobId: number) => api.post(`/evaluations/jobs/${jobId}/clip-checks/done`).then(r => r.data),
   detectColours: (token: string) => {
     const form = new FormData();
     form.append('video_token', token);

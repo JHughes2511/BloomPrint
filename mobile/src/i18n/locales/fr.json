@@ -338,7 +338,8 @@
     "findPlayerHint": "Son numéro et la couleur de son maillot permettent à la vidéo de noter ce qu'il fait, pour que le rapport dise à quelle fréquence. Si vous passez, le rapport est rédigé sans tendances chiffrées.",
     "jerseyNumber": "Numéro",
     "jerseyColour": "Couleur du maillot",
-    "continueBtn": "Continuer"
+    "continueBtn": "Continuer",
+    "colourOptional": "Facultatif. Laisse vide pour une vidéo de temps forts ; chaque extrait est vérifié."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Envoi de la vidéo {{i}} sur {{n}} — {{pct}} % ({{sent}} sur {{total}})",
     "working": "Traitement…",
     "colours": "Vérification des couleurs de maillot",
-    "waitColours": "En attente des couleurs de maillot"
+    "waitColours": "En attente des couleurs de maillot",
+    "identifying": "Recherche du joueur dans chaque extrait…",
+    "confirmClips": "En attente de ta confirmation sur quelques extraits…",
+    "identified": "Joueur trouvé dans les extraits…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Liste",
     "print": "Imprimer",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Est-ce {{name}} ?",
+    "hint": "Ces extraits n'étaient pas clairs. Oui compte l'extrait, Non l'écarte, et ce qui reste sans réponse est écarté. Chaque réponse apprend à BloomPrint à le reconnaître.",
+    "frame": "Image de l'extrait",
+    "clip": "Extrait {{n}}",
+    "counted": "Compté",
+    "leftOut": "Écarté",
+    "yes": "Oui",
+    "no": "Non",
+    "done": "Terminé",
+    "doneLeaveOut": "Terminé (écarter {{count}})"
   }
 }

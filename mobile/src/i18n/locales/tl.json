@@ -338,7 +338,8 @@
     "findPlayerHint": "Sa numero at kulay ng jersey, maitatala ng video ang ginagawa ng player para masabi ng report kung gaano kadalas. Kapag nilaktawan, isusulat ang report nang walang binilang na tendensiya.",
     "jerseyNumber": "Numero",
     "jerseyColour": "Kulay ng jersey",
-    "continueBtn": "Magpatuloy"
+    "continueBtn": "Magpatuloy",
+    "colourOptional": "Opsyonal. Iwanang blangko para sa highlight tape; susuriin ang bawat clip."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Ina-upload ang film {{i}} sa {{n}} — {{pct}}% ({{sent}} sa {{total}})",
     "working": "Ginagawa…",
     "colours": "Sinusuri ang kulay ng jersey",
-    "waitColours": "Hinihintay ang kulay ng jersey"
+    "waitColours": "Hinihintay ang kulay ng jersey",
+    "identifying": "Hinahanap ang player sa bawat clip…",
+    "confirmClips": "Naghihintay na kumpirmahin mo ang ilang clip…",
+    "identified": "Nahanap ang player sa mga clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Checklist",
     "print": "I-print",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Si {{name}} ba ito?",
+    "hint": "Hindi malinaw ang mga clip na ito. Oo ay ibinibilang, Hindi ay hindi isinasama, at ang hindi sinagot ay hindi isasama. Bawat sagot ay nagtuturo sa BloomPrint kung ano ang itsura niya.",
+    "frame": "Frame mula sa clip",
+    "clip": "Clip {{n}}",
+    "counted": "Ibinilang",
+    "leftOut": "Hindi isinama",
+    "yes": "Oo",
+    "no": "Hindi",
+    "done": "Tapos",
+    "doneLeaveOut": "Tapos (alisin ang {{count}})"
   }
 }

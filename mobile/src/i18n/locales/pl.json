@@ -338,7 +338,8 @@
     "findPlayerHint": "Numer i kolor stroju pozwalają nagraniu zapisać, co robi zawodnik, by raport mógł podać, jak często. Jeśli pominiesz, raport powstanie bez policzonych tendencji.",
     "jerseyNumber": "Numer",
     "jerseyColour": "Kolor stroju",
-    "continueBtn": "Dalej"
+    "continueBtn": "Dalej",
+    "colourOptional": "Opcjonalnie. Zostaw puste przy filmie z akcjami; każdy klip jest sprawdzany."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Przesyłanie nagrania {{i}} z {{n}} — {{pct}}% ({{sent}} z {{total}})",
     "working": "Przetwarzanie…",
     "colours": "Sprawdzanie kolorów strojów",
-    "waitColours": "Oczekiwanie na kolory strojów"
+    "waitColours": "Oczekiwanie na kolory strojów",
+    "identifying": "Szukam zawodnika w każdym klipie…",
+    "confirmClips": "Czekam na potwierdzenie kilku klipów…",
+    "identified": "Zawodnik znaleziony w klipach…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Lista",
     "print": "Drukuj",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Czy to {{name}}?",
+    "hint": "Te klipy nie były jasne. Tak liczy klip, Nie go pomija, a bez odpowiedzi jest pomijane. Każda odpowiedź uczy BloomPrint, jak wygląda zawodnik.",
+    "frame": "Kadr z klipu",
+    "clip": "Klip {{n}}",
+    "counted": "Liczony",
+    "leftOut": "Pominięty",
+    "yes": "Tak",
+    "no": "Nie",
+    "done": "Gotowe",
+    "doneLeaveOut": "Gotowe (pomiń {{count}})"
   }
 }

@@ -1296,6 +1296,55 @@ class ScoutInsight(Base):
     coach = relationship("Coach")
 
 
+class PlayerLook(Base):
+    """What the app has learned about how a player looks on film.
+
+    Built from clips the coach confirmed (or the analysis was sure of): every
+    number they have worn, visible traits with how often each was seen (build,
+    hair, headband, sleeve, shoes, handedness — never skin colour or faces),
+    and a few reference frames of them. Read by the next highlight tape, so
+    each one needs fewer questions than the last (video_vision/identify.py).
+    """
+    __tablename__ = "player_looks"
+    id = Column(Integer, primary_key=True, index=True)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=True, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    team_name = Column(String, nullable=True)
+    player_name = Column(String, nullable=True)
+    numbers = Column(JSON, default=list)
+    traits = Column(JSON, default=dict)          # {"white headband": 3, ...}
+    refs = Column(JSON, default=list)            # storage refs of reference crops, newest last
+    confirmed = Column(Integer, default=0)       # clips it has learned from
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class FilmClipCheck(Base):
+    """One clip of a highlight tape and whether it is the player.
+
+    Made while the film is analysed. `present` is what the analysis decided;
+    `answer` is the coach's, for the clips it was unsure of. Unanswered unsure
+    clips are left out of the counts.
+    """
+    __tablename__ = "film_clip_checks"
+    id = Column(Integer, primary_key=True, index=True)
+    job_id = Column(Integer, ForeignKey("generation_jobs.id"), nullable=True, index=True)
+    evaluation_id = Column(Integer, ForeignKey("evaluations.id"), nullable=True, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=True)
+    clip = Column(Integer, nullable=False)
+    film = Column(Integer, default=0)
+    start = Column(Float, nullable=True)
+    end = Column(Float, nullable=True)
+    present = Column(String, nullable=True)      # yes / no / unsure
+    uni = Column(String, nullable=True)
+    no = Column(String, nullable=True)
+    traits = Column(JSON, nullable=True)
+    box = Column(JSON, nullable=True)
+    thumb_ref = Column(String, nullable=True)
+    answer = Column(String, nullable=True)       # yes / no / skip (the coach's)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class ShortVersion(Base):
     """The short version of a report: the one page a staff hands out.
 

@@ -338,7 +338,8 @@
     "findPlayerHint": "Broj i boja dresa omogućuju snimci da bilježi što igrač radi, kako bi izvještaj rekao koliko često. Ako preskočiš, izvještaj se piše bez izbrojanih tendencija.",
     "jerseyNumber": "Broj",
     "jerseyColour": "Boja dresa",
-    "continueBtn": "Nastavi"
+    "continueBtn": "Nastavi",
+    "colourOptional": "Neobavezno. Ostavi prazno za snimku najboljih poteza; svaki isječak se provjerava."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Prijenos snimke {{i}} od {{n}} — {{pct}}% ({{sent}} od {{total}})",
     "working": "U tijeku…",
     "colours": "Provjera boja dresova",
-    "waitColours": "Čeka se boja dresova"
+    "waitColours": "Čeka se boja dresova",
+    "identifying": "Tražim igrača u svakom isječku…",
+    "confirmClips": "Čekam da potvrdiš nekoliko isječaka…",
+    "identified": "Igrač pronađen u isječcima…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Popis",
     "print": "Ispis",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Je li ovo {{name}}?",
+    "hint": "Ovi isječci nisu bili jasni. Da računa isječak, Ne ga izostavlja, a bez odgovora se izostavlja. Svaki odgovor uči BloomPrint kako igrač izgleda.",
+    "frame": "Kadar iz isječka",
+    "clip": "Isječak {{n}}",
+    "counted": "Računato",
+    "leftOut": "Izostavljeno",
+    "yes": "Da",
+    "no": "Ne",
+    "done": "Gotovo",
+    "doneLeaveOut": "Gotovo (izostavi {{count}})"
   }
 }

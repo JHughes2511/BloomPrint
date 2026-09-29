@@ -338,7 +338,8 @@
     "findPlayerHint": "球衣号码和颜色让视频记录该球员的动作，报告就能说明频率。跳过的话，报告将不含统计出的倾向。",
     "jerseyNumber": "球衣号码",
     "jerseyColour": "球衣颜色",
-    "continueBtn": "继续"
+    "continueBtn": "继续",
+    "colourOptional": "可选。集锦视频可留空；会逐个片段识别。"
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "正在上传第 {{i}} 段影片，共 {{n}} 段 — {{pct}}%（{{total}} 中已上传 {{sent}}）",
     "working": "处理中…",
     "colours": "正在检查球衣颜色",
-    "waitColours": "等待球衣颜色"
+    "waitColours": "等待球衣颜色",
+    "identifying": "正在每个片段中查找球员…",
+    "confirmClips": "等待你确认几个片段…",
+    "identified": "已在片段中找到球员…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "清单",
     "print": "打印",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "这是{{name}}吗？",
+    "hint": "这些片段不够清楚。“是”计入该片段，“否”排除，未回答的也会排除。每个回答都会让 BloomPrint 更认识这名球员。",
+    "frame": "片段画面",
+    "clip": "片段 {{n}}",
+    "counted": "已计入",
+    "leftOut": "已排除",
+    "yes": "是",
+    "no": "否",
+    "done": "完成",
+    "doneLeaveOut": "完成（排除 {{count}} 个）"
   }
 }

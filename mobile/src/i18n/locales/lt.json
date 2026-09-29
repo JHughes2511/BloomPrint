@@ -338,7 +338,8 @@
     "findPlayerHint": "Numeris ir aprangos spalva leidžia įrašui fiksuoti, ką žaidėjas daro, kad ataskaita galėtų pasakyti, kaip dažnai. Praleidus ataskaita rašoma be suskaičiuotų tendencijų.",
     "jerseyNumber": "Numeris",
     "jerseyColour": "Aprangos spalva",
-    "continueBtn": "Tęsti"
+    "continueBtn": "Tęsti",
+    "colourOptional": "Neprivaloma. Palikite tuščią, jei tai geriausių momentų įrašas; tikrinamas kiekvienas klipas."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Įkeliamas {{i}} įrašas iš {{n}} — {{pct}} % ({{sent}} iš {{total}})",
     "working": "Vykdoma…",
     "colours": "Tikrinamos aprangos spalvos",
-    "waitColours": "Laukiama aprangos spalvų"
+    "waitColours": "Laukiama aprangos spalvų",
+    "identifying": "Ieškoma žaidėjo kiekviename klipe…",
+    "confirmClips": "Laukiama, kol patvirtinsite kelis klipus…",
+    "identified": "Žaidėjas rastas klipuose…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Sąrašas",
     "print": "Spausdinti",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Ar tai {{name}}?",
+    "hint": "Šie klipai nebuvo aiškūs. Taip įskaito klipą, Ne jį praleidžia, o neatsakyti praleidžiami. Kiekvienas atsakymas moko BloomPrint atpažinti žaidėją.",
+    "frame": "Kadras iš klipo",
+    "clip": "Klipas {{n}}",
+    "counted": "Įskaityta",
+    "leftOut": "Praleista",
+    "yes": "Taip",
+    "no": "Ne",
+    "done": "Baigta",
+    "doneLeaveOut": "Baigta (praleisti {{count}})"
   }
 }

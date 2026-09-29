@@ -338,7 +338,8 @@
     "findPlayerHint": "Rugnummer en shirtkleur laten de video vastleggen wat de speler doet, zodat het rapport kan zeggen hoe vaak. Sla je dit over, dan wordt het rapport zonder getelde tendensen geschreven.",
     "jerseyNumber": "Rugnummer",
     "jerseyColour": "Shirtkleur",
-    "continueBtn": "Doorgaan"
+    "continueBtn": "Doorgaan",
+    "colourOptional": "Optioneel. Laat leeg bij een highlightvideo; elke clip wordt gecontroleerd."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Video {{i}} van {{n}} uploaden — {{pct}}% ({{sent}} van {{total}})",
     "working": "Bezig…",
     "colours": "Shirtkleuren controleren",
-    "waitColours": "Wachten op shirtkleuren"
+    "waitColours": "Wachten op shirtkleuren",
+    "identifying": "Speler zoeken in elke clip…",
+    "confirmClips": "Wacht op je bevestiging van een paar clips…",
+    "identified": "Speler gevonden in de clips…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Checklist",
     "print": "Afdrukken",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Is dit {{name}}?",
+    "hint": "Deze clips waren niet duidelijk. Ja telt de clip, Nee laat hem weg, en wat je niet beantwoordt valt weg. Elk antwoord leert BloomPrint hoe de speler eruitziet.",
+    "frame": "Beeld uit de clip",
+    "clip": "Clip {{n}}",
+    "counted": "Geteld",
+    "leftOut": "Weggelaten",
+    "yes": "Ja",
+    "no": "Nee",
+    "done": "Klaar",
+    "doneLeaveOut": "Klaar ({{count}} weglaten)"
   }
 }

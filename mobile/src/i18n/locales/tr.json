@@ -338,7 +338,8 @@
     "findPlayerHint": "Forma numarası ve rengi, videonun oyuncunun yaptıklarını kaydetmesini sağlar; rapor ne sıklıkla olduğunu söyleyebilir. Atlarsan rapor sayılmış eğilimler olmadan yazılır.",
     "jerseyNumber": "Forma no",
     "jerseyColour": "Forma rengi",
-    "continueBtn": "Devam"
+    "continueBtn": "Devam",
+    "colourOptional": "İsteğe bağlı. Öne çıkanlar videosu için boş bırak; her klip kontrol edilir."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "{{n}} videodan {{i}}. yükleniyor — %{{pct}} ({{total}} içinden {{sent}})",
     "working": "İşleniyor…",
     "colours": "Forma renkleri kontrol ediliyor",
-    "waitColours": "Forma renkleri bekleniyor"
+    "waitColours": "Forma renkleri bekleniyor",
+    "identifying": "Her klipte oyuncu aranıyor…",
+    "confirmClips": "Birkaç klibi onaylamanız bekleniyor…",
+    "identified": "Oyuncu kliplerde bulundu…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Liste",
     "print": "Yazdır",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Bu {{name}} mi?",
+    "hint": "Bu klipler net değildi. Evet klibi sayar, Hayır dışarıda bırakır; yanıtlamadıkların dışarıda kalır. Her yanıt BloomPrint'e oyuncuyu tanımayı öğretir.",
+    "frame": "Klipten kare",
+    "clip": "Klip {{n}}",
+    "counted": "Sayıldı",
+    "leftOut": "Dışarıda",
+    "yes": "Evet",
+    "no": "Hayır",
+    "done": "Bitti",
+    "doneLeaveOut": "Bitti ({{count}} dışarıda)"
   }
 }

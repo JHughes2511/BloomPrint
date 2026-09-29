@@ -338,7 +338,8 @@
     "findPlayerHint": "Numero e colore della maglia permettono al video di registrare cosa fa, così il report può dire quanto spesso. Se salti, il report viene scritto senza tendenze contate.",
     "jerseyNumber": "Numero",
     "jerseyColour": "Colore della maglia",
-    "continueBtn": "Continua"
+    "continueBtn": "Continua",
+    "colourOptional": "Facoltativo. Lascialo vuoto per un video di highlight; ogni clip viene controllata."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Caricamento del video {{i}} di {{n}} — {{pct}}% ({{sent}} di {{total}})",
     "working": "Elaborazione…",
     "colours": "Controllo dei colori delle maglie",
-    "waitColours": "In attesa dei colori delle maglie"
+    "waitColours": "In attesa dei colori delle maglie",
+    "identifying": "Cerco il giocatore in ogni clip…",
+    "confirmClips": "In attesa della tua conferma su alcune clip…",
+    "identified": "Giocatore trovato nelle clip…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Lista",
     "print": "Stampa",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "È {{name}}?",
+    "hint": "Queste clip non erano chiare. Sì conta la clip, No la esclude, e ciò a cui non rispondi viene escluso. Ogni risposta insegna a BloomPrint a riconoscerlo.",
+    "frame": "Fotogramma della clip",
+    "clip": "Clip {{n}}",
+    "counted": "Contata",
+    "leftOut": "Esclusa",
+    "yes": "Sì",
+    "no": "No",
+    "done": "Fatto",
+    "doneLeaveOut": "Fatto (escludi {{count}})"
   }
 }

@@ -62,7 +62,8 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
                         competition_level: str, coach_notes: str | None, combined_focus: str,
                         interval_seconds: float, max_frames: int, include_audio: bool,
                         video_paths: list[str], player_name: str, coach_program: str, coach_weight: int,
-                        title: str | None = None, focus_player: dict | None = None):
+                        title: str | None = None, focus_player: dict | None = None,
+                        identify_player: bool = False, typed_number: str | None = None):
     """Background task: analyze one or more films and create ONE evaluation. The
     client polls the job for completion, so nothing times out."""
     import asyncio
@@ -90,6 +91,25 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
         # Analysis needs real files — download any S3-backed refs to temp local.
         from ..storage import ensure_local
         local_paths = [ensure_local(r) for r in video_paths]
+        # A highlight tape is read clip by clip (video_vision/identify.py): the
+        # analysis is told everything already known about the player, and asks
+        # the coach only about the clips it is unsure of.
+        identity_args = {}
+        if identify_player:
+            from .. import player_look
+            idb = SessionLocal()
+            try:
+                pl = idb.get(models.Player, player_id)
+                who = player_look.who_for(idb, coach_id, pl, typed_number) if pl else None
+            finally:
+                idb.close()
+            if who:
+                identity_args = {
+                    "identify": who,
+                    "_on_clips": player_look.clip_checker(job_id, coach_id, player_id),
+                    "_tendencies_block_identified": lambda evs: tendencies.player_block(
+                        evs, player_name, "", several_films=True, already_theirs=True),
+                }
         result = asyncio.run(_handle_analyze_basketball_video({
             "video_paths": local_paths,
             "output_type": output_type,
@@ -108,6 +128,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
                 "_tendencies_block": lambda evs: tendencies.player_block(
                     evs, player_name, focus_player["no"], several_films=len(local_paths) > 1)}
                if focus_player else {}),
+            **identity_args,
         }))
         report_text = result[0].text
         from video_vision.server import EVENTS_PREFIX
@@ -129,6 +150,8 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             )
             if film_events is not None:
                 eval_record.film_events = film_events
+            # The tape's clip checks belong to the eval now.
+            db.query(models.FilmClipCheck).filter_by(job_id=job_id).update({"evaluation_id": eval_record.id})
             # Keep every film in the player's video catalog, linked to this eval.
             for vp in video_paths:
                 db.add(models.PlayerVideo(player_id=player_id, coach_id=coach_id,
@@ -381,6 +404,8 @@ async def submit_evaluation(
             max_frames=max_frames, include_audio=include_audio, video_paths=video_paths,
             player_name=player.name, coach_program=coach.program_name, coach_weight=coach.weight,
             title=matchup_title, focus_player=_focus_player(output_type, player_jersey, player_uniform),
+            identify_player=bool({t.strip() for t in (output_type or "").split(",")} & TENDENCY_TYPES),
+            typed_number=player_jersey,
         )
         return {"job_id": job.id, "status": "processing"}
 
@@ -1313,3 +1338,61 @@ def _strip_md(s: str) -> str:
     s = re.sub(r"^\s*#{1,6}\s*", "", s)    # leading heading hashes
     s = s.replace("##", "")                 # any stray hashes
     return s
+
+
+# ── Highlight tapes: the clips the analysis was unsure of ────────────────────
+
+def _clip_row(r: models.FilmClipCheck) -> dict:
+    thumb = None
+    if r.thumb_ref:
+        try:
+            from ..storage import ensure_local
+            import base64 as _b64
+            with open(ensure_local(r.thumb_ref), "rb") as f:
+                thumb = "data:image/jpeg;base64," + _b64.b64encode(f.read()).decode()
+        except Exception:
+            thumb = None
+    return {"id": r.id, "clip": r.clip, "start": r.start, "end": r.end, "uni": r.uni, "no": r.no,
+            "present": r.present, "answer": r.answer, "thumb": thumb}
+
+
+@router.get("/jobs/{job_id}/clip-checks")
+def job_clip_checks(job_id: int, db: Session = Depends(get_db),
+                    coach: models.Coach = Depends(get_current_coach)):
+    """The clips of a tape the analysis could not be sure were the player."""
+    job = db.get(models.GenerationJob, job_id)
+    if not job or job.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Job not found")
+    rows = (db.query(models.FilmClipCheck).filter_by(job_id=job_id, present="unsure")
+            .order_by(models.FilmClipCheck.clip).all())
+    return [_clip_row(r) for r in rows]
+
+
+class ClipAnswerIn(BaseModel):
+    answer: str          # yes / no
+
+
+@router.post("/clip-checks/{check_id}")
+def answer_clip_check(check_id: int, body: ClipAnswerIn, db: Session = Depends(get_db),
+                      coach: models.Coach = Depends(get_current_coach)):
+    r = db.get(models.FilmClipCheck, check_id)
+    if not r or r.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Clip not found")
+    if body.answer not in ("yes", "no"):
+        raise HTTPException(status_code=400, detail="yes or no")
+    r.answer = body.answer
+    db.commit()
+    return _clip_row(r)
+
+
+@router.post("/jobs/{job_id}/clip-checks/done")
+def finish_clip_checks(job_id: int, db: Session = Depends(get_db),
+                       coach: models.Coach = Depends(get_current_coach)):
+    """Done answering: the rest are left out, and the analysis carries on now."""
+    job = db.get(models.GenerationJob, job_id)
+    if not job or job.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Job not found")
+    (db.query(models.FilmClipCheck).filter_by(job_id=job_id, present="unsure", answer=None)
+     .update({"answer": "skip"}))
+    db.commit()
+    return {"ok": True}

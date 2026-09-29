@@ -324,15 +324,18 @@ REPORT_DIRECTIVE = (
 )
 
 
-def player_block(events: list[dict], name: str, jersey: str, several_films: bool = False) -> str:
+def player_block(events: list[dict], name: str, jersey: str, several_films: bool = False,
+                 already_theirs: bool = False) -> str:
     """A player report's tendencies: one player, counted from their film.
 
     The log was asked for this player only, but anything logged for someone
     else is dropped rather than trusted. Across several films a timestamp
     points nowhere, so none are given.
     """
-    mine = [e for e in events if str(e.get("no")) == str(jersey)]
-    who = f"#{jersey} {name}".strip()
+    # A highlight tape's events were matched to the player clip by clip
+    # (video_vision/identify.py), under whichever number they wore there.
+    mine = list(events) if already_theirs else [e for e in events if str(e.get("no")) == str(jersey)]
+    who = (f"#{jersey} {name}" if jersey else name).strip()
     facts = _facts(mine) if len(mine) >= MIN_EVENTS else []
     if several_films:
         for f in facts:

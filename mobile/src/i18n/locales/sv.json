@@ -338,7 +338,8 @@
     "findPlayerHint": "Tröjnummer och färg låter videon registrera vad spelaren gör, så att rapporten kan säga hur ofta. Hoppar du över skrivs rapporten utan räknade tendenser.",
     "jerseyNumber": "Tröjnummer",
     "jerseyColour": "Tröjfärg",
-    "continueBtn": "Fortsätt"
+    "continueBtn": "Fortsätt",
+    "colourOptional": "Valfritt. Lämna tomt för en highlightvideo; varje klipp kontrolleras."
   },
   "evalReport": {
     "pillars": {
@@ -2526,7 +2527,10 @@
     "uploadingOf": "Laddar upp film {{i}} av {{n}} — {{pct}} % ({{sent}} av {{total}})",
     "working": "Arbetar…",
     "colours": "Kontrollerar tröjfärgerna",
-    "waitColours": "Väntar på tröjfärgerna"
+    "waitColours": "Väntar på tröjfärgerna",
+    "identifying": "Letar efter spelaren i varje klipp…",
+    "confirmClips": "Väntar på att du bekräftar några klipp…",
+    "identified": "Spelaren hittad i klippen…"
   },
   "notifs": {
     "seasonNew": {
@@ -3167,5 +3171,17 @@
     "checklist": "Checklista",
     "print": "Skriv ut",
     "pdf": "PDF"
+  },
+  "clipCheck": {
+    "title": "Är det {{name}}?",
+    "hint": "Klippen var inte tydliga. Ja räknar klippet, Nej utesluter det, och det du inte svarar på utesluts. Varje svar lär BloomPrint hur spelaren ser ut.",
+    "frame": "Bild ur klippet",
+    "clip": "Klipp {{n}}",
+    "counted": "Räknat",
+    "leftOut": "Uteslutet",
+    "yes": "Ja",
+    "no": "Nej",
+    "done": "Klar",
+    "doneLeaveOut": "Klar (utesluta {{count}})"
   }
 }
