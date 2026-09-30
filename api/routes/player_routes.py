@@ -12,7 +12,7 @@ from ..auth import get_current_coach
 from .. import decisions, emails, models, notify, report_titles, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
-from ..report_sections import _without_sections
+from ..report_sections import _without_sections, without_projection
 from .player_auth import get_current_player_user
 from ..ai_models import OPUS, text_of
 
@@ -529,6 +529,7 @@ def share_report(
                 share_flags=body.share_flags,
                 share_questions=body.share_questions,
                 hidden_sections=json.dumps(body.hide_sections) if body.hide_sections else None,
+                include_projection=body.include_projection,
                 status="pending",
             )
             db.add(approval)
@@ -571,6 +572,7 @@ def share_report(
         share_flags=body.share_flags,
         share_questions=body.share_questions,
         hidden_sections=json.dumps(body.hide_sections) if body.hide_sections else None,
+        include_projection=body.include_projection,
         message=body.message,
     )
     db.add(shared)
@@ -652,7 +654,7 @@ async def generate_player_training(
         f"You are the BloomPrint Basketball Intelligence Model. "
         f"Generate a personalized training program for {pu.name} based on the following evaluation report.\n\n"
         f"EVALUATION TYPE: {ev.output_type.replace('_', ' ')}\n"
-        f"REPORT:\n{ev.report_text or 'No report text available'}\n\n"
+        f"REPORT:\n{_build_shared_report_out(shared).report_text or 'No report text available'}\n\n"
         "Create a detailed, actionable training program with specific drills, focus areas, and weekly structure. "
         "Prioritize areas for improvement while reinforcing strengths. Format with clear sections."
     )
@@ -766,6 +768,18 @@ def get_coach_training(
     return _coach_training_out(session)
 
 
+def _short_without_projection(got: dict, included: bool | None) -> dict:
+    """The short page's projection fields, gone unless the coach included the
+    projection. The page is made from text without it already; this makes
+    sure nothing on the card was drawn from elsewhere in the report."""
+    if included or not isinstance(got.get("data"), dict):
+        return got
+    got["data"] = {k: v for k, v in got["data"].items() if k not in ("projection", "comps", "confidence")}
+    if isinstance(got.get("schema"), list):
+        got["schema"] = [f for f in got["schema"] if f.get("key") not in ("projection", "comps", "confidence")]
+    return got
+
+
 @router.get("/shared-reports/{shared_id}/short")
 def get_shared_report_short(shared_id: int, db: Session = Depends(get_db),
                             pu: models.PlayerUser = Depends(get_current_player_user)):
@@ -776,7 +790,7 @@ def get_shared_report_short(shared_id: int, db: Session = Depends(get_db),
     from .. import short_versions as sv
     got = sv.out(sv.ensure(db, "player_share", shared_id), db)
     got.pop("stale", None); got.pop("edited", None)
-    return got
+    return _short_without_projection(got, report.include_projection)
 
 
 @router.get("/team-shared-reports/{shared_id}/short")
@@ -788,7 +802,7 @@ def get_team_shared_report_short(shared_id: int, db: Session = Depends(get_db),
     from .. import short_versions as sv
     got = sv.out(sv.ensure(db, "player_team_share", shared_id), db)
     got.pop("stale", None); got.pop("edited", None)
-    return got
+    return _short_without_projection(got, r.include_projection)
 
 
 @router.get("/coach-training/{training_id}/short")
@@ -1793,6 +1807,7 @@ def share_team_report(
                         output_type=body.output_type,
                         report_text=body.report_text,
                         message=body.message,
+                        include_projection=body.include_projection,
                         status="pending",
                     )
                     db.add(approval)
@@ -1888,6 +1903,7 @@ def share_team_report(
             output_type=body.output_type,
             report_text=body.report_text,
             message=body.message,
+            include_projection=body.include_projection,
         )
         db.add(tsr)
         db.flush()
@@ -1969,6 +1985,7 @@ def approve_share(
             # Carry the coach's choice through approval — the withheld sections
             # were chosen when the share was requested, not when it was approved.
             hidden_sections=a.hidden_sections,
+            include_projection=bool(a.include_projection),
             message=a.message,
         )
         db.add(shared)
@@ -1994,6 +2011,7 @@ def approve_share(
             output_type=a.output_type,
             report_text=a.report_text or "",
             message=a.message,
+            include_projection=bool(a.include_projection),
         )
         db.add(tsr)
         db.flush()
@@ -2071,6 +2089,7 @@ def player_team_shared_reports(
     for r in reports:
         out = schemas.TeamSharedReportOut.model_validate(r)
         out.shared_by_name = r.shared_by.name if r.shared_by else ""
+        out.report_text = team_share_text(r)
         result.append(out)
     return result
 
@@ -2101,6 +2120,11 @@ def search_staff(
 
 # ── Helper ────────────────────────────────────────────────────────────────────
 
+def team_share_text(r: models.TeamSharedReport) -> str:
+    """A team-report share's text as the player sees it."""
+    return r.report_text if getattr(r, "include_projection", False) else without_projection(r.report_text or "")
+
+
 def _build_shared_report_out(shared: models.SharedReport) -> schemas.SharedReportOut:
     ev = shared.evaluation
     out = schemas.SharedReportOut.model_validate(shared)
@@ -2117,6 +2141,8 @@ def _build_shared_report_out(shared: models.SharedReport) -> schemas.SharedRepor
                 except Exception:
                     hidden = []
             out.report_text = _without_sections(ev.report_text or "", hidden) if hidden else ev.report_text
+            if not getattr(shared, "include_projection", False):
+                out.report_text = without_projection(out.report_text or "")
         if shared.share_grades:
             out.overall_grade = ev.overall_grade
             out.pillar_grades = ev.pillar_grades

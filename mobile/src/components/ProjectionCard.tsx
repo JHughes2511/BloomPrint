@@ -28,6 +28,8 @@ const sepColor = (sep: string, t: ThemeTokens) =>
   sep === 'DOMINANT' || sep === 'SEPARATES' ? t.positive
     : sep === 'ONE-TOOL SEPARATOR' ? t.accent : sep === 'AT LEVEL' ? t.brown : sep ? t.negative : t.muted;
 
+const PATH = ['now', 'year1', 'years2_3', 'years4_5'] as const;
+
 const sepKey = (sep: string) => sep.toLowerCase().replace(/[^a-z]+/g, '_');
 
 export default function ProjectionCard({ playerId, t, tr, style, refreshKey }: Props) {
@@ -117,13 +119,36 @@ export default function ProjectionCard({ playerId, t, tr, style, refreshKey }: P
             </View>
           )}
 
-          {/* Likely level and role */}
-          <View>
-            <Text style={s.section}>{tr('projection.likelyIn')}</Text>
-            <Text style={s.headline}>{[d.level, d.role].filter(Boolean).join(' · ') || d.likely}</Text>
-          </View>
+          {/* The path, year by year. A step the file could not support is
+              left out rather than filled in. Projections made before the
+              path existed show the likely level and role instead. */}
+          {PATH.some(k => d.path?.[k]) ? (
+            <View>
+              {PATH.filter(k => d.path?.[k]).map((k, i, arr) => {
+                const last = i === arr.length - 1;
+                return (
+                  <View key={k} style={{ flexDirection: 'row', gap: 10 }}>
+                    <View style={{ alignItems: 'center', width: 14 }}>
+                      <View style={[s.dot, last && { backgroundColor: t.accent, borderColor: t.accent }]} />
+                      {!last && <View style={s.rail} />}
+                    </View>
+                    <View style={{ flex: 1, paddingBottom: last ? 0 : 12 }}>
+                      <Text style={[s.section, { marginBottom: 2 }, last && { color: t.accent }]}>{tr(`projection.path.${k}`)}</Text>
+                      <Text style={last ? s.headline : s.body}>{d.path[k]}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <View>
+              <Text style={s.section}>{tr('projection.inYears')}</Text>
+              <Text style={s.headline}>{[d.level, d.role].filter(Boolean).join(' · ') || d.likely}</Text>
+            </View>
+          )}
 
-          {/* Best / likely / floor */}
+          {/* Best / likely / floor, 4–5 years out */}
+          <Text style={[s.section, { marginBottom: -4 }]}>{tr('projection.inYears')}</Text>
           <View style={s.outcomes}>
             {(['best', 'likely', 'floor'] as const).map(k => (
               <View key={k} style={[s.outcome, k === 'likely' && { borderColor: t.accent }]}>
@@ -194,6 +219,8 @@ const makeStyles = (t: ThemeTokens) => ({
   pillText: { fontSize: 11.5, fontFamily: fonts[800], letterSpacing: 0.5 },
   outcomes: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 8 },
   outcome: { flexGrow: 1, flexBasis: 150, borderWidth: 1, borderColor: t.divider, borderRadius: 12, padding: 10 },
+  dot: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: t.label, backgroundColor: t.card, marginTop: 2 },
+  rail: { flex: 1, width: 2, backgroundColor: t.divider, marginVertical: 2 },
   track: { height: 8, borderRadius: 999, backgroundColor: t.chip, overflow: 'hidden' as const },
   fill: { height: 8, borderRadius: 999 },
   changed: { flexDirection: 'row' as const, gap: 6, alignItems: 'flex-start' as const, backgroundColor: t.brownSoft, borderRadius: 10, padding: 9 },

@@ -3248,7 +3248,7 @@
     "doneLeave": "Gotowe ({{count}} otwarte)"
   },
   "projection": {
-    "title": "Projekcja · 4–5 lat",
+    "title": "Projekcja",
     "refresh": "Odśwież",
     "making": "Analizuję wszystkie materiały…",
     "updating": "Aktualizuję o najnowsze dane…",
@@ -3256,7 +3256,6 @@
     "empty": "Przygotuj raport lub śledź mecz, aby rozpocząć projekcję.",
     "failed": "Nie udało się przygotować ostatniej projekcji. Spróbuj ponownie.",
     "make": "Utwórz projekcję",
-    "likelyIn": "Prawdopodobnie za 4–5 lat",
     "best": "Najlepszy scenariusz",
     "likely": "Prawdopodobny",
     "floor": "Minimum",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Jeden atut lub umiejętność powyżej poziomu, reszta na poziomie.",
       "at_level": "Rywalizuje, ale jeszcze się nie wyróżnia.",
       "behind_the_level": "Na razie poziom przerasta zawodnika."
-    }
+    },
+    "path": {
+      "now": "Teraz",
+      "year1": "Rok 1",
+      "years2_3": "Lata 2–3",
+      "years4_5": "Lata 4–5"
+    },
+    "inYears": "Za 4–5 lat",
+    "include": "Dołącz projekcję",
+    "includeHint": "Zawodnicy nie widzą projekcji, chyba że ją dołączysz."
   }
 }

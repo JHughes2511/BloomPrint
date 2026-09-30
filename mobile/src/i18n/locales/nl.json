@@ -3248,7 +3248,7 @@
     "doneLeave": "Klaar ({{count}} open)"
   },
   "projection": {
-    "title": "Projectie · 4–5 jaar",
+    "title": "Projectie",
     "refresh": "Vernieuwen",
     "making": "Alles in het dossier wordt gelezen…",
     "updating": "Bijwerken met de nieuwste gegevens…",
@@ -3256,7 +3256,6 @@
     "empty": "Maak een rapport of volg een wedstrijd om de projectie te starten.",
     "failed": "De laatste projectie kon niet worden gemaakt. Probeer het opnieuw.",
     "make": "Projectie maken",
-    "likelyIn": "Waarschijnlijk over 4–5 jaar",
     "best": "Beste scenario",
     "likely": "Waarschijnlijk",
     "floor": "Ondergrens",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Eén wapen of vaardigheid boven het niveau, de rest op niveau.",
       "at_level": "Kan meekomen, steekt er nog niet bovenuit.",
       "behind_the_level": "Het niveau is de speler nu nog te snel af."
-    }
+    },
+    "path": {
+      "now": "Nu",
+      "year1": "Jaar 1",
+      "years2_3": "Jaren 2–3",
+      "years4_5": "Jaren 4–5"
+    },
+    "inYears": "Over 4–5 jaar",
+    "include": "Projectie meesturen",
+    "includeHint": "Spelers zien de projectie alleen als je die meestuurt."
   }
 }

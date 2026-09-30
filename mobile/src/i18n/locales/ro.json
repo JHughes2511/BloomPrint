@@ -3248,7 +3248,7 @@
     "doneLeave": "Gata ({{count}} deschise)"
   },
   "projection": {
-    "title": "Proiecție · 4–5 ani",
+    "title": "Proiecție",
     "refresh": "Reîmprospătează",
     "making": "Se citește tot dosarul…",
     "updating": "Se actualizează cu cele mai noi date…",
@@ -3256,7 +3256,6 @@
     "empty": "Fă un raport sau urmărește un meci pentru a porni proiecția.",
     "failed": "Ultima proiecție nu a putut fi realizată. Încearcă din nou.",
     "make": "Creează proiecția",
-    "likelyIn": "Probabil peste 4–5 ani",
     "best": "Cel mai bun scenariu",
     "likely": "Probabil",
     "floor": "Minim",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "O armă sau abilitate peste nivel, restul la nivel.",
       "at_level": "Face față, dar încă nu se detașează.",
       "behind_the_level": "Deocamdată nivelul este peste jucător."
-    }
+    },
+    "path": {
+      "now": "Acum",
+      "year1": "Anul 1",
+      "years2_3": "Anii 2–3",
+      "years4_5": "Anii 4–5"
+    },
+    "inYears": "Peste 4–5 ani",
+    "include": "Include proiecția",
+    "includeHint": "Jucătorii nu văd proiecția decât dacă o incluzi."
   }
 }

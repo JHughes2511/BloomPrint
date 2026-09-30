@@ -808,6 +808,8 @@ export interface ShareReportRequest {
   player_user_id: number;
   /** Section headings the coach switched off; the server filters them out. */
   hide_sections?: string[];
+  /** The report's PROJECTION goes to the player only when this is true. */
+  include_projection?: boolean;
   share_report_text?: boolean;
   share_grades?: boolean;
   share_flags?: boolean;
@@ -853,7 +855,7 @@ export const playerAPI = {
     api.delete(`/player/coach-comments/${commentId}`).then(r => r.data),
   coachReplyToReport: (sharedId: number, text: string, parentId?: number) =>
     api.post(`/player/shared-reports/${sharedId}/coach-reply`, { text, parent_id: parentId }).then(r => r.data),
-  shareTeamReport: (data: { output_type: string; report_text: string; target_type: string; player_user_id?: number; team_id?: number; message?: string; subject_player_id?: number; require_consent?: boolean; consent_override?: boolean }) =>
+  shareTeamReport: (data: { output_type: string; report_text: string; target_type: string; player_user_id?: number; team_id?: number; message?: string; subject_player_id?: number; require_consent?: boolean; consent_override?: boolean; include_projection?: boolean }) =>
     api.post('/player/share-team-report', data).then(r => r.data),
   searchStaff: (q: string) =>
     api.get('/player/staff/search', { params: { q } }).then(r => r.data),

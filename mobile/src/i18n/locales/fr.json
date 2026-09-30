@@ -3248,7 +3248,7 @@
     "doneLeave": "Terminé ({{count}} en attente)"
   },
   "projection": {
-    "title": "Projection · 4–5 ans",
+    "title": "Projection",
     "refresh": "Actualiser",
     "making": "Lecture de tout le dossier…",
     "updating": "Mise à jour avec les éléments les plus récents…",
@@ -3256,7 +3256,6 @@
     "empty": "Rédigez un rapport ou suivez un match pour lancer la projection.",
     "failed": "La dernière projection n'a pas pu être réalisée. Réessayez.",
     "make": "Lancer la projection",
-    "likelyIn": "Probable dans 4–5 ans",
     "best": "Meilleur scénario",
     "likely": "Probable",
     "floor": "Plancher",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Une arme ou compétence au-dessus du niveau, le reste au niveau.",
       "at_level": "Rivalise, mais ne se démarque pas encore.",
       "behind_the_level": "Pour l'instant, le niveau est encore trop élevé pour le joueur."
-    }
+    },
+    "path": {
+      "now": "Maintenant",
+      "year1": "Année 1",
+      "years2_3": "Années 2–3",
+      "years4_5": "Années 4–5"
+    },
+    "inYears": "Dans 4–5 ans",
+    "include": "Inclure la projection",
+    "includeHint": "Les joueurs ne voient pas la projection sauf si vous l'incluez."
   }
 }

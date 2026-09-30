@@ -380,6 +380,9 @@ class SharedReport(Base):
     # reference — its text is read from the evaluation at view time — so the
     # choice has to live here or it is lost the moment the share is saved.
     hidden_sections   = Column(Text, nullable=True)   # JSON list of headings
+    # The PROJECTION phase is the coach's; a player sees it only when the
+    # coach included it when sending (api/report_sections.without_projection).
+    include_projection = Column(Boolean, default=False)
     message           = Column(Text, nullable=True)
     created_at        = Column(DateTime, default=datetime.utcnow)
 
@@ -398,6 +401,8 @@ class TeamSharedReport(Base):
     output_type    = Column(String, nullable=False)
     report_text    = Column(Text, nullable=True)
     message        = Column(Text, nullable=True)
+    # See SharedReport.include_projection.
+    include_projection = Column(Boolean, default=False)
     created_at     = Column(DateTime, default=datetime.utcnow)
 
     player_user = relationship("PlayerUser")
@@ -508,6 +513,7 @@ class ShareApproval(Base):
     share_flags              = Column(Boolean, default=True)
     share_questions          = Column(Boolean, default=True)
     hidden_sections          = Column(Text, nullable=True)        # JSON list of withheld headings
+    include_projection       = Column(Boolean, default=False)
     status                   = Column(String, default="pending")  # pending / approved / rejected
     created_at               = Column(DateTime, default=datetime.utcnow)
 

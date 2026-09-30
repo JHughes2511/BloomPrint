@@ -3248,7 +3248,7 @@
     "doneLeave": "Done (leave {{count}} open)"
   },
   "projection": {
-    "title": "Projection · 4–5 years",
+    "title": "Projection",
     "refresh": "Refresh",
     "making": "Reading everything on file…",
     "updating": "Updating with the newest evidence…",
@@ -3256,7 +3256,6 @@
     "empty": "Make a report or track a game to start the projection.",
     "failed": "The last projection could not be made. Try again.",
     "make": "Make projection",
-    "likelyIn": "Likely in 4–5 years",
     "best": "Best case",
     "likely": "Likely",
     "floor": "Floor",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "One tool or skill above the level, the rest at level.",
       "at_level": "Competes, doesn't separate yet.",
       "behind_the_level": "The level is ahead of the player right now."
-    }
+    },
+    "path": {
+      "now": "Now",
+      "year1": "Year 1",
+      "years2_3": "Years 2–3",
+      "years4_5": "Years 4–5"
+    },
+    "inYears": "In 4–5 years",
+    "include": "Include projection",
+    "includeHint": "Players don't see the projection unless you include it."
   }
 }

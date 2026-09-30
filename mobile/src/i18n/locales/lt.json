@@ -3248,7 +3248,7 @@
     "doneLeave": "Baigta ({{count}} atvira)"
   },
   "projection": {
-    "title": "Prognozė · po 4–5 metų",
+    "title": "Prognozė",
     "refresh": "Atnaujinti",
     "making": "Peržiūrima visa byla…",
     "updating": "Atnaujinama pagal naujausius duomenis…",
@@ -3256,7 +3256,6 @@
     "empty": "Parenkite ataskaitą arba stebėkite rungtynes, kad pradėtumėte prognozę.",
     "failed": "Paskutinės prognozės nepavyko sudaryti. Bandykite dar kartą.",
     "make": "Sudaryti prognozę",
-    "likelyIn": "Tikėtina po 4–5 metų",
     "best": "Geriausias scenarijus",
     "likely": "Tikėtina",
     "floor": "Minimumas",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Vienas ginklas ar įgūdis virš lygio, kita atitinka lygį.",
       "at_level": "Konkuruoja, bet dar neišsiskiria.",
       "behind_the_level": "Kol kas lygis aukštesnis už žaidėją."
-    }
+    },
+    "path": {
+      "now": "Dabar",
+      "year1": "1 metai",
+      "years2_3": "2–3 metai",
+      "years4_5": "4–5 metai"
+    },
+    "inYears": "Po 4–5 metų",
+    "include": "Įtraukti prognozę",
+    "includeHint": "Žaidėjai nemato prognozės, nebent ją įtrauksite."
   }
 }

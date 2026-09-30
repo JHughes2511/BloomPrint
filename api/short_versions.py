@@ -312,7 +312,8 @@ def source_text(db: Session, kind: str, ref_id: int) -> tuple[str | None, int | 
         return (_build_shared_report_out(sh).report_text or None), None
     if kind == "player_team_share":
         r = db.get(models.TeamSharedReport, ref_id)
-        return (r.report_text if r else None), None
+        from .routes.player_routes import team_share_text
+        return (team_share_text(r) or None) if r else None, None
     return None, None
 
 

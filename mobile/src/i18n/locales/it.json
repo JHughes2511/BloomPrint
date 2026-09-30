@@ -3248,7 +3248,7 @@
     "doneLeave": "Fatto ({{count}} in sospeso)"
   },
   "projection": {
-    "title": "Proiezione · 4–5 anni",
+    "title": "Proiezione",
     "refresh": "Aggiorna",
     "making": "Lettura di tutto l'archivio…",
     "updating": "Aggiornamento con i dati più recenti…",
@@ -3256,7 +3256,6 @@
     "empty": "Crea un report o traccia una partita per avviare la proiezione.",
     "failed": "Non è stato possibile creare l'ultima proiezione. Riprova.",
     "make": "Crea proiezione",
-    "likelyIn": "Probabile tra 4–5 anni",
     "best": "Scenario migliore",
     "likely": "Probabile",
     "floor": "Minimo",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Un'arma o abilità sopra il livello, il resto al livello.",
       "at_level": "Compete, ma non fa ancora la differenza.",
       "behind_the_level": "Per ora il livello è superiore al giocatore."
-    }
+    },
+    "path": {
+      "now": "Ora",
+      "year1": "Anno 1",
+      "years2_3": "Anni 2–3",
+      "years4_5": "Anni 4–5"
+    },
+    "inYears": "Tra 4–5 anni",
+    "include": "Includi proiezione",
+    "includeHint": "I giocatori non vedono la proiezione a meno che tu non la includa."
   }
 }

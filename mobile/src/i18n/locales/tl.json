@@ -3248,7 +3248,7 @@
     "doneLeave": "Tapos ({{count}} bukas)"
   },
   "projection": {
-    "title": "Projection · 4–5 taon",
+    "title": "Projection",
     "refresh": "I-refresh",
     "making": "Binabasa ang lahat ng nasa file…",
     "updating": "Ina-update gamit ang pinakabagong ebidensya…",
@@ -3256,7 +3256,6 @@
     "empty": "Gumawa ng report o mag-track ng laro para simulan ang projection.",
     "failed": "Hindi nagawa ang huling projection. Subukan ulit.",
     "make": "Gumawa ng projection",
-    "likelyIn": "Malamang sa loob ng 4–5 taon",
     "best": "Pinakamagandang kaso",
     "likely": "Malamang",
     "floor": "Pinakamababa",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Isang sandata o skill ang lampas sa level, pasok sa level ang iba.",
       "at_level": "Nakakasabay, pero hindi pa umaangat.",
       "behind_the_level": "Sa ngayon, mas mataas pa ang level kaysa sa player."
-    }
+    },
+    "path": {
+      "now": "Ngayon",
+      "year1": "Taon 1",
+      "years2_3": "Taon 2–3",
+      "years4_5": "Taon 4–5"
+    },
+    "inYears": "Sa loob ng 4–5 taon",
+    "include": "Isama ang projection",
+    "includeHint": "Hindi makikita ng mga player ang projection maliban kung isasama mo."
   }
 }

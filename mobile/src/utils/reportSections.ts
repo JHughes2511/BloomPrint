@@ -230,3 +230,13 @@ export function getFixedSections(
 
   return result.some(s => s.body.trim()) ? result : null;
 }
+
+// ── The PROJECTION phase is the coach's ─────────────────────────────────────────
+// A player sees it only when the coach switches it on when sending (the server
+// drops it otherwise: api/report_sections.without_projection).
+
+export const isProjectionHeading = (heading?: string | null): boolean =>
+  /^projection$/i.test((heading ?? '').replace(/[*#:]/g, '').trim());
+
+export const hasProjection = (text?: string | null): boolean =>
+  /^\s*PROJECTION:?\s*$/m.test(text ?? '') || /^\s*[-•*]?\s*Projection \(4[–-]5 years\):/im.test(text ?? '');

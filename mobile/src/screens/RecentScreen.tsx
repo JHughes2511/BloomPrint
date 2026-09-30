@@ -1,3 +1,4 @@
+import { hasProjection, isProjectionHeading } from '../utils/reportSections';
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
@@ -251,13 +252,21 @@ export default function RecentScreen() {
   // absent means on, so a report opened for sending starts with everything
   // included, exactly as before this was switchable.
   const [sectionToggles, setSectionToggles] = useState<Record<string, boolean>>({});
+  // The PROJECTION is the coach's: it has its own switch, off by default, and
+  // is left out of the per-section list.
+  const [sendProjection, setSendProjection] = useState(false);
   const sendSections = splitReportSections(activeModal?.text ?? '');
-  const sendToggleSections = sendSections.filter(sec => !sec.pinned);
+  const sendHasProjection = hasProjection(activeModal?.text);
+  const sendToggleSections = sendSections.filter(sec => !sec.pinned && !isProjectionHeading(sec.heading));
+  const effectiveToggles = (): Record<string, boolean> => ({
+    ...sectionToggles,
+    ...Object.fromEntries(sendSections.filter(sec => isProjectionHeading(sec.heading)).map(sec => [sec.heading, sendProjection])),
+  });
   const hiddenSendSections = () =>
-    sendToggleSections.filter(sec => sectionToggles[sec.heading] === false).map(sec => sec.heading);
+    sendSections.filter(sec => !sec.pinned && effectiveToggles()[sec.heading] === false).map(sec => sec.heading);
   /** The report text with the coach's withheld sections removed. */
   const sendTextFiltered = () =>
-    (hiddenSendSections().length ? joinReportSections(sendSections, sectionToggles) : activeModal?.text) || '';
+    (hiddenSendSections().length ? joinReportSections(sendSections, effectiveToggles()) : activeModal?.text) || '';
 
   const openStaffShareModal = (ctx: StaffShareContext, previewText?: string, fullText?: string) => {
     setStaffShareCtx(ctx);
@@ -819,6 +828,7 @@ export default function RecentScreen() {
           share_grades: playerShareToggles.share_overall_grade || playerShareToggles.share_pillar_grades,
           share_flags: playerShareToggles.share_green_flags || playerShareToggles.share_watch_flags,
           share_questions: playerShareToggles.share_key_questions,
+          include_projection: sendProjection,
         });
       } else {
         // Training and team reports send their text outright, so the sections
@@ -828,6 +838,7 @@ export default function RecentScreen() {
           report_text: playerShareToggles.share_report_text ? sendTextFiltered() : '',
           target_type: 'player',
           player_user_id: target.id,
+          include_projection: sendProjection,
         });
       }
       setSendSearch('');
@@ -1140,7 +1151,7 @@ export default function RecentScreen() {
                           title: item.title,
                           createdAt: item.created_at,
                         });
-                        setSectionToggles({});
+                        setSectionToggles({}); setSendProjection(false);
                         setTimeout(() => setModalView('send'), 50);
                       }}
                     >
@@ -1498,7 +1509,7 @@ export default function RecentScreen() {
                   {/* Send to Player — reports ABOUT a player only, as on the
                       cards. Share reaches a player for everything else. */}
                   {(activeModal?.kind === 'eval' || activeModal?.kind === 'training') && (
-                    <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setSectionToggles({}); setModalView('send'); }}>
+                    <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setSectionToggles({}); setSendProjection(false); setModalView('send'); }}>
                       <Ionicons name="person-outline" size={18} color={t.positive} />
                       <Text style={[styles.actionText, { color: t.positive }]} numberOfLines={1}>{tr('recent.playerBtn')}</Text>
                     </TouchableOpacity>
@@ -1614,6 +1625,17 @@ export default function RecentScreen() {
                         />
                       </View>
                     ))}
+                  </View>
+                )}
+
+                {playerShareToggles.share_report_text && sendHasProjection && (
+                  <View style={{ marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7 }}>
+                      <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }}>{tr('projection.include')}</Text>
+                      <Switch value={sendProjection} onValueChange={setSendProjection}
+                              trackColor={{ false: t.line, true: t.positive }} thumbColor="#fff" />
+                    </View>
+                    <Text style={{ color: t.muted2, fontSize: 11.5 }}>{tr('projection.includeHint')}</Text>
                   </View>
                 )}
 

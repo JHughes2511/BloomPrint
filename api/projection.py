@@ -104,6 +104,8 @@ def _prompt(player: models.Player, level: str, file_text: str, ev: dict, m: dict
         f"Return JSON only:\n"
         "{\"separation\": \"<one of: " + scale + ">\",\n"
         " \"separation_why\": \"<one line: the evidence for it>\",\n"
+        " \"path\": {\"now\": \"<level and role today>\", \"year1\": \"<level and role a year from now>\", "
+        "\"years2_3\": \"<level and role in 2-3 years>\", \"years4_5\": \"<level and role in 4-5 years: the likely outcome>\"},\n"
         " \"level\": \"<the level most likely reached in 4-5 years>\",\n"
         " \"role\": \"<the role there>\",\n"
         " \"best\": \"<best case: level and role>\",\n"
@@ -119,6 +121,8 @@ def _prompt(player: models.Player, level: str, file_text: str, ev: dict, m: dict
         "- Separation is judged against the level the player plays at now: DOMINANT = the level is too easy; "
         "SEPARATES = above the level in more than one area; ONE-TOOL SEPARATOR = one tool above the level, the "
         "rest at level; AT LEVEL = competes, doesn't separate yet; BEHIND THE LEVEL = the level is ahead of them.\n"
+        "- The path is the likely route, step by step. Leave a step empty (\"\") when the file cannot support it; "
+        "never fill a step to complete the path.\n"
         "- Work only from the file. Never invent a stat, a measurement, an age or an injury. Account for injuries.\n"
         "- Where the reports' own projections agree, say so through the fields; where they differ, weigh the newer "
         "and better-evidenced one.\n"
@@ -141,6 +145,8 @@ def _clean(d: dict) -> dict | None:
         "level": s("level", 80), "role": s("role", 120),
         "best": s("best"), "likely": s("likely"), "floor": s("floor"),
         "style_comp": s("style_comp"), "level_comp": s("level_comp"),
+        "path": {k: str(((d.get("path") or {}) if isinstance(d.get("path"), dict) else {}).get(k) or "").strip()[:160]
+                 for k in ("now", "year1", "years2_3", "years4_5")},
         "must_happen": [str(x).strip()[:200] for x in (d.get("must_happen") or []) if str(x or "").strip()][:3],
         "confidence_note": s("confidence_note"),
         "what_changed": s("what_changed"),

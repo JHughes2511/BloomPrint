@@ -353,6 +353,8 @@ class ShareReportRequest(BaseModel):
     share_report_text: bool = True
     # Section headings the coach switched off in the send sheet.
     hide_sections: list[str] = []
+    # The report's PROJECTION goes to the player only when the coach says so.
+    include_projection: bool = False
     share_grades: bool = False
     share_flags: bool = False
     share_questions: bool = False
@@ -469,6 +471,7 @@ class TeamShareRequest(BaseModel):
     subject_player_id: int | None = None
     require_consent: bool = False
     consent_override: bool = False   # coach confirms sending when subject has no account
+    include_projection: bool = False  # the report's PROJECTION goes to the player only if asked
 
 
 class ShareApprovalOut(BaseModel):

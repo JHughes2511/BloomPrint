@@ -3248,7 +3248,7 @@
     "doneLeave": "Klar ({{count}} öppna)"
   },
   "projection": {
-    "title": "Prognos · 4–5 år",
+    "title": "Prognos",
     "refresh": "Uppdatera",
     "making": "Läser allt som finns sparat…",
     "updating": "Uppdaterar med de senaste underlagen…",
@@ -3256,7 +3256,6 @@
     "empty": "Gör en rapport eller registrera en match för att starta prognosen.",
     "failed": "Den senaste prognosen kunde inte göras. Försök igen.",
     "make": "Gör prognos",
-    "likelyIn": "Troligt om 4–5 år",
     "best": "Bästa scenario",
     "likely": "Troligt",
     "floor": "Lägstanivå",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Ett vapen eller en färdighet över nivån, resten på nivå.",
       "at_level": "Hänger med, men sticker inte ut än.",
       "behind_the_level": "Nivån ligger just nu före spelaren."
-    }
+    },
+    "path": {
+      "now": "Nu",
+      "year1": "År 1",
+      "years2_3": "År 2–3",
+      "years4_5": "År 4–5"
+    },
+    "inYears": "Om 4–5 år",
+    "include": "Ta med prognos",
+    "includeHint": "Spelare ser inte prognosen om du inte tar med den."
   }
 }

@@ -3248,7 +3248,7 @@
     "doneLeave": "Fertig ({{count}} offen)"
   },
   "projection": {
-    "title": "Prognose · 4–5 Jahre",
+    "title": "Prognose",
     "refresh": "Aktualisieren",
     "making": "Alle Unterlagen werden ausgewertet…",
     "updating": "Wird mit den neuesten Daten aktualisiert…",
@@ -3256,7 +3256,6 @@
     "empty": "Erstelle einen Bericht oder erfasse ein Spiel, um die Prognose zu starten.",
     "failed": "Die letzte Prognose konnte nicht erstellt werden. Versuche es erneut.",
     "make": "Prognose erstellen",
-    "likelyIn": "Wahrscheinlich in 4–5 Jahren",
     "best": "Bestes Szenario",
     "likely": "Wahrscheinlich",
     "floor": "Untergrenze",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Eine Stärke oder Fähigkeit über dem Niveau, der Rest auf Niveau.",
       "at_level": "Kann mithalten, hebt sich aber noch nicht ab.",
       "behind_the_level": "Das Niveau ist dem Spieler derzeit noch voraus."
-    }
+    },
+    "path": {
+      "now": "Jetzt",
+      "year1": "Jahr 1",
+      "years2_3": "Jahre 2–3",
+      "years4_5": "Jahre 4–5"
+    },
+    "inYears": "In 4–5 Jahren",
+    "include": "Prognose einschließen",
+    "includeHint": "Spieler sehen die Prognose nur, wenn du sie einschließt."
   }
 }

@@ -3248,7 +3248,7 @@
     "doneLeave": "Bitti ({{count}} açık)"
   },
   "projection": {
-    "title": "Projeksiyon · 4–5 yıl",
+    "title": "Projeksiyon",
     "refresh": "Yenile",
     "making": "Dosyadaki her şey okunuyor…",
     "updating": "En yeni verilerle güncelleniyor…",
@@ -3256,7 +3256,6 @@
     "empty": "Projeksiyonu başlatmak için bir rapor hazırlayın veya bir maçı takip edin.",
     "failed": "Son projeksiyon oluşturulamadı. Tekrar deneyin.",
     "make": "Projeksiyon oluştur",
-    "likelyIn": "4–5 yıl içinde olası",
     "best": "En iyi senaryo",
     "likely": "Olası",
     "floor": "Taban",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Bir silahı veya becerisi seviyenin üstünde, geri kalanı seviyesinde.",
       "at_level": "Rekabet ediyor, ama henüz fark yaratmıyor.",
       "behind_the_level": "Seviye şu an oyuncunun önünde."
-    }
+    },
+    "path": {
+      "now": "Şimdi",
+      "year1": "1. yıl",
+      "years2_3": "2–3. yıllar",
+      "years4_5": "4–5. yıllar"
+    },
+    "inYears": "4–5 yıl içinde",
+    "include": "Projeksiyonu ekle",
+    "includeHint": "Oyuncular projeksiyonu siz eklemedikçe görmez."
   }
 }

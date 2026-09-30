@@ -3248,7 +3248,7 @@
     "doneLeave": "Listo (dejar {{count}} pendientes)"
   },
   "projection": {
-    "title": "Proyección · 4–5 años",
+    "title": "Proyección",
     "refresh": "Actualizar",
     "making": "Leyendo todo lo registrado…",
     "updating": "Actualizando con la evidencia más reciente…",
@@ -3256,7 +3256,6 @@
     "empty": "Haz un informe o registra un partido para empezar la proyección.",
     "failed": "No se pudo hacer la última proyección. Inténtalo de nuevo.",
     "make": "Hacer proyección",
-    "likelyIn": "Probable en 4–5 años",
     "best": "Mejor escenario",
     "likely": "Probable",
     "floor": "Suelo",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Una herramienta o habilidad por encima del nivel, el resto al nivel.",
       "at_level": "Compite, pero aún no marca diferencia.",
       "behind_the_level": "Ahora mismo el nivel va por delante del jugador."
-    }
+    },
+    "path": {
+      "now": "Ahora",
+      "year1": "Año 1",
+      "years2_3": "Años 2–3",
+      "years4_5": "Años 4–5"
+    },
+    "inYears": "En 4–5 años",
+    "include": "Incluir proyección",
+    "includeHint": "Los jugadores no ven la proyección a menos que la incluyas."
   }
 }

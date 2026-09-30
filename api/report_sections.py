@@ -216,3 +216,21 @@ def strip_sections(text: str, hidden: list[str]) -> str:
     # three blank lines deep in the middle of the page.
     joined = re.sub(r"\n{3,}", "\n\n", "\n".join(out))
     return joined.strip("\n") + ("\n" if text.endswith("\n") else "")
+
+
+# The per-player lines a position analysis writes inside each player's block
+# (video_vision/bim/prompts.py, three_phases_directive "per_player").
+_PER_PLAYER_PROJECTION = re.compile(
+    r"^\s*[-•*]?\s*(Projection \(4[–-]5 years\):|Comps: style\b|Confidence: (HIGH|MEDIUM|LOW)\b)", re.I)
+
+
+def without_projection(text: str) -> str:
+    """A report as a player may see it: the PROJECTION phase is the coach's.
+
+    Drops the PROJECTION section and a position analysis's per-player
+    projection lines. Everything else, IDENTIFY included, stays.
+    """
+    if not text:
+        return text
+    kept = _without_sections(text, ["PROJECTION"])
+    return "\n".join(l for l in kept.split("\n") if not _PER_PLAYER_PROJECTION.match(l)).strip()

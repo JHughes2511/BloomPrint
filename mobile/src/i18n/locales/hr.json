@@ -3248,7 +3248,7 @@
     "doneLeave": "Gotovo ({{count}} otvoreno)"
   },
   "projection": {
-    "title": "Projekcija · 4–5 godina",
+    "title": "Projekcija",
     "refresh": "Osvježi",
     "making": "Čitamo sve iz dosjea…",
     "updating": "Ažuriramo najnovijim podacima…",
@@ -3256,7 +3256,6 @@
     "empty": "Napravite izvještaj ili pratite utakmicu kako biste pokrenuli projekciju.",
     "failed": "Posljednja projekcija nije se mogla napraviti. Pokušajte ponovno.",
     "make": "Napravi projekciju",
-    "likelyIn": "Vjerojatno za 4–5 godina",
     "best": "Najbolji scenarij",
     "likely": "Vjerojatno",
     "floor": "Minimum",
@@ -3288,6 +3287,15 @@
       "one_tool_separator": "Jedno oružje ili vještina iznad razine, ostalo na razini.",
       "at_level": "Konkurentan je, ali se još ne ističe.",
       "behind_the_level": "Razina je trenutačno ispred igrača."
-    }
+    },
+    "path": {
+      "now": "Sada",
+      "year1": "Godina 1",
+      "years2_3": "Godine 2–3",
+      "years4_5": "Godine 4–5"
+    },
+    "inYears": "Za 4–5 godina",
+    "include": "Uključi projekciju",
+    "includeHint": "Igrači ne vide projekciju osim ako je ne uključite."
   }
 }

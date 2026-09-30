@@ -17,7 +17,7 @@ import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel, parseOutputTypes } from '../utils/reportType';
-import { extractBrief, getFixedSections, recruitGrade, recruitGradeScale } from '../utils/reportSections';
+import { extractBrief, getFixedSections, recruitGrade, recruitGradeScale, hasProjection } from '../utils/reportSections';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
@@ -132,6 +132,8 @@ export default function EvalReportScreen() {
   const [shareCats, setShareCats] = useState({
     share_report_text: true, share_grades: false,
     share_flags: false, share_questions: false,
+    // The projection is the coach's; off unless the coach includes it.
+    include_projection: false,
   });
   const [sharing, setSharing] = useState(false);
   const [shareSearchLoading, setShareSearchLoading] = useState(false);
@@ -210,6 +212,7 @@ export default function EvalReportScreen() {
         share_grades: shareCats.share_grades,
         share_flags: shareCats.share_flags,
         share_questions: shareCats.share_questions,
+        include_projection: shareCats.share_report_text && shareCats.include_projection,
         message: shareMessage.trim() || null,
         consent_override: consentOverride,
       });
@@ -983,6 +986,7 @@ export default function EvalReportScreen() {
                   { key: 'share_grades', label: tr('evalReport.grades'), has: ev?.overall_grade != null || ev?.pillar_grades != null },
                   { key: 'share_flags', label: tr('evalReport.flags'), has: (ev?.green_flags?.length ?? 0) > 0 || (ev?.watch_flags?.length ?? 0) > 0 },
                   { key: 'share_questions', label: tr('evalReport.keyQuestions'), has: (ev?.key_questions?.length ?? 0) > 0 },
+                  { key: 'include_projection', label: tr('projection.title'), has: shareCats.share_report_text && hasProjection(ev?.report_text) },
                 ].filter(cat => cat.has).map(cat => (
                   <View key={cat.key} style={styles.toggleRow}>
                     <Text style={styles.toggleLabel}>{cat.label}</Text>
