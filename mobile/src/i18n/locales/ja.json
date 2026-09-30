@@ -450,7 +450,8 @@
       "players": "選手",
       "lineupsDepth": "ラインナップと選手層",
       "clips": "クリップ",
-      "summary": "まとめ"
+      "summary": "まとめ",
+      "identify": "見極め"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "課題",
       "priorities": "優先事項",
       "moments": "重要な場面",
-      "takeaways": "学び"
+      "takeaways": "学び",
+      "separation": "突出度",
+      "projection": "予測（4〜5年）",
+      "comps": "比較選手",
+      "confidence": "確度"
     },
     "c": {
       "player": "選手",
@@ -3216,7 +3221,9 @@
       "edge": "優位",
       "play": "プレー",
       "defense": "ディフェンス",
-      "result": "結果"
+      "result": "結果",
+      "outcome": "結果",
+      "level_role": "レベルと役割"
     },
     "addRow": "行を追加"
   },

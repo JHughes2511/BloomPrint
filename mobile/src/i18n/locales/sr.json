@@ -450,7 +450,8 @@
       "players": "Igrači",
       "lineupsDepth": "Postave i dubina",
       "clips": "Klipovi",
-      "summary": "Rezime"
+      "summary": "Rezime",
+      "identify": "Препознај"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Potrebe",
       "priorities": "Prioriteti",
       "moments": "Ključni trenuci",
-      "takeaways": "Pouke"
+      "takeaways": "Pouke",
+      "separation": "Издвајање",
+      "projection": "Пројекција (4–5 год.)",
+      "comps": "Поређења",
+      "confidence": "Поузданост"
     },
     "c": {
       "player": "Igrač",
@@ -3216,7 +3221,9 @@
       "edge": "Prednost",
       "play": "Akcija",
       "defense": "Odbrana",
-      "result": "Rezultat"
+      "result": "Rezultat",
+      "outcome": "Исход",
+      "level_role": "Ниво и улога"
     },
     "addRow": "Dodaj red"
   },

@@ -450,7 +450,8 @@
       "players": "Spelare",
       "lineupsDepth": "Laguppställningar & djup",
       "clips": "Klipp",
-      "summary": "Sammanfattning"
+      "summary": "Sammanfattning",
+      "identify": "Identifiera"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Behov",
       "priorities": "Prioriteringar",
       "moments": "Nyckelögonblick",
-      "takeaways": "Lärdomar"
+      "takeaways": "Lärdomar",
+      "separation": "Särskiljning",
+      "projection": "Prognos (4–5 år)",
+      "comps": "Jämförelser",
+      "confidence": "Säkerhet"
     },
     "c": {
       "player": "Spelare",
@@ -3216,7 +3221,9 @@
       "edge": "Fördel",
       "play": "Spel",
       "defense": "Försvar",
-      "result": "Resultat"
+      "result": "Resultat",
+      "outcome": "Utfall",
+      "level_role": "Nivå & roll"
     },
     "addRow": "Lägg till rad"
   },

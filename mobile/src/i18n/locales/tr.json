@@ -450,7 +450,8 @@
       "players": "Oyuncular",
       "lineupsDepth": "Beşliler ve derinlik",
       "clips": "Klipler",
-      "summary": "Özet"
+      "summary": "Özet",
+      "identify": "Belirle"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "İhtiyaçlar",
       "priorities": "Öncelikler",
       "moments": "Kilit anlar",
-      "takeaways": "Çıkarımlar"
+      "takeaways": "Çıkarımlar",
+      "separation": "Ayrışma",
+      "projection": "Projeksiyon (4–5 yıl)",
+      "comps": "Benzerler",
+      "confidence": "Güven"
     },
     "c": {
       "player": "Oyuncu",
@@ -3216,7 +3221,9 @@
       "edge": "Üstünlük",
       "play": "Set",
       "defense": "Savunma",
-      "result": "Sonuç"
+      "result": "Sonuç",
+      "outcome": "Sonuç",
+      "level_role": "Seviye ve rol"
     },
     "addRow": "Satır ekle"
   },

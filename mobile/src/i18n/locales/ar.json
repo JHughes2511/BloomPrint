@@ -450,7 +450,8 @@
       "players": "اللاعبون",
       "lineupsDepth": "التشكيلات والعمق",
       "clips": "المقاطع",
-      "summary": "الملخص"
+      "summary": "الملخص",
+      "identify": "التحديد"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "الاحتياجات",
       "priorities": "الأولويات",
       "moments": "لحظات حاسمة",
-      "takeaways": "الدروس"
+      "takeaways": "الدروس",
+      "separation": "التميّز",
+      "projection": "التوقع (4–5 سنوات)",
+      "comps": "المقارنات",
+      "confidence": "الثقة"
     },
     "c": {
       "player": "اللاعب",
@@ -3216,7 +3221,9 @@
       "edge": "الأفضلية",
       "play": "الخطة",
       "defense": "الدفاع",
-      "result": "النتيجة"
+      "result": "النتيجة",
+      "outcome": "النتيجة",
+      "level_role": "المستوى والدور"
     },
     "addRow": "إضافة صف"
   },

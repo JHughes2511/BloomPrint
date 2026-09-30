@@ -450,7 +450,8 @@
       "players": "שחקנים",
       "lineupsDepth": "חמישיות ועומק",
       "clips": "קטעים",
-      "summary": "סיכום"
+      "summary": "סיכום",
+      "identify": "זיהוי"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "צרכים",
       "priorities": "עדיפויות",
       "moments": "רגעי מפתח",
-      "takeaways": "מסקנות"
+      "takeaways": "מסקנות",
+      "separation": "בידול",
+      "projection": "תחזית (4–5 שנים)",
+      "comps": "השוואות",
+      "confidence": "ודאות"
     },
     "c": {
       "player": "שחקן",
@@ -3216,7 +3221,9 @@
       "edge": "יתרון",
       "play": "מהלך",
       "defense": "הגנה",
-      "result": "תוצאה"
+      "result": "תוצאה",
+      "outcome": "תוצאה",
+      "level_role": "רמה ותפקיד"
     },
     "addRow": "הוספת שורה"
   },

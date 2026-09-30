@@ -450,7 +450,8 @@
       "players": "Giocatori",
       "lineupsDepth": "Quintetti e rotazioni",
       "clips": "Clip",
-      "summary": "Sintesi"
+      "summary": "Sintesi",
+      "identify": "Identificare"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Bisogni",
       "priorities": "Priorità",
       "moments": "Momenti chiave",
-      "takeaways": "Da ricordare"
+      "takeaways": "Da ricordare",
+      "separation": "Distacco",
+      "projection": "Proiezione (4–5 anni)",
+      "comps": "Paragoni",
+      "confidence": "Affidabilità"
     },
     "c": {
       "player": "Giocatore",
@@ -3216,7 +3221,9 @@
       "edge": "Vantaggio",
       "play": "Gioco",
       "defense": "Difesa",
-      "result": "Esito"
+      "result": "Esito",
+      "outcome": "Esito",
+      "level_role": "Livello e ruolo"
     },
     "addRow": "Aggiungi riga"
   },

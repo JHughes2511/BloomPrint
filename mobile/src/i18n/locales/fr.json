@@ -450,7 +450,8 @@
       "players": "Joueurs",
       "lineupsDepth": "Cinq et rotation",
       "clips": "Clips",
-      "summary": "Synthèse"
+      "summary": "Synthèse",
+      "identify": "Identifier"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Besoins",
       "priorities": "Priorités",
       "moments": "Moments clés",
-      "takeaways": "À retenir"
+      "takeaways": "À retenir",
+      "separation": "Démarcation",
+      "projection": "Projection (4–5 ans)",
+      "comps": "Comparaisons",
+      "confidence": "Confiance"
     },
     "c": {
       "player": "Joueur",
@@ -3216,7 +3221,9 @@
       "edge": "Avantage",
       "play": "Système",
       "defense": "Défense",
-      "result": "Résultat"
+      "result": "Résultat",
+      "outcome": "Issue",
+      "level_role": "Niveau et rôle"
     },
     "addRow": "Ajouter une ligne"
   },

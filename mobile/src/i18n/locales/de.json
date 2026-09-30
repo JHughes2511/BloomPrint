@@ -450,7 +450,8 @@
       "players": "Spieler",
       "lineupsDepth": "Aufstellungen & Kadertiefe",
       "clips": "Clips",
-      "summary": "Zusammenfassung"
+      "summary": "Zusammenfassung",
+      "identify": "Erkennen"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Bedarf",
       "priorities": "Prioritäten",
       "moments": "Schlüsselmomente",
-      "takeaways": "Erkenntnisse"
+      "takeaways": "Erkenntnisse",
+      "separation": "Abhebung",
+      "projection": "Prognose (4–5 J.)",
+      "comps": "Vergleiche",
+      "confidence": "Sicherheit"
     },
     "c": {
       "player": "Spieler",
@@ -3216,7 +3221,9 @@
       "edge": "Vorteil",
       "play": "Spielzug",
       "defense": "Verteidigung",
-      "result": "Ergebnis"
+      "result": "Ergebnis",
+      "outcome": "Ergebnis",
+      "level_role": "Niveau & Rolle"
     },
     "addRow": "Zeile hinzufügen"
   },

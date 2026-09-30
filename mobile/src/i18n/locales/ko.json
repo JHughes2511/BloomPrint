@@ -450,7 +450,8 @@
       "players": "선수",
       "lineupsDepth": "라인업 및 뎁스",
       "clips": "클립",
-      "summary": "요약"
+      "summary": "요약",
+      "identify": "식별"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "필요한 것",
       "priorities": "우선순위",
       "moments": "핵심 장면",
-      "takeaways": "배운 점"
+      "takeaways": "배운 점",
+      "separation": "차별성",
+      "projection": "전망 (4–5년)",
+      "comps": "비교 선수",
+      "confidence": "신뢰도"
     },
     "c": {
       "player": "선수",
@@ -3216,7 +3221,9 @@
       "edge": "우위",
       "play": "플레이",
       "defense": "수비",
-      "result": "결과"
+      "result": "결과",
+      "outcome": "결과",
+      "level_role": "레벨과 역할"
     },
     "addRow": "행 추가"
   },

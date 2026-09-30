@@ -450,7 +450,8 @@
       "players": "Spelers",
       "lineupsDepth": "Opstellingen & diepte",
       "clips": "Clips",
-      "summary": "Samenvatting"
+      "summary": "Samenvatting",
+      "identify": "Herkennen"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Behoeften",
       "priorities": "Prioriteiten",
       "moments": "Sleutelmomenten",
-      "takeaways": "Lessen"
+      "takeaways": "Lessen",
+      "separation": "Onderscheid",
+      "projection": "Projectie (4–5 jr)",
+      "comps": "Vergelijkingen",
+      "confidence": "Betrouwbaarheid"
     },
     "c": {
       "player": "Speler",
@@ -3216,7 +3221,9 @@
       "edge": "Voordeel",
       "play": "Spel",
       "defense": "Verdediging",
-      "result": "Resultaat"
+      "result": "Resultaat",
+      "outcome": "Uitkomst",
+      "level_role": "Niveau & rol"
     },
     "addRow": "Rij toevoegen"
   },

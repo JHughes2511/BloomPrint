@@ -450,7 +450,8 @@
       "players": "球员",
       "lineupsDepth": "阵容与厚度",
       "clips": "片段",
-      "summary": "总结"
+      "summary": "总结",
+      "identify": "识别"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "需求",
       "priorities": "优先事项",
       "moments": "关键时刻",
-      "takeaways": "收获"
+      "takeaways": "收获",
+      "separation": "区分度",
+      "projection": "预测（4–5年）",
+      "comps": "对比球员",
+      "confidence": "可信度"
     },
     "c": {
       "player": "球员",
@@ -3216,7 +3221,9 @@
       "edge": "优势方",
       "play": "战术",
       "defense": "防守",
-      "result": "结果"
+      "result": "结果",
+      "outcome": "结果",
+      "level_role": "级别与角色"
     },
     "addRow": "添加一行"
   },

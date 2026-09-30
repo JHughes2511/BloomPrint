@@ -450,7 +450,8 @@
       "players": "खिलाड़ी",
       "lineupsDepth": "लाइनअप और गहराई",
       "clips": "क्लिप",
-      "summary": "सारांश"
+      "summary": "सारांश",
+      "identify": "पहचान"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "ज़रूरतें",
       "priorities": "प्राथमिकताएँ",
       "moments": "अहम पल",
-      "takeaways": "सीख"
+      "takeaways": "सीख",
+      "separation": "अलगाव",
+      "projection": "अनुमान (4–5 वर्ष)",
+      "comps": "तुलनाएँ",
+      "confidence": "विश्वास"
     },
     "c": {
       "player": "खिलाड़ी",
@@ -3216,7 +3221,9 @@
       "edge": "बढ़त",
       "play": "प्ले",
       "defense": "डिफेंस",
-      "result": "नतीजा"
+      "result": "नतीजा",
+      "outcome": "परिणाम",
+      "level_role": "स्तर और भूमिका"
     },
     "addRow": "पंक्ति जोड़ें"
   },

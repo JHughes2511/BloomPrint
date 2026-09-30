@@ -450,7 +450,8 @@
       "players": "Zawodnicy",
       "lineupsDepth": "Składy i głębia",
       "clips": "Klipy",
-      "summary": "Podsumowanie"
+      "summary": "Podsumowanie",
+      "identify": "Rozpoznaj"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Potrzeby",
       "priorities": "Priorytety",
       "moments": "Kluczowe momenty",
-      "takeaways": "Wnioski"
+      "takeaways": "Wnioski",
+      "separation": "Wyróżnienie",
+      "projection": "Prognoza (4–5 lat)",
+      "comps": "Porównania",
+      "confidence": "Pewność"
     },
     "c": {
       "player": "Zawodnik",
@@ -3216,7 +3221,9 @@
       "edge": "Przewaga",
       "play": "Zagrywka",
       "defense": "Obrona",
-      "result": "Wynik"
+      "result": "Wynik",
+      "outcome": "Wynik",
+      "level_role": "Poziom i rola"
     },
     "addRow": "Dodaj wiersz"
   },

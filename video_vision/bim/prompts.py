@@ -176,6 +176,129 @@ def additional_focus_directive(context: str) -> str:
     return directive
 
 
+# ── The three phases: Identify, Evaluate, Project ─────────────────────────────
+# A player report answers three questions in order: does he separate at his
+# level (IDENTIFY), what does he do (EVALUATE, which is the report's existing
+# sections, untouched), and who will he be in 4–5 years (PROJECTION). The first
+# and last are added around each report that is about a player; nothing the
+# report already asks for moves or changes.
+
+SEPARATION_SCALE = [
+    ("DOMINANT", "the level is too easy for him"),
+    ("SEPARATES", "above the level in more than one area"),
+    ("ONE-TOOL SEPARATOR", "one tool or skill above the level, the rest at level"),
+    ("AT LEVEL", "competes, doesn't separate yet"),
+    ("BEHIND THE LEVEL", "the level is ahead of him right now"),
+]
+
+# Which report types get the phases, and in what form.
+PHASE_TYPES = {
+    "player_eval": "full", "scouting_report": "full", "recruitment_profile": "full",
+    "matchup": "subjects", "position_analysis": "per_player", "film_breakdown": "brief",
+}
+
+
+def _scale_block() -> str:
+    return "SEPARATION SCALE (judged against the level he plays at now):\n" + "\n".join(
+        f"  {name}: {meaning}." for name, meaning in SEPARATION_SCALE)
+
+
+_PHASE_RULES = (
+    "Rules for both phases: work only from the film, reports, stats and player file you were given. "
+    "Never invent a stat, a measurement, an age or an injury. Comps must be real players; if you are "
+    "not sure of a real player who fits, describe the player type instead of naming someone. Stay "
+    "consistent with any comps, projections or grades given elsewhere in the report; if you reuse a "
+    "name, that is fine, if you differ, say why. Refer to the player the way the rest of the report does."
+)
+
+
+def _projection_lines(indent: str = "") -> str:
+    return (
+        f"{indent}Window: 4–5 years from now (say what age or stage that is, only if his age or class is known)\n"
+        f"{indent}Best case: [level and role if everything goes right]\n"
+        f"{indent}Likely: [the level he most likely reaches, and his role there]\n"
+        f"{indent}Floor: [level and role if development stalls]\n"
+        f"{indent}Style comp: [a pro who plays the way he plays — style, not level — and why]\n"
+        f"{indent}Level comp: [a player with a similar profile who reached the level he projects to, and why]\n"
+        f"{indent}What must happen: [the two or three things that decide which outcome he reaches]\n"
+        f"{indent}Confidence: [HIGH / MEDIUM / LOW] — [what this projection rests on: how many games, reports, "
+        f"film and tracked stats you actually had; what more evidence would raise it]"
+    )
+
+
+def three_phases_directive(output_type: str, player_name: str = "", summary: bool = False) -> str:
+    """The IDENTIFY and PROJECTION phases for a player report, or "" when the
+    report is not about a player. `summary` is the player summary, which reads
+    every report on the player and always gets the full phases."""
+    types = parse_output_types(output_type)
+    forms = {PHASE_TYPES[t] for t in types if t in PHASE_TYPES}
+    if summary:
+        forms = {"full"}
+    # Team film (a game packet, a team eval) has no one player to judge; only
+    # a position analysis still reads player by player.
+    name = (player_name or "").strip()
+    if not summary and (not name or name.lower() == "team"):
+        forms &= {"per_player"}
+    if not forms:
+        return ""
+    form = next(f for f in ("full", "subjects", "per_player", "brief") if f in forms)
+    order = (
+        "THE THREE PHASES. This report follows three phases in order: IDENTIFY, EVALUATE, PROJECTION. "
+        "Keep every section the report format above asks for, in its order and with its headings; the "
+        "phases are added around them, they replace nothing."
+    )
+    after = ("PROJECTION comes after every other section, except ADDITIONAL FOCUS if the report has one, "
+             "which stays last.")
+    if len(types) > 1:
+        after = ("PROJECTION comes once, after the last lens and before INTEGRATED PRIORITIES. The "
+                 "IDENTIFY section comes once, right after the executive summary.")
+
+    if form == "full":
+        body = (
+            "IDENTIFY: — straight after BRIEF (or at the top if there is no BRIEF), a section titled exactly "
+            "\"IDENTIFY:\" on its own line, then:\n"
+            "  Verdict: [one word or phrase from the scale, exactly as written] — [its one-line meaning]\n"
+            "  Evidence: [two or three specific things from the film or data that earn the verdict, with "
+            "(MM:SS) film times where you have them]\n"
+            "  Where he separates: [the tools that are above the level, or \"none yet\"]\n\n"
+            "EVALUATE: — then a section titled exactly \"EVALUATE:\" with ONE sentence tying the verdict to "
+            "the evaluation that follows (what the rest of the report shows about why he is where he is). "
+            "Then the report's existing sections, unchanged.\n\n"
+            "PROJECTION: — a section titled exactly \"PROJECTION:\" on its own line that gathers everything "
+            "above into who he will be:\n" + _projection_lines("  ")
+        )
+    elif form == "subjects":
+        body = (
+            "IDENTIFY: — straight after BRIEF, a section titled exactly \"IDENTIFY:\" with one line per "
+            "subject: \"[Name]: [verdict from the scale] — [one-line reason with evidence]\". Each subject "
+            "is judged against HIS OWN level.\n\n"
+            "EVALUATE: — then a section titled exactly \"EVALUATE:\" with ONE sentence tying the verdicts to "
+            "the comparison that follows. Then the report's existing sections, unchanged.\n\n"
+            "PROJECTION: — a section titled exactly \"PROJECTION:\", with a short block per subject starting "
+            "\"[Name]:\" on its own line, then:\n" + _projection_lines("  ") +
+            "\n  Finish with one line: \"Who projects higher:\" and why."
+        )
+    elif form == "per_player":
+        body = (
+            "For EACH player block, add as its first line \"Identify: [verdict from the scale] — [one-line "
+            "reason with evidence]\", and as its last lines \"Projection (4–5 years): likely [level and "
+            "role]; best case [..]; floor [..]\", \"Comps: style [real pro and why]; level [player who "
+            "reached that level and why]\" and \"Confidence: [HIGH / MEDIUM / LOW] — [what it rests on]\". "
+            "The block's existing lines stay as they are, between these."
+        )
+    else:  # brief: one player's film
+        body = (
+            "IDENTIFY: — straight after BRIEF, a section titled exactly \"IDENTIFY:\" with "
+            "\"Verdict: [from the scale] — [one-line reason from this film]\". Then the report's existing "
+            "sections, unchanged.\n\n"
+            "PROJECTION: — after SUMMARY, a section titled exactly \"PROJECTION:\" with three lines: "
+            "\"Likely (4–5 years): [level and role]\", \"Comps: style [real pro]; level [player who reached "
+            "that level]\" and \"Confidence: LOW / MEDIUM / HIGH — one film is thin evidence; say what "
+            "else is needed\"."
+        )
+    return f"\n\n{order}\n\n{_scale_block()}\n\n{body}\n\n{after}\n\n{_PHASE_RULES}"
+
+
 def _film_vocab_block() -> str:
     lines = ["LOCKED FILM VOCABULARY — label every concept you identify:"]
     for category, concepts in FILM_VOCABULARY.items():
@@ -693,9 +816,11 @@ def build_prompt(
         if not blocks:
             valid = ", ".join(PROMPT_MAP.keys())
             raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
-        return header + "\n".join(blocks) + _brief_directive(output_type) + _SCOREBOARD + _NO_MARKDOWN
+        return (header + "\n".join(blocks) + _brief_directive(output_type)
+                + three_phases_directive(output_type, player_name) + _SCOREBOARD + _NO_MARKDOWN)
 
     # Single type — fall back to a general coaching report for any unrecognized
     # key rather than raising (unguarded callers would otherwise 500).
     fn = PROMPT_MAP.get(output_type) or PROMPT_MAP.get("coaching_report")
-    return fn(program, level, coach_weight, player_name) + _brief_directive(output_type) + _SCOREBOARD + _NO_MARKDOWN
+    return (fn(program, level, coach_weight, player_name) + _brief_directive(output_type)
+            + three_phases_directive(output_type, player_name) + _SCOREBOARD + _NO_MARKDOWN)

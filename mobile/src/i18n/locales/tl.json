@@ -450,7 +450,8 @@
       "players": "Mga manlalaro",
       "lineupsDepth": "Lineup at lalim",
       "clips": "Mga clip",
-      "summary": "Buod"
+      "summary": "Buod",
+      "identify": "Tukuyin"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Kailangan",
       "priorities": "Prayoridad",
       "moments": "Mahahalagang sandali",
-      "takeaways": "Aral"
+      "takeaways": "Aral",
+      "separation": "Pag-angat",
+      "projection": "Projection (4–5 taon)",
+      "comps": "Mga kahambing",
+      "confidence": "Kumpiyansa"
     },
     "c": {
       "player": "Player",
@@ -3216,7 +3221,9 @@
       "edge": "Lamang",
       "play": "Play",
       "defense": "Depensa",
-      "result": "Resulta"
+      "result": "Resulta",
+      "outcome": "Kinalabasan",
+      "level_role": "Antas at papel"
     },
     "addRow": "Magdagdag ng row"
   },

@@ -450,7 +450,8 @@
       "players": "Players",
       "lineupsDepth": "Lineups & Depth",
       "clips": "Clips",
-      "summary": "Summary"
+      "summary": "Summary",
+      "identify": "Identify"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Needs",
       "priorities": "Priorities",
       "moments": "Key moments",
-      "takeaways": "Takeaways"
+      "takeaways": "Takeaways",
+      "separation": "Separation",
+      "projection": "Projection (4–5 yrs)",
+      "comps": "Comps",
+      "confidence": "Confidence"
     },
     "c": {
       "player": "Player",
@@ -3216,7 +3221,9 @@
       "edge": "Edge",
       "play": "Play",
       "defense": "Defense",
-      "result": "Result"
+      "result": "Result",
+      "outcome": "Outcome",
+      "level_role": "Level & role"
     },
     "addRow": "Add row"
   },

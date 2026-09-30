@@ -450,7 +450,8 @@
       "players": "Jugadores",
       "lineupsDepth": "Quintetos y fondo de banquillo",
       "clips": "Clips",
-      "summary": "Resumen"
+      "summary": "Resumen",
+      "identify": "Identificar"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Necesidades",
       "priorities": "Prioridades",
       "moments": "Momentos clave",
-      "takeaways": "Conclusiones"
+      "takeaways": "Conclusiones",
+      "separation": "Separación",
+      "projection": "Proyección (4–5 años)",
+      "comps": "Comparables",
+      "confidence": "Confianza"
     },
     "c": {
       "player": "Jugador",
@@ -3216,7 +3221,9 @@
       "edge": "Ventaja",
       "play": "Jugada",
       "defense": "Defensa",
-      "result": "Resultado"
+      "result": "Resultado",
+      "outcome": "Resultado",
+      "level_role": "Nivel y rol"
     },
     "addRow": "Añadir fila"
   },

@@ -137,16 +137,19 @@ interface FixedSectionDef {
 
 const FIXED_DEFS: Record<string, FixedSectionDef[]> = {
   scouting_report: [
+    { key: 'identify', labelKey: 'evalReport.fixed.identify', icon: 'eye-outline', tone: 'label', match: /^(identify|evaluate)$/i },
     { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'offense', labelKey: 'evalReport.fixed.offensiveSkills', icon: 'basketball-outline', tone: 'label', match: /offens|scoring|shoot|elite skill/i },
     { key: 'defense', labelKey: 'evalReport.fixed.defense', icon: 'shield-outline',     tone: 'label', match: /defens/i },
     { key: 'projection', labelKey: 'evalReport.fixed.projection', icon: 'flag-outline',       tone: 'brown', match: /projection|rating|status|comp|recruit|outlook|mental|intel|physical|medical|key question|3-year|development/i },
   ],
   recruitment_profile: [
+    { key: 'identify', labelKey: 'evalReport.fixed.identify', icon: 'eye-outline', tone: 'label', match: /^(identify|evaluate)$/i },
     { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'fit', labelKey: 'evalReport.fixed.systemFit', icon: 'git-compare-outline', tone: 'label', match: /system fit|recommendation|alignment|snapshot|position-less/i },
-    { key: 'dev', labelKey: 'evalReport.fixed.development', icon: 'trending-up-outline', tone: 'label', match: /correctable|structural|3-year|development|projection/i },
+    { key: 'dev', labelKey: 'evalReport.fixed.development', icon: 'trending-up-outline', tone: 'label', match: /correctable|structural|3-year|development/i },
     { key: 'outlook', labelKey: 'evalReport.fixed.outlook', icon: 'flag-outline', tone: 'brown', match: /comparable|key question|partnership|unique|best-case|realistic/i },
+    { key: 'phaseProjection', labelKey: 'evalReport.fixed.projection', icon: 'telescope-outline', tone: 'brown', match: /^projection$/i },
   ],
   game_analysis: [
     { key: 'offense', labelKey: 'evalReport.fixed.offense', icon: 'basketball-outline', tone: 'label', match: /offens|hot zone|cold zone|ball-screen package/i },
@@ -165,9 +168,11 @@ const FIXED_DEFS: Record<string, FixedSectionDef[]> = {
     { key: 'lineups', labelKey: 'evalReport.fixed.lineupsDepth', icon: 'grid-outline', tone: 'brown', match: /comparison|lineup|combination|depth/i },
   ],
   film_breakdown: [
+    { key: 'identify', labelKey: 'evalReport.fixed.identify', icon: 'eye-outline', tone: 'label', match: /^(identify|evaluate)$/i },
     { key: 'tendencies', labelKey: 'teamGrade.playerTendencies', icon: 'analytics-outline', tone: 'label', match: /player tendenc/i },
     { key: 'clips', labelKey: 'evalReport.fixed.clips', icon: 'film-outline', tone: 'label', match: /timestamp|concept|clip|decision|kpi/i },
     { key: 'summary', labelKey: 'evalReport.fixed.summary', icon: 'flag-outline', tone: 'brown', match: /summary/i },
+    { key: 'phaseProjection', labelKey: 'evalReport.fixed.projection', icon: 'telescope-outline', tone: 'brown', match: /^projection$/i },
   ],
 };
 

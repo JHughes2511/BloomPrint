@@ -450,7 +450,8 @@
       "players": "Žaidėjai",
       "lineupsDepth": "Sudėtys ir gylis",
       "clips": "Klipai",
-      "summary": "Santrauka"
+      "summary": "Santrauka",
+      "identify": "Atpažinti"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Poreikiai",
       "priorities": "Prioritetai",
       "moments": "Svarbiausios akimirkos",
-      "takeaways": "Išvados"
+      "takeaways": "Išvados",
+      "separation": "Išsiskyrimas",
+      "projection": "Prognozė (4–5 m.)",
+      "comps": "Palyginimai",
+      "confidence": "Patikimumas"
     },
     "c": {
       "player": "Žaidėjas",
@@ -3216,7 +3221,9 @@
       "edge": "Pranašumas",
       "play": "Derinys",
       "defense": "Gynyba",
-      "result": "Rezultatas"
+      "result": "Rezultatas",
+      "outcome": "Baigtis",
+      "level_role": "Lygis ir vaidmuo"
     },
     "addRow": "Pridėti eilutę"
   },

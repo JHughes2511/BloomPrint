@@ -450,7 +450,8 @@
       "players": "Jucători",
       "lineupsDepth": "Formule și adâncime",
       "clips": "Clipuri",
-      "summary": "Rezumat"
+      "summary": "Rezumat",
+      "identify": "Identifică"
     }
   },
   "home": {
@@ -3200,7 +3201,11 @@
       "needs": "Nevoi",
       "priorities": "Priorități",
       "moments": "Momente-cheie",
-      "takeaways": "Concluzii"
+      "takeaways": "Concluzii",
+      "separation": "Diferențiere",
+      "projection": "Proiecție (4–5 ani)",
+      "comps": "Comparații",
+      "confidence": "Încredere"
     },
     "c": {
       "player": "Jucător",
@@ -3216,7 +3221,9 @@
       "edge": "Avantaj",
       "play": "Sistem",
       "defense": "Apărare",
-      "result": "Rezultat"
+      "result": "Rezultat",
+      "outcome": "Rezultat",
+      "level_role": "Nivel și rol"
     },
     "addRow": "Adaugă rând"
   },
