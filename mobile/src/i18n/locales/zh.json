@@ -3246,5 +3246,48 @@
     "neither": "都不是",
     "pending": "{{count}} 个片段需要你：谁是谁？",
     "doneLeave": "完成（{{count}} 个待定）"
+  },
+  "projection": {
+    "title": "预测 · 4–5 年",
+    "refresh": "刷新",
+    "making": "正在读取所有档案…",
+    "updating": "正在用最新资料更新…",
+    "intro": "根据档案中的每份报告、录像、追踪比赛和伤病记录，看看这名球员 4–5 年后会成为什么样的球员。每次有新报告时都会自动更新。",
+    "empty": "撰写报告或追踪一场比赛即可开始预测。",
+    "failed": "上一次预测未能生成。请重试。",
+    "make": "生成预测",
+    "likelyIn": "4–5 年后的可能情况",
+    "best": "最好情况",
+    "likely": "可能",
+    "floor": "下限",
+    "styleComp": "风格对标",
+    "levelComp": "水平对标",
+    "mustHappen": "必须实现的条件",
+    "confidence": "可信度",
+    "conf": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "evReports": "报告",
+    "evGames": "追踪比赛",
+    "evFilms": "录像",
+    "changed": "变化内容",
+    "newer": "此预测生成后有了新资料。刷新以纳入。",
+    "updated": "更新于 {{date}}",
+    "sep": {
+      "dominant": "统治级",
+      "separates": "脱颖而出",
+      "one_tool_separator": "单项突出",
+      "at_level": "符合水平",
+      "behind_the_level": "低于水平"
+    },
+    "sepMeaning": {
+      "dominant": "这个级别太轻松了。",
+      "separates": "不止一个方面高于该级别水平。",
+      "one_tool_separator": "一项武器或技能高于该级别，其余持平。",
+      "at_level": "能竞争，但还未脱颖而出。",
+      "behind_the_level": "目前该级别的水平仍领先于这名球员。"
+    }
   }
 }

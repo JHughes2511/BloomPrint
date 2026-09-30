@@ -3246,5 +3246,48 @@
     "neither": "Nessuna",
     "pending": "{{count}} clip ti aspettano: chi è chi?",
     "doneLeave": "Fatto ({{count}} in sospeso)"
+  },
+  "projection": {
+    "title": "Proiezione · 4–5 anni",
+    "refresh": "Aggiorna",
+    "making": "Lettura di tutto l'archivio…",
+    "updating": "Aggiornamento con i dati più recenti…",
+    "intro": "Scopri che giocatore potrà diventare tra 4–5 anni, in base a ogni report, video, partita tracciata e infortunio in archivio. Si aggiorna da sola ogni volta che viene fatto un nuovo report.",
+    "empty": "Crea un report o traccia una partita per avviare la proiezione.",
+    "failed": "Non è stato possibile creare l'ultima proiezione. Riprova.",
+    "make": "Crea proiezione",
+    "likelyIn": "Probabile tra 4–5 anni",
+    "best": "Scenario migliore",
+    "likely": "Probabile",
+    "floor": "Minimo",
+    "styleComp": "Paragone di stile",
+    "levelComp": "Paragone di livello",
+    "mustHappen": "Cosa deve succedere",
+    "confidence": "Affidabilità",
+    "conf": {
+      "low": "Bassa",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "evReports": "Report",
+    "evGames": "Partite tracciate",
+    "evFilms": "Video",
+    "changed": "Cosa è cambiato",
+    "newer": "Ci sono dati più recenti da quando è stata fatta. Aggiorna per includerli.",
+    "updated": "Aggiornato il {{date}}",
+    "sep": {
+      "dominant": "DOMINANTE",
+      "separates": "FA LA DIFFERENZA",
+      "one_tool_separator": "FA LA DIFFERENZA IN UN ASPETTO",
+      "at_level": "AL LIVELLO",
+      "behind_the_level": "SOTTO IL LIVELLO"
+    },
+    "sepMeaning": {
+      "dominant": "Il livello è troppo facile.",
+      "separates": "Sopra il livello in più di un aspetto.",
+      "one_tool_separator": "Un'arma o abilità sopra il livello, il resto al livello.",
+      "at_level": "Compete, ma non fa ancora la differenza.",
+      "behind_the_level": "Per ora il livello è superiore al giocatore."
+    }
   }
 }

@@ -3246,5 +3246,48 @@
     "neither": "Neither",
     "pending": "{{count}} clip(s) need you: who's who?",
     "doneLeave": "Done (leave {{count}} open)"
+  },
+  "projection": {
+    "title": "Projection · 4–5 years",
+    "refresh": "Refresh",
+    "making": "Reading everything on file…",
+    "updating": "Updating with the newest evidence…",
+    "intro": "See who this player projects to be in 4–5 years, read from every report, film, tracked game and injury on file. It updates itself whenever a new report is made.",
+    "empty": "Make a report or track a game to start the projection.",
+    "failed": "The last projection could not be made. Try again.",
+    "make": "Make projection",
+    "likelyIn": "Likely in 4–5 years",
+    "best": "Best case",
+    "likely": "Likely",
+    "floor": "Floor",
+    "styleComp": "Style comp",
+    "levelComp": "Level comp",
+    "mustHappen": "What must happen",
+    "confidence": "Confidence",
+    "conf": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "evReports": "Reports",
+    "evGames": "Tracked games",
+    "evFilms": "Films",
+    "changed": "What changed",
+    "newer": "There is newer evidence since this was made. Refresh to include it.",
+    "updated": "Updated {{date}}",
+    "sep": {
+      "dominant": "DOMINANT",
+      "separates": "SEPARATES",
+      "one_tool_separator": "ONE-TOOL SEPARATOR",
+      "at_level": "AT LEVEL",
+      "behind_the_level": "BEHIND THE LEVEL"
+    },
+    "sepMeaning": {
+      "dominant": "The level is too easy.",
+      "separates": "Above the level in more than one area.",
+      "one_tool_separator": "One tool or skill above the level, the rest at level.",
+      "at_level": "Competes, doesn't separate yet.",
+      "behind_the_level": "The level is ahead of the player right now."
+    }
   }
 }

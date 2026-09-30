@@ -3246,5 +3246,48 @@
     "neither": "둘 다 아님",
     "pending": "{{count}}개 클립이 기다려요: 누가 누구?",
     "doneLeave": "완료 ({{count}}개 보류)"
+  },
+  "projection": {
+    "title": "전망 · 4–5년",
+    "refresh": "새로고침",
+    "making": "모든 기록을 읽는 중…",
+    "updating": "최신 자료로 업데이트하는 중…",
+    "intro": "보관된 모든 리포트, 영상, 기록된 경기, 부상 정보를 바탕으로 이 선수가 4–5년 후 어떤 선수가 될지 확인하세요. 새 리포트가 작성될 때마다 자동으로 업데이트됩니다.",
+    "empty": "리포트를 작성하거나 경기를 기록하면 전망이 시작됩니다.",
+    "failed": "마지막 전망을 만들지 못했습니다. 다시 시도하세요.",
+    "make": "전망 만들기",
+    "likelyIn": "4–5년 후 예상",
+    "best": "최상의 경우",
+    "likely": "예상",
+    "floor": "최저선",
+    "styleComp": "스타일 비교 선수",
+    "levelComp": "레벨 비교 선수",
+    "mustHappen": "필요한 조건",
+    "confidence": "신뢰도",
+    "conf": {
+      "low": "낮음",
+      "medium": "보통",
+      "high": "높음"
+    },
+    "evReports": "리포트",
+    "evGames": "기록된 경기",
+    "evFilms": "영상",
+    "changed": "달라진 점",
+    "newer": "이 전망 이후 새로운 자료가 있습니다. 새로고침하여 반영하세요.",
+    "updated": "{{date}} 업데이트",
+    "sep": {
+      "dominant": "압도적",
+      "separates": "두각을 나타냄",
+      "one_tool_separator": "한 가지 무기로 두각",
+      "at_level": "수준 부합",
+      "behind_the_level": "수준 미달"
+    },
+    "sepMeaning": {
+      "dominant": "이 레벨은 너무 쉽다.",
+      "separates": "여러 부분에서 레벨을 넘어선다.",
+      "one_tool_separator": "무기나 기술 하나가 레벨을 넘어서고, 나머지는 레벨 수준.",
+      "at_level": "경쟁은 하지만 아직 두각을 드러내지는 못한다.",
+      "behind_the_level": "지금은 레벨이 선수보다 앞서 있다."
+    }
   }
 }

@@ -82,6 +82,10 @@ from .routes import injuries as _injuries  # noqa: E402
 app.include_router(_injuries.router)
 from .routes import short_versions as _short_versions  # noqa: E402
 app.include_router(_short_versions.router)
+from .routes import projection as _projection_routes  # noqa: E402
+app.include_router(_projection_routes.router)
+from . import projection as _projection  # noqa: E402
+_projection.install()
 
 
 @app.on_event("startup")

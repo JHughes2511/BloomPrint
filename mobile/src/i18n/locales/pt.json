@@ -3246,5 +3246,48 @@
     "neither": "Nenhum",
     "pending": "{{count}} clipe(s) precisam de você: quem é quem?",
     "doneLeave": "Concluir ({{count}} em aberto)"
+  },
+  "projection": {
+    "title": "Projeção · 4–5 anos",
+    "refresh": "Atualizar",
+    "making": "Lendo tudo o que está registrado…",
+    "updating": "Atualizando com as evidências mais recentes…",
+    "intro": "Veja o que este jogador pode ser em 4–5 anos, com base em cada relatório, vídeo, jogo registrado e lesão no arquivo. A projeção se atualiza sozinha sempre que um novo relatório é feito.",
+    "empty": "Faça um relatório ou registre um jogo para começar a projeção.",
+    "failed": "Não foi possível fazer a última projeção. Tente novamente.",
+    "make": "Fazer projeção",
+    "likelyIn": "Provável em 4–5 anos",
+    "best": "Melhor cenário",
+    "likely": "Provável",
+    "floor": "Piso",
+    "styleComp": "Comparação de estilo",
+    "levelComp": "Comparação de nível",
+    "mustHappen": "O que precisa acontecer",
+    "confidence": "Confiança",
+    "conf": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta"
+    },
+    "evReports": "Relatórios",
+    "evGames": "Jogos registrados",
+    "evFilms": "Vídeos",
+    "changed": "O que mudou",
+    "newer": "Há evidências mais recentes desde que esta foi feita. Atualize para incluí-las.",
+    "updated": "Atualizado em {{date}}",
+    "sep": {
+      "dominant": "DOMINANTE",
+      "separates": "SE DESTACA",
+      "one_tool_separator": "DESTAQUE EM UM FUNDAMENTO",
+      "at_level": "NO NÍVEL",
+      "behind_the_level": "ABAIXO DO NÍVEL"
+    },
+    "sepMeaning": {
+      "dominant": "O nível é fácil demais.",
+      "separates": "Acima do nível em mais de uma área.",
+      "one_tool_separator": "Uma arma ou habilidade acima do nível, o resto no nível.",
+      "at_level": "Compete, mas ainda não se destaca.",
+      "behind_the_level": "Neste momento o nível está à frente do jogador."
+    }
   }
 }

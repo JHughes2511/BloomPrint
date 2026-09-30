@@ -1402,6 +1402,29 @@ class ShortVersion(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class PlayerProjection(Base):
+    """A player's living projection: who they will be in 4-5 years, read from
+    everything on file (reports, film, tracked games, injuries).
+
+    One per player, shared by everyone who can open the player. Remade on
+    demand and whenever a new report on the player is saved. `evidence` is the
+    count of what it was made from, which sets the confidence meter; `previous`
+    is the projection it replaced, so the next one can say what changed.
+    """
+    __tablename__ = "player_projections"
+    id = Column(Integer, primary_key=True, index=True)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=False, unique=True, index=True)
+    status = Column(String, nullable=False, default="making")   # making / ready / failed
+    data = Column(JSON, nullable=True)
+    evidence = Column(JSON, nullable=True)
+    previous = Column(JSON, nullable=True)
+    # Asked again while one was being made: make one more when it finishes.
+    again = Column(Boolean, default=False)
+    error = Column(Text, nullable=True)
+    made_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class PlayerInjury(Base):
     """One injury, as a team's injury report lists it.
 

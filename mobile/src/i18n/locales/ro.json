@@ -3246,5 +3246,48 @@
     "neither": "Niciuna",
     "pending": "{{count}} clip(uri) te așteaptă: cine e cine?",
     "doneLeave": "Gata ({{count}} deschise)"
+  },
+  "projection": {
+    "title": "Proiecție · 4–5 ani",
+    "refresh": "Reîmprospătează",
+    "making": "Se citește tot dosarul…",
+    "updating": "Se actualizează cu cele mai noi date…",
+    "intro": "Vezi ce jucător poate deveni peste 4–5 ani, pe baza fiecărui raport, video, meci urmărit și accidentări din dosar. Proiecția se actualizează singură la fiecare raport nou.",
+    "empty": "Fă un raport sau urmărește un meci pentru a porni proiecția.",
+    "failed": "Ultima proiecție nu a putut fi realizată. Încearcă din nou.",
+    "make": "Creează proiecția",
+    "likelyIn": "Probabil peste 4–5 ani",
+    "best": "Cel mai bun scenariu",
+    "likely": "Probabil",
+    "floor": "Minim",
+    "styleComp": "Comparație de stil",
+    "levelComp": "Comparație de nivel",
+    "mustHappen": "Ce trebuie să se întâmple",
+    "confidence": "Încredere",
+    "conf": {
+      "low": "Scăzută",
+      "medium": "Medie",
+      "high": "Ridicată"
+    },
+    "evReports": "Rapoarte",
+    "evGames": "Meciuri urmărite",
+    "evFilms": "Video-uri",
+    "changed": "Ce s-a schimbat",
+    "newer": "Există date mai noi de când a fost realizată. Reîmprospătează pentru a le include.",
+    "updated": "Actualizat la {{date}}",
+    "sep": {
+      "dominant": "DOMINANT",
+      "separates": "SE DETAȘEAZĂ",
+      "one_tool_separator": "SE DETAȘEAZĂ PRINTR-O ARMĂ",
+      "at_level": "LA NIVEL",
+      "behind_the_level": "SUB NIVEL"
+    },
+    "sepMeaning": {
+      "dominant": "Nivelul e prea ușor.",
+      "separates": "Peste nivel în mai multe zone.",
+      "one_tool_separator": "O armă sau abilitate peste nivel, restul la nivel.",
+      "at_level": "Face față, dar încă nu se detașează.",
+      "behind_the_level": "Deocamdată nivelul este peste jucător."
+    }
   }
 }

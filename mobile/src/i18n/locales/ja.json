@@ -3246,5 +3246,48 @@
     "neither": "どちらでもない",
     "pending": "{{count}}件のクリップが確認待ち：誰がどちら？",
     "doneLeave": "完了（{{count}}件は未回答）"
+  },
+  "projection": {
+    "title": "予測 · 4–5年後",
+    "refresh": "更新",
+    "making": "すべての記録を読み込み中…",
+    "updating": "最新の情報で更新中…",
+    "intro": "すべてのレポート、映像、記録した試合、ケガの情報をもとに、この選手が4–5年後にどんな選手になるかを予測します。新しいレポートが作成されるたびに自動で更新されます。",
+    "empty": "レポートを作成するか試合を記録すると、予測を開始できます。",
+    "failed": "前回の予測を作成できませんでした。もう一度お試しください。",
+    "make": "予測を作成",
+    "likelyIn": "4–5年後の見込み",
+    "best": "最高のケース",
+    "likely": "見込み",
+    "floor": "最低ライン",
+    "styleComp": "スタイルの類似選手",
+    "levelComp": "レベルの類似選手",
+    "mustHappen": "必要なこと",
+    "confidence": "確度",
+    "conf": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "evReports": "レポート",
+    "evGames": "記録した試合",
+    "evFilms": "映像",
+    "changed": "変わったこと",
+    "newer": "作成後に新しい情報があります。反映するには更新してください。",
+    "updated": "{{date}}に更新",
+    "sep": {
+      "dominant": "圧倒的",
+      "separates": "抜きん出ている",
+      "one_tool_separator": "一芸で抜きん出ている",
+      "at_level": "レベル相応",
+      "behind_the_level": "レベルに届かず"
+    },
+    "sepMeaning": {
+      "dominant": "このレベルでは物足りない。",
+      "separates": "複数の面でレベルを上回っている。",
+      "one_tool_separator": "一つの武器やスキルがレベルを上回り、他はレベル相応。",
+      "at_level": "戦えているが、まだ抜きん出てはいない。",
+      "behind_the_level": "現時点ではレベルが選手を上回っている。"
+    }
   }
 }

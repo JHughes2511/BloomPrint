@@ -3246,5 +3246,48 @@
     "neither": "Hiçbiri",
     "pending": "{{count}} klip seni bekliyor: kim kim?",
     "doneLeave": "Bitti ({{count}} açık)"
+  },
+  "projection": {
+    "title": "Projeksiyon · 4–5 yıl",
+    "refresh": "Yenile",
+    "making": "Dosyadaki her şey okunuyor…",
+    "updating": "En yeni verilerle güncelleniyor…",
+    "intro": "Bu oyuncunun 4–5 yıl içinde nasıl bir oyuncu olacağını, dosyadaki her rapor, video, takip edilen maç ve sakatlıktan yola çıkarak görün. Her yeni rapor yapıldığında kendini günceller.",
+    "empty": "Projeksiyonu başlatmak için bir rapor hazırlayın veya bir maçı takip edin.",
+    "failed": "Son projeksiyon oluşturulamadı. Tekrar deneyin.",
+    "make": "Projeksiyon oluştur",
+    "likelyIn": "4–5 yıl içinde olası",
+    "best": "En iyi senaryo",
+    "likely": "Olası",
+    "floor": "Taban",
+    "styleComp": "Stil karşılaştırması",
+    "levelComp": "Seviye karşılaştırması",
+    "mustHappen": "Olması gerekenler",
+    "confidence": "Güven",
+    "conf": {
+      "low": "Düşük",
+      "medium": "Orta",
+      "high": "Yüksek"
+    },
+    "evReports": "Raporlar",
+    "evGames": "Takip edilen maçlar",
+    "evFilms": "Videolar",
+    "changed": "Neler değişti",
+    "newer": "Bu oluşturulduğundan beri daha yeni veriler var. Dahil etmek için yenileyin.",
+    "updated": "Güncellendi: {{date}}",
+    "sep": {
+      "dominant": "DOMİNANT",
+      "separates": "FARK YARATIYOR",
+      "one_tool_separator": "TEK SİLAHLA FARK YARATIYOR",
+      "at_level": "SEVİYESİNDE",
+      "behind_the_level": "SEVİYENİN ALTINDA"
+    },
+    "sepMeaning": {
+      "dominant": "Seviye ona çok kolay geliyor.",
+      "separates": "Birden fazla alanda seviyenin üstünde.",
+      "one_tool_separator": "Bir silahı veya becerisi seviyenin üstünde, geri kalanı seviyesinde.",
+      "at_level": "Rekabet ediyor, ama henüz fark yaratmıyor.",
+      "behind_the_level": "Seviye şu an oyuncunun önünde."
+    }
   }
 }

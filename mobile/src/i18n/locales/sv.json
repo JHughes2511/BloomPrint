@@ -3246,5 +3246,48 @@
     "neither": "Inget",
     "pending": "{{count}} klipp behöver dig: vem är vem?",
     "doneLeave": "Klar ({{count}} öppna)"
+  },
+  "projection": {
+    "title": "Prognos · 4–5 år",
+    "refresh": "Uppdatera",
+    "making": "Läser allt som finns sparat…",
+    "updating": "Uppdaterar med de senaste underlagen…",
+    "intro": "Se vad den här spelaren kan bli om 4–5 år, utifrån varje rapport, film, registrerad match och skada som finns sparad. Prognosen uppdateras automatiskt varje gång en ny rapport görs.",
+    "empty": "Gör en rapport eller registrera en match för att starta prognosen.",
+    "failed": "Den senaste prognosen kunde inte göras. Försök igen.",
+    "make": "Gör prognos",
+    "likelyIn": "Troligt om 4–5 år",
+    "best": "Bästa scenario",
+    "likely": "Troligt",
+    "floor": "Lägstanivå",
+    "styleComp": "Stiljämförelse",
+    "levelComp": "Nivåjämförelse",
+    "mustHappen": "Vad som måste hända",
+    "confidence": "Säkerhet",
+    "conf": {
+      "low": "Låg",
+      "medium": "Medel",
+      "high": "Hög"
+    },
+    "evReports": "Rapporter",
+    "evGames": "Registrerade matcher",
+    "evFilms": "Filmer",
+    "changed": "Vad som har ändrats",
+    "newer": "Det finns nyare underlag sedan den gjordes. Uppdatera för att ta med det.",
+    "updated": "Uppdaterad {{date}}",
+    "sep": {
+      "dominant": "DOMINANT",
+      "separates": "STICKER UT",
+      "one_tool_separator": "STICKER UT MED ETT VAPEN",
+      "at_level": "PÅ NIVÅ",
+      "behind_the_level": "UNDER NIVÅN"
+    },
+    "sepMeaning": {
+      "dominant": "Nivån är för lätt.",
+      "separates": "Över nivån på mer än ett område.",
+      "one_tool_separator": "Ett vapen eller en färdighet över nivån, resten på nivå.",
+      "at_level": "Hänger med, men sticker inte ut än.",
+      "behind_the_level": "Nivån ligger just nu före spelaren."
+    }
   }
 }

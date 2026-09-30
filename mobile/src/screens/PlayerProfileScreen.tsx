@@ -28,6 +28,7 @@ import { outputTypeLabel } from '../utils/reportType';
 import { useAuth } from '../context/AuthContext';
 import SendTrainingModal from '../components/SendTrainingModal';
 import InjuryLog from '../components/InjuryLog';
+import ProjectionCard from '../components/ProjectionCard';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
@@ -668,6 +669,11 @@ export default function PlayerProfileScreen() {
           )}
         </View>
       )}
+
+      {/* The living projection: every report, film, tracked game and injury,
+          read together. It sits above the history it is made from. */}
+      <ProjectionCard playerId={player.id} t={t} tr={tr} refreshKey={evals.length}
+                      style={{ marginHorizontal: 20, marginTop: 16 }} />
 
       {/* Eval history */}
       <View style={styles.section}>

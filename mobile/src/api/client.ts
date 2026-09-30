@@ -351,6 +351,9 @@ export const playersAPI = {
     api.get('/players', { params: teamId != null ? { team_id: teamId } : {} }).then(r => r.data),
 
   get: (id: number) => api.get(`/players/${id}`).then(r => r.data),
+  /** The living projection (api/projection.py): who they will be in 4–5 years. */
+  projection: (id: number) => api.get(`/players/${id}/projection`).then(r => r.data),
+  refreshProjection: (id: number) => api.post(`/players/${id}/projection/refresh`).then(r => r.data),
 
   videos: (playerId: number) => api.get(`/players/${playerId}/videos`).then(r => r.data),
   deleteVideo: (videoId: number) => api.delete(`/players/videos/${videoId}`).then(r => r.data),

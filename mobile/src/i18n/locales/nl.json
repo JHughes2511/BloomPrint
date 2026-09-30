@@ -3246,5 +3246,48 @@
     "neither": "Geen van beide",
     "pending": "{{count}} clip(s) wachten op je: wie is wie?",
     "doneLeave": "Klaar ({{count}} open)"
+  },
+  "projection": {
+    "title": "Projectie · 4–5 jaar",
+    "refresh": "Vernieuwen",
+    "making": "Alles in het dossier wordt gelezen…",
+    "updating": "Bijwerken met de nieuwste gegevens…",
+    "intro": "Zie wat voor speler dit over 4–5 jaar kan zijn, op basis van elk rapport, elke video, elke gevolgde wedstrijd en elke blessure in het dossier. De projectie werkt zichzelf bij zodra er een nieuw rapport is.",
+    "empty": "Maak een rapport of volg een wedstrijd om de projectie te starten.",
+    "failed": "De laatste projectie kon niet worden gemaakt. Probeer het opnieuw.",
+    "make": "Projectie maken",
+    "likelyIn": "Waarschijnlijk over 4–5 jaar",
+    "best": "Beste scenario",
+    "likely": "Waarschijnlijk",
+    "floor": "Ondergrens",
+    "styleComp": "Stijlvergelijking",
+    "levelComp": "Niveauvergelijking",
+    "mustHappen": "Wat er moet gebeuren",
+    "confidence": "Betrouwbaarheid",
+    "conf": {
+      "low": "Laag",
+      "medium": "Gemiddeld",
+      "high": "Hoog"
+    },
+    "evReports": "Rapporten",
+    "evGames": "Gevolgde wedstrijden",
+    "evFilms": "Video's",
+    "changed": "Wat er veranderd is",
+    "newer": "Er zijn nieuwere gegevens sinds deze is gemaakt. Vernieuw om ze mee te nemen.",
+    "updated": "Bijgewerkt op {{date}}",
+    "sep": {
+      "dominant": "DOMINANT",
+      "separates": "STEEKT BOVENUIT",
+      "one_tool_separator": "STEEKT UIT MET ÉÉN WAPEN",
+      "at_level": "OP NIVEAU",
+      "behind_the_level": "ONDER HET NIVEAU"
+    },
+    "sepMeaning": {
+      "dominant": "Het niveau is te makkelijk.",
+      "separates": "Boven het niveau op meer dan één vlak.",
+      "one_tool_separator": "Eén wapen of vaardigheid boven het niveau, de rest op niveau.",
+      "at_level": "Kan meekomen, steekt er nog niet bovenuit.",
+      "behind_the_level": "Het niveau is de speler nu nog te snel af."
+    }
   }
 }

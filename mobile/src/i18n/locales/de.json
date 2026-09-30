@@ -3246,5 +3246,48 @@
     "neither": "Keines",
     "pending": "{{count}} Clip(s) brauchen dich: Wer ist wer?",
     "doneLeave": "Fertig ({{count}} offen)"
+  },
+  "projection": {
+    "title": "Prognose · 4–5 Jahre",
+    "refresh": "Aktualisieren",
+    "making": "Alle Unterlagen werden ausgewertet…",
+    "updating": "Wird mit den neuesten Daten aktualisiert…",
+    "intro": "Sieh, was aus diesem Spieler in 4–5 Jahren werden kann, abgeleitet aus allen Berichten, Videos, erfassten Spielen und Verletzungen in der Akte. Die Prognose aktualisiert sich bei jedem neuen Bericht automatisch.",
+    "empty": "Erstelle einen Bericht oder erfasse ein Spiel, um die Prognose zu starten.",
+    "failed": "Die letzte Prognose konnte nicht erstellt werden. Versuche es erneut.",
+    "make": "Prognose erstellen",
+    "likelyIn": "Wahrscheinlich in 4–5 Jahren",
+    "best": "Bestes Szenario",
+    "likely": "Wahrscheinlich",
+    "floor": "Untergrenze",
+    "styleComp": "Stil-Vergleich",
+    "levelComp": "Niveau-Vergleich",
+    "mustHappen": "Was passieren muss",
+    "confidence": "Sicherheit",
+    "conf": {
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch"
+    },
+    "evReports": "Berichte",
+    "evGames": "Erfasste Spiele",
+    "evFilms": "Videos",
+    "changed": "Was sich geändert hat",
+    "newer": "Seit der Erstellung gibt es neuere Daten. Aktualisiere, um sie einzubeziehen.",
+    "updated": "Aktualisiert am {{date}}",
+    "sep": {
+      "dominant": "DOMINANT",
+      "separates": "HEBT SICH AB",
+      "one_tool_separator": "HEBT SICH MIT EINER STÄRKE AB",
+      "at_level": "AUF NIVEAU",
+      "behind_the_level": "UNTER NIVEAU"
+    },
+    "sepMeaning": {
+      "dominant": "Das Niveau ist zu leicht.",
+      "separates": "In mehr als einem Bereich über dem Niveau.",
+      "one_tool_separator": "Eine Stärke oder Fähigkeit über dem Niveau, der Rest auf Niveau.",
+      "at_level": "Kann mithalten, hebt sich aber noch nicht ab.",
+      "behind_the_level": "Das Niveau ist dem Spieler derzeit noch voraus."
+    }
   }
 }

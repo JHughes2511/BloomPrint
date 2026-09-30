@@ -3246,5 +3246,48 @@
     "neither": "Ninguno",
     "pending": "{{count}} clip(s) te necesitan: ¿quién es quién?",
     "doneLeave": "Listo (dejar {{count}} pendientes)"
+  },
+  "projection": {
+    "title": "Proyección · 4–5 años",
+    "refresh": "Actualizar",
+    "making": "Leyendo todo lo registrado…",
+    "updating": "Actualizando con la evidencia más reciente…",
+    "intro": "Mira qué jugador puede llegar a ser en 4–5 años, a partir de cada informe, vídeo, partido registrado y lesión en su ficha. Se actualiza sola cada vez que se hace un nuevo informe.",
+    "empty": "Haz un informe o registra un partido para empezar la proyección.",
+    "failed": "No se pudo hacer la última proyección. Inténtalo de nuevo.",
+    "make": "Hacer proyección",
+    "likelyIn": "Probable en 4–5 años",
+    "best": "Mejor escenario",
+    "likely": "Probable",
+    "floor": "Suelo",
+    "styleComp": "Comparación de estilo",
+    "levelComp": "Comparación de nivel",
+    "mustHappen": "Qué tiene que pasar",
+    "confidence": "Confianza",
+    "conf": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "evReports": "Informes",
+    "evGames": "Partidos registrados",
+    "evFilms": "Vídeos",
+    "changed": "Qué ha cambiado",
+    "newer": "Hay evidencia más reciente desde que se hizo. Actualiza para incluirla.",
+    "updated": "Actualizado {{date}}",
+    "sep": {
+      "dominant": "DOMINANTE",
+      "separates": "MARCA DIFERENCIA",
+      "one_tool_separator": "DIFERENCIAL EN UNA FACETA",
+      "at_level": "AL NIVEL",
+      "behind_the_level": "POR DEBAJO DEL NIVEL"
+    },
+    "sepMeaning": {
+      "dominant": "El nivel se le queda pequeño.",
+      "separates": "Por encima del nivel en más de un aspecto.",
+      "one_tool_separator": "Una herramienta o habilidad por encima del nivel, el resto al nivel.",
+      "at_level": "Compite, pero aún no marca diferencia.",
+      "behind_the_level": "Ahora mismo el nivel va por delante del jugador."
+    }
   }
 }

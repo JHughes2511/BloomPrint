@@ -3246,5 +3246,48 @@
     "neither": "Nė viena",
     "pending": "{{count}} klipas(-ai) laukia: kas yra kas?",
     "doneLeave": "Baigta ({{count}} atvira)"
+  },
+  "projection": {
+    "title": "Prognozė · po 4–5 metų",
+    "refresh": "Atnaujinti",
+    "making": "Peržiūrima visa byla…",
+    "updating": "Atnaujinama pagal naujausius duomenis…",
+    "intro": "Pažiūrėkite, kuo šis žaidėjas gali tapti po 4–5 metų, remiantis kiekviena ataskaita, vaizdo įrašu, stebėtomis rungtynėmis ir trauma byloje. Prognozė atsinaujina savaime po kiekvienos naujos ataskaitos.",
+    "empty": "Parenkite ataskaitą arba stebėkite rungtynes, kad pradėtumėte prognozę.",
+    "failed": "Paskutinės prognozės nepavyko sudaryti. Bandykite dar kartą.",
+    "make": "Sudaryti prognozę",
+    "likelyIn": "Tikėtina po 4–5 metų",
+    "best": "Geriausias scenarijus",
+    "likely": "Tikėtina",
+    "floor": "Minimumas",
+    "styleComp": "Stiliaus palyginimas",
+    "levelComp": "Lygio palyginimas",
+    "mustHappen": "Kas turi įvykti",
+    "confidence": "Patikimumas",
+    "conf": {
+      "low": "Žemas",
+      "medium": "Vidutinis",
+      "high": "Aukštas"
+    },
+    "evReports": "Ataskaitos",
+    "evGames": "Stebėtos rungtynės",
+    "evFilms": "Vaizdo įrašai",
+    "changed": "Kas pasikeitė",
+    "newer": "Nuo sudarymo atsirado naujesnių duomenų. Atnaujinkite, kad juos įtrauktumėte.",
+    "updated": "Atnaujinta {{date}}",
+    "sep": {
+      "dominant": "DOMINUOJA",
+      "separates": "IŠSISKIRIA",
+      "one_tool_separator": "IŠSISKIRIA VIENU GINKLU",
+      "at_level": "ATITINKA LYGĮ",
+      "behind_the_level": "ŽEMIAU LYGIO"
+    },
+    "sepMeaning": {
+      "dominant": "Lygis per lengvas.",
+      "separates": "Virš lygio daugiau nei vienoje srityje.",
+      "one_tool_separator": "Vienas ginklas ar įgūdis virš lygio, kita atitinka lygį.",
+      "at_level": "Konkuruoja, bet dar neišsiskiria.",
+      "behind_the_level": "Kol kas lygis aukštesnis už žaidėją."
+    }
   }
 }

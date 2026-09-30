@@ -3246,5 +3246,48 @@
     "neither": "Aucune",
     "pending": "{{count}} extrait(s) t'attendent : qui est qui ?",
     "doneLeave": "Terminé ({{count}} en attente)"
+  },
+  "projection": {
+    "title": "Projection · 4–5 ans",
+    "refresh": "Actualiser",
+    "making": "Lecture de tout le dossier…",
+    "updating": "Mise à jour avec les éléments les plus récents…",
+    "intro": "Découvrez ce que ce joueur peut devenir dans 4–5 ans, d'après chaque rapport, vidéo, match suivi et blessure au dossier. La projection se met à jour automatiquement à chaque nouveau rapport.",
+    "empty": "Rédigez un rapport ou suivez un match pour lancer la projection.",
+    "failed": "La dernière projection n'a pas pu être réalisée. Réessayez.",
+    "make": "Lancer la projection",
+    "likelyIn": "Probable dans 4–5 ans",
+    "best": "Meilleur scénario",
+    "likely": "Probable",
+    "floor": "Plancher",
+    "styleComp": "Comparaison de style",
+    "levelComp": "Comparaison de niveau",
+    "mustHappen": "Ce qui doit se passer",
+    "confidence": "Confiance",
+    "conf": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Élevée"
+    },
+    "evReports": "Rapports",
+    "evGames": "Matchs suivis",
+    "evFilms": "Vidéos",
+    "changed": "Ce qui a changé",
+    "newer": "De nouveaux éléments sont disponibles depuis. Actualisez pour les intégrer.",
+    "updated": "Mis à jour le {{date}}",
+    "sep": {
+      "dominant": "DOMINANT",
+      "separates": "SE DÉMARQUE",
+      "one_tool_separator": "SE DÉMARQUE SUR UN POINT",
+      "at_level": "AU NIVEAU",
+      "behind_the_level": "EN DESSOUS DU NIVEAU"
+    },
+    "sepMeaning": {
+      "dominant": "Le niveau est trop facile.",
+      "separates": "Au-dessus du niveau dans plus d'un domaine.",
+      "one_tool_separator": "Une arme ou compétence au-dessus du niveau, le reste au niveau.",
+      "at_level": "Rivalise, mais ne se démarque pas encore.",
+      "behind_the_level": "Pour l'instant, le niveau est encore trop élevé pour le joueur."
+    }
   }
 }

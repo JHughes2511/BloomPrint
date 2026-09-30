@@ -3246,5 +3246,48 @@
     "neither": "Nijedna",
     "pending": "{{count}} isječak(a) čeka: tko je tko?",
     "doneLeave": "Gotovo ({{count}} otvoreno)"
+  },
+  "projection": {
+    "title": "Projekcija · 4–5 godina",
+    "refresh": "Osvježi",
+    "making": "Čitamo sve iz dosjea…",
+    "updating": "Ažuriramo najnovijim podacima…",
+    "intro": "Pogledajte kakav igrač može postati za 4–5 godina, na temelju svakog izvještaja, snimke, praćene utakmice i ozljede u dosjeu. Projekcija se sama ažurira nakon svakog novog izvještaja.",
+    "empty": "Napravite izvještaj ili pratite utakmicu kako biste pokrenuli projekciju.",
+    "failed": "Posljednja projekcija nije se mogla napraviti. Pokušajte ponovno.",
+    "make": "Napravi projekciju",
+    "likelyIn": "Vjerojatno za 4–5 godina",
+    "best": "Najbolji scenarij",
+    "likely": "Vjerojatno",
+    "floor": "Minimum",
+    "styleComp": "Usporedba stila",
+    "levelComp": "Usporedba razine",
+    "mustHappen": "Što se mora dogoditi",
+    "confidence": "Pouzdanost",
+    "conf": {
+      "low": "Niska",
+      "medium": "Srednja",
+      "high": "Visoka"
+    },
+    "evReports": "Izvještaji",
+    "evGames": "Praćene utakmice",
+    "evFilms": "Snimke",
+    "changed": "Što se promijenilo",
+    "newer": "Otkad je ovo napravljeno pojavili su se noviji podaci. Osvježite kako biste ih uključili.",
+    "updated": "Ažurirano {{date}}",
+    "sep": {
+      "dominant": "DOMINANTAN",
+      "separates": "ISTIČE SE",
+      "one_tool_separator": "ISTIČE SE JEDNIM ORUŽJEM",
+      "at_level": "NA RAZINI",
+      "behind_the_level": "ISPOD RAZINE"
+    },
+    "sepMeaning": {
+      "dominant": "Razina je prelagana.",
+      "separates": "Iznad razine u više od jednog područja.",
+      "one_tool_separator": "Jedno oružje ili vještina iznad razine, ostalo na razini.",
+      "at_level": "Konkurentan je, ali se još ne ističe.",
+      "behind_the_level": "Razina je trenutačno ispred igrača."
+    }
   }
 }

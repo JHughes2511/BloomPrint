@@ -3246,5 +3246,48 @@
     "neither": "Wala",
     "pending": "{{count}} clip ang naghihintay: sino ang sino?",
     "doneLeave": "Tapos ({{count}} bukas)"
+  },
+  "projection": {
+    "title": "Projection · 4–5 taon",
+    "refresh": "I-refresh",
+    "making": "Binabasa ang lahat ng nasa file…",
+    "updating": "Ina-update gamit ang pinakabagong ebidensya…",
+    "intro": "Tingnan kung anong klaseng player ang magiging siya sa loob ng 4–5 taon, batay sa bawat report, video, na-track na laro at injury na nasa file. Kusa itong nag-a-update tuwing may bagong report.",
+    "empty": "Gumawa ng report o mag-track ng laro para simulan ang projection.",
+    "failed": "Hindi nagawa ang huling projection. Subukan ulit.",
+    "make": "Gumawa ng projection",
+    "likelyIn": "Malamang sa loob ng 4–5 taon",
+    "best": "Pinakamagandang kaso",
+    "likely": "Malamang",
+    "floor": "Pinakamababa",
+    "styleComp": "Kahawig sa istilo",
+    "levelComp": "Kahawig sa level",
+    "mustHappen": "Ano ang dapat mangyari",
+    "confidence": "Kumpiyansa",
+    "conf": {
+      "low": "Mababa",
+      "medium": "Katamtaman",
+      "high": "Mataas"
+    },
+    "evReports": "Mga report",
+    "evGames": "Mga na-track na laro",
+    "evFilms": "Mga video",
+    "changed": "Ano ang nagbago",
+    "newer": "May mas bagong ebidensya mula nang gawin ito. I-refresh para maisama.",
+    "updated": "Na-update {{date}}",
+    "sep": {
+      "dominant": "DOMINANTE",
+      "separates": "UMAANGAT",
+      "one_tool_separator": "UMAANGAT SA ISANG SANDATA",
+      "at_level": "PASOK SA LEVEL",
+      "behind_the_level": "KULANG PA SA LEVEL"
+    },
+    "sepMeaning": {
+      "dominant": "Masyadong madali ang level.",
+      "separates": "Mas mataas sa level sa higit sa isang aspeto.",
+      "one_tool_separator": "Isang sandata o skill ang lampas sa level, pasok sa level ang iba.",
+      "at_level": "Nakakasabay, pero hindi pa umaangat.",
+      "behind_the_level": "Sa ngayon, mas mataas pa ang level kaysa sa player."
+    }
   }
 }
